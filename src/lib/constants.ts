@@ -57,3 +57,6 @@ export const TYPE_LABELS: Record<ListingType, string> = {
 };
 
 export const MAX_PHOTOS = 4;
+
+// Showcase account — sign-in enabled only when DEMO_PASSWORD is set.
+export const DEMO_EMAIL = "demo@mail.uc.edu";

@@ -31,6 +31,18 @@ No `.env` is required for local dev — a SQLite `DATABASE_URL` is written
 automatically. To customize, copy `.env.example` to `.env` and set
 `NEXTAUTH_SECRET` (any random string) for stable sessions across restarts.
 
+### Showcase sign-in (demo account)
+
+For demos and grading there's a password sign-in that skips email entirely:
+open **`/demo`** (also linked from the sign-in page), enter the demo
+password, and you're in as **Alex Demo** — an account staged with active
+listings, a draft, unread messages, a meetup proposal to accept, a pending
+lost & found claim to approve, and an open rating prompt.
+
+It's enabled only when the `DEMO_PASSWORD` env var is set (it creates a
+normal database session, so sign-out and auth guards behave exactly like a
+magic-link session). Unset the variable to turn it off.
+
 ### Signing in locally
 
 No email server is configured in dev, so **the magic link is printed to the

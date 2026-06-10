@@ -96,6 +96,12 @@ export default function SignInPage() {
       <Suspense>
         <SignInForm />
       </Suspense>
+      <Link
+        href="/demo"
+        className="mt-8 text-xs text-faint underline underline-offset-4 hover:text-ink"
+      >
+        Reviewing the project? Use the showcase sign-in
+      </Link>
     </main>
   );
 }

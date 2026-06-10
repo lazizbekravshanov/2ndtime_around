@@ -449,6 +449,229 @@ async function main() {
     ],
   });
 
+  // ================= Showcase demo account =================
+  // demo@mail.uc.edu — staged so every feature is demonstrable from one
+  // sign-in: active listings, a draft, unread messages, a meetup proposal
+  // to answer, a pending L&F claim to judge, and an open rating prompt.
+  const demo = await db.user.create({
+    data: {
+      email: "demo@mail.uc.edu",
+      displayName: "Alex Demo",
+      major: "Information Technology",
+      year: "Junior",
+      createdAt: daysAgo(300),
+      emailVerified: daysAgo(300),
+    },
+  });
+
+  await L({
+    type: "SELL", title: "IKEA desk + chair set",
+    description:
+      "Micke desk and matching chair, both solid. Selling together only. Perfect starter setup for an apartment move.",
+    category: "Furniture", condition: "Good", price: 45,
+    photos: ["/seed/desk-set.svg"], ownerId: demo.id,
+    createdAt: daysAgo(4, 2), viewCount: 24,
+  });
+  const demoHeadphones = await L({
+    type: "SELL", title: "Sony noise-cancelling headphones",
+    description:
+      "WH-CH720N, bought last year. Great for the library during finals. Comes with the case and cable. Battery still lasts ~30h.",
+    category: "Electronics", condition: "Like new", price: 80,
+    photos: ["/seed/headphones.svg"], ownerId: demo.id,
+    createdAt: daysAgo(2, 7), viewCount: 46,
+  });
+  await L({
+    type: "DONATE", title: "Closet organizer + 30 hangers",
+    description:
+      "Hanging fabric organizer plus a big stack of matching hangers. Free — just come grab it before move-out.",
+    category: "Dorm", condition: "Good",
+    photos: ["/seed/hangers.svg"], ownerId: demo.id,
+    createdAt: daysAgo(5, 4), viewCount: 13,
+  });
+  await L({
+    type: "LOST", title: "AirPods Pro case with carabiner",
+    description:
+      "Lost the charging case (AirPods were in my ears, of course). White case, small black carabiner clipped on, scratches on the bottom.",
+    category: "Electronics", locationNote: "CRC locker room",
+    photos: ["/seed/airpods-case.svg"], ownerId: demo.id,
+    createdAt: daysAgo(1, 5), viewCount: 20,
+  });
+  const demoBeanie = await L({
+    type: "FOUND", title: "Gray knit beanie",
+    description:
+      "Found a gray beanie left on a table in the TUC food court on Thursday evening. Describe the brand or any marks and it's yours.",
+    category: "Clothing", locationNote: "TUC food court",
+    photos: ["/seed/beanie.svg"], ownerId: demo.id,
+    createdAt: daysAgo(2, 1), viewCount: 15,
+  });
+  await L({
+    type: "SELL", title: "Skateboard, barely used",
+    description:
+      "8.0 deck, smooth wheels. Realized I'm more of a bus person. Draft until I take real photos.",
+    category: "Other", condition: "Like new", price: 35,
+    photos: ["/seed/skateboard.svg"], ownerId: demo.id,
+    status: "DRAFT", createdAt: daysAgo(0, -4), viewCount: 0,
+  });
+  const demoMicrowave = await L({
+    type: "SELL", title: "Microwave (0.7 cu ft)",
+    description: "Dorm-size microwave, works perfectly. Sold to Jordan.",
+    category: "Dorm", condition: "Good", price: 25,
+    photos: ["/seed/microwave.svg"], ownerId: demo.id,
+    status: "SOLD", createdAt: daysAgo(20), updatedAt: daysAgo(18), viewCount: 37,
+  });
+
+  // Unread thread: Maya wants the headphones and proposed a meetup.
+  const demoConvo1 = await db.conversation.create({
+    data: {
+      listingId: demoHeadphones.id, starterId: maya.id,
+      participantIds: [maya.id, demo.id],
+      createdAt: daysAgo(0, -6), updatedAt: daysAgo(0, -1),
+    },
+  });
+  await db.message.createMany({
+    data: [
+      {
+        conversationId: demoConvo1.id, senderId: maya.id, kind: "TEXT",
+        body: "Hi! Are the headphones still available?",
+        createdAt: daysAgo(0, -6),
+      },
+      {
+        conversationId: demoConvo1.id, senderId: maya.id, kind: "TEXT",
+        body: "Would you take $70? I can meet anywhere on campus this week.",
+        createdAt: daysAgo(0, -5),
+      },
+      {
+        conversationId: demoConvo1.id, senderId: maya.id, kind: "MEETUP_PROPOSAL",
+        body: "Meetup proposed: Langsam Library lobby",
+        meta: {
+          spot: "Langsam Library lobby",
+          datetime: daysAgo(-2, 6).toISOString(),
+          status: "PENDING",
+        },
+        createdAt: daysAgo(0, -1),
+      },
+    ],
+  });
+
+  // Pending ownership claim on the found beanie, for the demo user to judge.
+  const demoConvo2 = await db.conversation.create({
+    data: {
+      listingId: demoBeanie.id, starterId: sam.id,
+      participantIds: [sam.id, demo.id],
+      createdAt: daysAgo(0, -8), updatedAt: daysAgo(0, -8),
+    },
+  });
+  await db.message.create({
+    data: {
+      conversationId: demoConvo2.id, senderId: sam.id, kind: "CLAIM",
+      body: "It's a gray Carhartt beanie — there's a small white paint stain on the fold from a studio project, and the tag inside is half torn off.",
+      meta: { status: "PENDING" },
+      createdAt: daysAgo(0, -8),
+    },
+  });
+
+  // Completed sale where Jordan already rated; the demo user's rating
+  // prompt is still open in this thread.
+  const demoConvo3 = await db.conversation.create({
+    data: {
+      listingId: demoMicrowave.id, starterId: jordan.id,
+      participantIds: [jordan.id, demo.id],
+      createdAt: daysAgo(20), updatedAt: daysAgo(18),
+    },
+  });
+  await db.message.createMany({
+    data: [
+      {
+        conversationId: demoConvo3.id, senderId: jordan.id, kind: "TEXT",
+        body: "I'll take the microwave if it's still around!",
+        createdAt: daysAgo(20), readAt: daysAgo(20),
+      },
+      {
+        conversationId: demoConvo3.id, senderId: demo.id, kind: "TEXT",
+        body: "It's yours — TUC main entrance tomorrow at 2?",
+        createdAt: daysAgo(19, 12), readAt: daysAgo(19, 13),
+      },
+      {
+        conversationId: demoConvo3.id, senderId: jordan.id, kind: "TEXT",
+        body: "Perfect, see you then.",
+        createdAt: daysAgo(19, 14), readAt: daysAgo(19, 15),
+      },
+    ],
+  });
+  await db.rating.create({
+    data: {
+      fromUserId: jordan.id, toUserId: demo.id, listingId: demoMicrowave.id,
+      stars: 5, comment: "Microwave works great, smooth handoff at TUC.",
+      createdAt: daysAgo(17),
+    },
+  });
+
+  // ================= Extra marketplace volume =================
+  await L({
+    type: "SELL", title: "Physics 2001 textbook",
+    description:
+      "University Physics vol. 1, used one semester. Light highlighting in two chapters, otherwise clean.",
+    category: "Textbooks", condition: "Good", price: 30,
+    photos: ["/seed/chem-textbook.svg"], ownerId: priya.id,
+    createdAt: daysAgo(3, 9), viewCount: 18,
+  });
+  await L({
+    type: "SELL", title: "Electric kettle, 1.7L",
+    description:
+      "Boils fast, auto shutoff. Essential for ramen and all-nighters. Descaled last month.",
+    category: "Dorm", condition: "Good", price: 12,
+    photos: ["/seed/kettle.svg"], ownerId: sam.id,
+    createdAt: daysAgo(4, 6), viewCount: 21,
+  });
+  await L({
+    type: "SELL", title: "MainStreet concert tickets (2)",
+    description:
+      "Two tickets for Friday's show at MainStreet. Can't go anymore — face value.",
+    category: "Tickets", condition: "New", price: 25,
+    photos: ["/seed/bball-tickets.svg"], ownerId: devon.id,
+    createdAt: daysAgo(0, -7), viewCount: 33,
+  });
+  await L({
+    type: "SELL", title: "Women's rain jacket, size M",
+    description:
+      "Packable rain shell, great for the walk between Langsam and TUC. Zips into its own pocket.",
+    category: "Clothing", condition: "Like new", price: 18,
+    photos: ["/seed/winter-coat.svg"], ownerId: maya.id,
+    createdAt: daysAgo(6, 3), viewCount: 10,
+  });
+  await L({
+    type: "DONATE", title: "Moving boxes (8) + packing paper",
+    description:
+      "Eight sturdy boxes, broken down flat, plus a roll of packing paper. Free to whoever's moving next.",
+    category: "Other", condition: "Good",
+    photos: ["/seed/boxes.svg"], ownerId: jordan.id,
+    createdAt: daysAgo(1, 9), viewCount: 17,
+  });
+  await L({
+    type: "DONATE", title: "Full-length mirror",
+    description:
+      "Door-hanging mirror, no cracks. Too heavy to ship home — free for pickup near campus.",
+    category: "Dorm", condition: "Good",
+    photos: ["/seed/mirror.svg"], ownerId: maya.id,
+    createdAt: daysAgo(5, 8), viewCount: 25,
+  });
+  await L({
+    type: "LOST", title: "Silver ring with a blue stone",
+    description:
+      "Thin silver band with a small blue stone. Likely slipped off near the Sigma Sigma commons amphitheater. Huge sentimental value.",
+    category: "Other", locationNote: "Sigma Sigma commons",
+    photos: ["/seed/ring.svg"], ownerId: sam.id,
+    createdAt: daysAgo(3, 5), viewCount: 29,
+  });
+  await L({
+    type: "FOUND", title: "TI calculator in a green case",
+    description:
+      "Found after the 11am lecture let out. There's a name written inside the case lid — tell me the name and it's yours.",
+    category: "Electronics", locationNote: "Swift Hall 800",
+    photos: ["/seed/ti84.svg"], ownerId: devon.id,
+    createdAt: daysAgo(1, 4), viewCount: 12,
+  });
+
   const counts = {
     users: await db.user.count(),
     listings: await db.listing.count(),

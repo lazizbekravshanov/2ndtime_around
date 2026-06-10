@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#F3E8FD"/>
+  <rect x="20" y="20" width="760" height="560" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2" rx="16"/>
+  <text x="400" y="290" font-size="160" text-anchor="middle">🎧</text>
+  <text x="400" y="420" font-family="Helvetica, Arial, sans-serif" font-size="34" font-weight="600" fill="#44403C" text-anchor="middle">Headphones</text>
+</svg>
