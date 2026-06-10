@@ -79,9 +79,29 @@ S3/Vercel Blob — the app already talks to an `UploadService` interface
 
 ## Screenshots
 
-_Placeholder — add screenshots of: landing, browse (three tabs), listing
-detail with meetup spots, the sell wizard, a message thread with a meetup
-proposal, the claim approval card, my items, profile with ratings, impact._
+> Live at **https://2ndtime-around.vercel.app** · demo walkthrough in
+> [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) · full architecture in
+> [`docs/SYSTEM_DESIGN.md`](docs/SYSTEM_DESIGN.md)
+
+| Landing | Browse (Marketplace) |
+| --- | --- |
+| ![Landing page](docs/screenshots/landing.png) | ![Browse marketplace](docs/screenshots/browse-marketplace.png) |
+
+| Lost & Found | Listing detail |
+| --- | --- |
+| ![Lost and found tab](docs/screenshots/browse-lostfound.png) | ![Listing detail](docs/screenshots/listing-detail.png) |
+
+| Sell wizard | My items |
+| --- | --- |
+| ![Sell wizard](docs/screenshots/sell-wizard.png) | ![My items](docs/screenshots/my-items.png) |
+
+| Meetup proposal in chat | Lost & found claim |
+| --- | --- |
+| ![Meetup proposal](docs/screenshots/thread-meetup.png) | ![Ownership claim](docs/screenshots/thread-claim.png) |
+
+| Campus impact | Mobile browse |
+| --- | --- |
+| ![Impact page](docs/screenshots/impact.png) | ![Mobile browse](docs/screenshots/mobile-browse.png) |
 
 ## Architecture overview
 
