@@ -1,0 +1,151 @@
+// Datasource provider is managed by scripts/prepare-db.mjs:
+// "postgresql" when DATABASE_URL is a postgres URL, "sqlite" otherwise.
+// Enums are modeled as String fields (validated by Zod at every boundary)
+// so the same schema works on both providers.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  displayName   String?
+  major         String?
+  year          String?
+  createdAt     DateTime  @default(now())
+
+  listings        Listing[]
+  messages        Message[]
+  startedThreads  Conversation[] @relation("ConversationStarter")
+  ratingsGiven    Rating[]  @relation("RatingsGiven")
+  ratingsReceived Rating[]  @relation("RatingsReceived")
+  accounts        Account[]
+  sessions        Session[]
+}
+
+// type: SELL | DONATE | LOST | FOUND
+// status: ACTIVE | SOLD | RESOLVED | DELETED
+model Listing {
+  id           String   @id @default(cuid())
+  type         String
+  title        String
+  description  String
+  category     String
+  condition    String?
+  price        Float?
+  status       String   @default("ACTIVE")
+  locationNote String?
+  photos       Json     @default("[]")
+  ownerId      String
+  viewCount    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  ratings       Rating[]
+
+  @@index([type, status, category, createdAt])
+  @@index([ownerId])
+}
+
+model Conversation {
+  id             String   @id @default(cuid())
+  listingId      String
+  // JSON array of the two participant user ids. SQLite can't filter inside
+  // Json columns, so starterId (the non-owner participant) is also stored
+  // as a queryable scalar; the owner side is reachable via listing.ownerId.
+  participantIds Json
+  starterId      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  listing  Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  starter  User      @relation("ConversationStarter", fields: [starterId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  // One thread per buyer per listing — "Message seller" reopens the thread.
+  @@unique([listingId, starterId])
+  @@index([listingId])
+}
+
+// kind: TEXT | MEETUP_PROPOSAL | CLAIM
+// meta: MEETUP_PROPOSAL -> { spot, datetime, status: PENDING|ACCEPTED|DECLINED }
+//       CLAIM           -> { detail, status: PENDING|APPROVED|DENIED }
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String
+  kind           String    @default("TEXT")
+  meta           Json?
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+model Rating {
+  id         String   @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  listingId  String
+  stars      Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  fromUser User    @relation("RatingsGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User    @relation("RatingsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  listing  Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, listingId])
+  @@index([toUserId])
+}
+
+// ---- NextAuth (Auth.js) models ----
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
