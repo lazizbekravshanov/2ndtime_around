@@ -1,87 +1,73 @@
 # 2nd Time Around
 
-The UC-only marketplace for buying, selling, donating, and finding lost items.
+your stuff deserves a second chance. the UC-only marketplace for buying,
+selling, donating, and finding lost things.
 
-Built by **Team 4 — IT2021**, University of Cincinnati (HCI course project).
+**live:** https://2ndtime-around.vercel.app · built by Team 4 — IT2021,
+University of Cincinnati
 
-Every user is a verified UC student. Listings, in-app messaging, safe
-on-campus meetup suggestions, a digital lost & found with an ownership-claim
-flow, and a sustainability counter all live in one place — replacing the
-fragmented mix of Facebook Marketplace, GroupMe chats, and the physical
-lost & found office.
+no randoms from across town. no sketchy meetups. no "is this still
+available?" into the void. every account is a UC student, every meetup spot
+is on campus, and every sale keeps something out of a dumpster.
 
-## Tech stack
+## the stack
 
-- **Next.js 15 (App Router)** + TypeScript (strict)
-- **Tailwind CSS 4** with a disciplined token set (one accent: UC Red `#E00122`)
-- **Prisma ORM** — PostgreSQL in production, SQLite fallback for local dev
-- **NextAuth.js** email magic links, restricted to `@uc.edu` / `@mail.uc.edu`
-- **Zod** validation on every mutation, **React Hook Form** for forms
+- **Next.js 15** (App Router) + TypeScript, strict mode — no `any`, no mercy
+- **Tailwind 4** — one accent color (UC Red), warm neutrals, zero clutter
+- **Prisma + Postgres** (SQLite locally, zero config)
+- **NextAuth** — magic links, `@uc.edu` only
+- **Zod** — the server trusts nobody
 
-## Getting started
+## run it
 
 ```bash
-npm install            # also generates the Prisma client (postinstall)
-npm run db:push        # creates the local SQLite database (prisma/dev.db)
-npm run db:seed        # 5 demo users, 26 listings, conversations, ratings
-npm run dev            # http://localhost:3000
+npm install      # deps + prisma client
+npm run db:push  # local SQLite db, no setup
+npm run db:seed  # 7 users, 46 listings, drama included
+npm run dev      # localhost:3000
 ```
 
-No `.env` is required for local dev — a SQLite `DATABASE_URL` is written
-automatically. To customize, copy `.env.example` to `.env` and set
-`NEXTAUTH_SECRET` (any random string) for stable sessions across restarts.
+that's it. no `.env` needed locally — SQLite happens automatically.
 
-### Signing in (demo mode)
+## signing in (demo mode)
 
-The platform currently runs in **demo mode**: `/signin` is a persona
-picker with two pre-created accounts sharing one demo password
-(`DEMO_PASSWORD` env var):
+right now the app is invite-only on purpose. `/signin` is a persona picker —
+two accounts, one shared password (the `DEMO_PASSWORD` env var):
 
-- **Alex Demo** — staged with active listings, a draft, unread messages, a
-  meetup proposal to accept, a pending lost & found claim to approve, and
-  an open rating prompt.
-- **Professor** — a clean reviewer account for exploring freely.
+- **Alex Demo** — pre-loaded with unread messages, a meetup proposal to
+  accept, a lost & found claim to judge, and a rating waiting to happen
+- **Professor** — clean account. explore, post, break things
 
-Persona sign-in creates a normal database session (same Session table
-NextAuth uses), so auth guards and sign-out behave exactly like a real
-session. The endpoint only accepts emails on the published persona list and
-is disabled entirely when `DEMO_PASSWORD` is unset.
+picking a persona creates a real session (same table NextAuth uses), so
+sign-out and auth guards work exactly like the real thing. the endpoint
+only accepts the two listed emails — the password alone gets you nowhere
+else. unset `DEMO_PASSWORD` and the whole side door disappears.
 
-**Open registration is deliberately out of scope for now.** The UC-only
-magic-link flow (email form, `@uc.edu` domain gate in the NextAuth `signIn`
-callback, console-logged links in dev) is fully implemented server-side —
-re-enabling it is a UI change plus an `EMAIL_SERVER` env var, not a
-rebuild.
+open sign-up isn't missing, it's parked: the full UC magic-link flow
+(domain gate enforced server-side, links logged to console in dev) is
+implemented and waiting on one env var + a UI toggle.
 
-### Environment variables
+## env vars
 
-| Variable | Required | Notes |
+| var | needed? | what |
 | --- | --- | --- |
-| `DATABASE_URL` | no (dev) / yes (prod) | Postgres URL in production; defaults to `file:./dev.db` locally |
-| `NEXTAUTH_SECRET` | yes in prod | `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | yes in prod | The deployed origin |
-| `EMAIL_SERVER` | no | SMTP URL; when unset, magic links log to the console |
-| `EMAIL_FROM` | no | From address for real email |
+| `DATABASE_URL` | prod only | postgres url; local falls back to SQLite |
+| `NEXTAUTH_SECRET` | prod only | `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | prod only | your deployed origin |
+| `DEMO_PASSWORD` | for demo mode | gates the persona sign-in |
+| `EMAIL_SERVER` / `EMAIL_FROM` | later | SMTP for real magic links |
 
-### Deploying to Vercel
+## deploy
 
-1. Create a Postgres database (Vercel Postgres / Neon / Supabase) and set
-   `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` (and `EMAIL_SERVER` /
-   `EMAIL_FROM` for real magic-link emails).
-2. `npm run db:push` once against the production database
-   (`scripts/prepare-db.mjs` flips the Prisma provider to `postgresql`
-   automatically when `DATABASE_URL` starts with `postgres`).
-3. Push to the connected repo — the build runs `prisma generate && next build`.
+push to main → Vercel builds it. needs the env vars above, a postgres db
+(`npm run db:push` once against it — the prisma provider flips to postgres
+automatically), and a Vercel Blob store for photos. that's the whole
+ceremony.
 
-Note: in production you'd swap the local `/public/uploads` photo storage for
-S3/Vercel Blob — the app already talks to an `UploadService` interface
-(`src/lib/uploads.ts`), so that's a one-class change.
+## screenshots
 
-## Screenshots
-
-> Live at **https://2ndtime-around.vercel.app** · demo walkthrough in
-> [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) · full architecture in
-> [`docs/SYSTEM_DESIGN.md`](docs/SYSTEM_DESIGN.md)
+> demo walkthrough: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) · system
+> design: [`docs/SYSTEM_DESIGN.md`](docs/SYSTEM_DESIGN.md)
 
 | Landing | Sign in (demo mode) |
 | --- | --- |
@@ -107,73 +93,53 @@ S3/Vercel Blob — the app already talks to an `UploadService` interface
 | --- | --- |
 | ![Impact page](docs/screenshots/impact.png) | |
 
-## Architecture overview
+## how it's laid out
 
 ```
 src/
   app/
-    page.tsx            landing (public; signed-in users → /browse)
-    signin/             magic-link sign-in + "check your email"
-    onboarding/         first-run display-name setup
-    (app)/              auth-guarded shell (header, mobile tab bar, footer)
-      browse/           tabs: Marketplace · Donations · Lost & Found
-      listing/[id]/     detail, edit, owner actions, claim button
-      sell/             4-step wizard (type → photos → details → review)
-      messages/         conversation list + thread (5s polling)
-      my-items/         Active / Sold & Resolved / Drafts
-      profile/[id]/     public profile + ratings received
-      impact/           sustainability stats (plain bars, no chart lib)
-    api/
-      auth/[...nextauth]/ NextAuth route
-      upload/             photo upload (auth + type/size checks)
-      conversations/[id]/messages/  poll target; marks incoming as read
+    page.tsx           landing (signed in? → /browse)
+    signin/            persona picker
+    (app)/             everything behind auth
+      browse/          Marketplace · Donations · Lost & Found
+      listing/[id]/    detail, edit, owner actions, "this is mine"
+      sell/            4-step wizard, one question per screen
+      messages/        threads, 5s polling, meetup proposals, claims
+      my-items/        Active / Sold / Drafts
+      profile/[id]/    ratings live here
+      impact/          the landfill counter, explained
+    api/               auth, uploads, message polling, demo login
   lib/
-    actions/            server actions (listings, conversations, ratings)
-    auth.ts validation.ts db.ts uploads.ts impact.ts constants.ts
-  components/           design-system primitives (Button, Badge, Field,
-                        Stars, EmptyState) + app components
-prisma/
-  schema.prisma         User, Listing, Conversation, Message, Rating (+ auth)
-  seed.ts               demo users/listings/conversations/ratings
+    actions/           server actions — every mutation validated + authorized
+    ...                auth, zod schemas, db, uploads, constants
+  components/          the design system (Button, Badge, Field, Stars…)
+prisma/                schema + seed
 ```
 
-**Flow of a mutation:** client form (React Hook Form, inline errors) →
-server action → Zod parse → ownership/participant checks → Prisma →
-`revalidatePath`. Client-side validation is a courtesy; every mutation
-re-validates and re-authorizes on the server.
+every mutation goes: form → server action → zod → "do you even own this?" →
+db. client-side validation is decoration; the server is the bouncer.
 
-**Messaging** is polling-based (5s) per the MVP scope. Meetup proposals and
-lost & found claims are `Message` rows with `kind` + `meta` JSON
-(`MEETUP_PROPOSAL`: spot/datetime/status; `CLAIM`: status), rendered as
-interactive cards with inline Accept/Decline and Approve/Deny.
+messaging is 5-second polling — no websockets, no regrets at this scale.
+meetup proposals and ownership claims are just messages with a `kind` and
+some json, rendered as cards you can tap accept/decline on.
 
-## Notable design decisions
+## decisions worth knowing
 
-- **Categories** are the 13-item campus taxonomy from
-  [`docs/SYSTEM_DESIGN.md`](docs/SYSTEM_DESIGN.md) §2 (Textbooks & Course
-  Materials, Bikes & Transit, Music & Instruments for CCM, Art & Design
-  Supplies for DAAP, …), implemented as one validated string enum that
-  drives the Zod schema, browse filters, and the sell wizard. Subcategories
-  stay search keywords for now — depth kills mobile filter UX.
-- **`DRAFT` listing status** was added beyond the spec's four statuses so
-  the My Items → Drafts tab has real backing (wizard offers "Save as draft").
-- **`Conversation.starterId`** exists alongside the spec's `participantIds`
-  JSON because SQLite can't filter inside JSON columns; the owner side is
-  reachable via `listing.ownerId`. A unique `(listingId, starterId)` keeps
-  one thread per buyer per listing.
-- **Provider switching:** Prisma can't read the datasource provider from an
-  env var, so `scripts/prepare-db.mjs` (run on `postinstall`) rewrites the
-  one provider line based on `DATABASE_URL`. Enums are modeled as validated
-  strings so one schema works on both SQLite and Postgres.
-- **Impact counting:** completed sales + donations count as "kept out of
-  landfills"; resolved lost & found items are tracked separately on
-  `/impact` (returning an item isn't reuse).
-- **View counting** ignores the owner's own visits.
-- **Search** uses `contains` matching, case-insensitive on both providers
-  (SQLite's LIKE natively; Postgres via `mode: "insensitive"`, applied at
-  runtime when `DATABASE_URL` is a postgres URL).
-- **HCI principles in code:** optimistic message sending and photo-slot
-  skeletons (immediate feedback), designed empty states with a single CTA,
-  inline confirmation on every destructive action, skeleton loaders instead
-  of spinners, and inline per-field validation errors. Look for comments
-  marking these in the components.
+- **13 categories**, built for campus life — Textbooks by college, Bikes &
+  Transit, Music & Instruments (CCM), Art & Design Supplies (DAAP). full
+  reasoning in the [design doc](docs/SYSTEM_DESIGN.md). subcategories stay
+  search terms — deep menus on a phone are violence.
+- **donations aren't a category, they're a tab** — free stuff gets equal
+  billing, not a landfill page at the bottom.
+- **the claim flow is the flex**: describe a detail only the owner would
+  know → finder approves → contacts exchanged, item resolved. the physical
+  lost & found office is closed at 11pm. we're not.
+- **impact counting is honest** — completed sales + donations count as
+  reuse; returned lost items are tracked separately because giving
+  something back isn't recycling.
+- **DRAFT status** exists beyond the original spec so half-written posts
+  have somewhere to live.
+- **`prepare-db.mjs`** flips the prisma provider between SQLite and
+  postgres based on `DATABASE_URL`, because prisma won't read it from env
+  and we refuse to maintain two schemas.
+- view counts skip the owner. inflating your own numbers is cringe.
