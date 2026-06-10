@@ -43,7 +43,7 @@ export default async function LandingPage() {
         </p>
 
         <Link href="/signin" className={`${buttonClasses("primary", "lg")} mt-8`}>
-          Sign in with your UC email
+          Sign in
         </Link>
 
         <div className="mt-20 grid w-full max-w-3xl gap-4 sm:grid-cols-3">

@@ -5,19 +5,23 @@ pointing at the production database) to reset the demo stage. This restores
 the unread messages, the pending meetup proposal, the pending lost & found
 claim, and the open rating prompt. Do this after every practice run.
 
-**Sign in:** https://2ndtime-around.vercel.app/demo → password
-`Bearcats2026!` → you're **Alex Demo**, a junior in IT.
+**Sign in:** https://2ndtime-around.vercel.app/signin → pick **Alex Demo**
+→ password `Bearcats2026!`. (The **Professor** persona is a clean account —
+hand it to your reviewer so they can explore on their own device while you
+present.)
 
 ---
 
-### 1. Trust: UC-only access (30s)
+### 1. Trust: UC-only by design (30s)
 
-Before signing in, show `/signin`: type a `gmail.com` address — friendly
-inline rejection. The same rule is enforced server-side (the form is a
-courtesy, the auth callback is the gate). Then sign in via `/demo`.
+Show the persona picker and explain the posture: the platform is in demo
+mode, open registration deliberately switched off. The real flow — UC email
+magic links with the `@uc.edu` domain gate enforced server-side in the auth
+callback — is implemented and shown in the design doc; flipping it on is an
+env var, not a rebuild.
 
-*Talking point: every account maps to a verified UC email — the .edu domain
-**is** the identity check.*
+*Talking point: every account maps to a UC email — the .edu domain **is**
+the identity check. Demo mode just pre-creates the accounts.*
 
 ### 2. Browse & search (45s)
 

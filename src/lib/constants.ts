@@ -66,5 +66,18 @@ export const TYPE_LABELS: Record<ListingType, string> = {
 
 export const MAX_PHOTOS = 4;
 
-// Showcase account — sign-in enabled only when DEMO_PASSWORD is set.
-export const DEMO_EMAIL = "demo@mail.uc.edu";
+// Showcase personas — the only sign-in path while the platform is in
+// demo mode. All share DEMO_PASSWORD; the endpoint rejects any email
+// not on this list.
+export const DEMO_ACCOUNTS = [
+  {
+    email: "demo@mail.uc.edu",
+    name: "Alex Demo",
+    role: "Demo student — staged with messages, a claim, and listings",
+  },
+  {
+    email: "professor@mail.uc.edu",
+    name: "Professor",
+    role: "Reviewer — clean account, explore freely",
+  },
+] as const;

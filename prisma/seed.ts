@@ -464,6 +464,16 @@ async function main() {
     },
   });
 
+  // Reviewer persona — clean account for exploring freely.
+  await db.user.create({
+    data: {
+      email: "professor@mail.uc.edu",
+      displayName: "Professor",
+      createdAt: daysAgo(1),
+      emailVerified: daysAgo(1),
+    },
+  });
+
   await L({
     type: "SELL", title: "IKEA desk + chair set",
     description:

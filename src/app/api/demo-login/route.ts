@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { z } from "zod";
-import { DEMO_EMAIL } from "@/lib/constants";
+import { DEMO_ACCOUNTS } from "@/lib/constants";
 import { db } from "@/lib/db";
 
-const bodySchema = z.object({ password: z.string().min(1) });
+const bodySchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
 
 function safeEqual(a: string, b: string): boolean {
   const ha = crypto.createHash("sha256").update(a).digest();
@@ -13,10 +16,10 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 /**
- * Showcase sign-in: creates a real database session for the demo account,
- * using the same Session table NextAuth reads, so everything downstream
- * (auth guards, sign-out) behaves identically to a magic-link session.
- * Disabled entirely unless DEMO_PASSWORD is configured.
+ * Persona sign-in: creates a real database session for one of the
+ * pre-created demo accounts, using the same Session table NextAuth reads,
+ * so everything downstream (auth guards, sign-out) behaves identically to
+ * a magic-link session. Disabled entirely unless DEMO_PASSWORD is set.
  */
 export async function POST(request: Request) {
   const demoPassword = process.env.DEMO_PASSWORD;
@@ -26,7 +29,16 @@ export async function POST(request: Request) {
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ error: "Enter the demo password." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Pick an account and enter the demo password." },
+      { status: 400 }
+    );
+  }
+  // Only the published personas may sign in this way — never an arbitrary
+  // email, even with the right password.
+  const account = DEMO_ACCOUNTS.find((a) => a.email === parsed.data.email);
+  if (!account) {
+    return NextResponse.json({ error: "Unknown demo account." }, { status: 403 });
   }
   if (!safeEqual(parsed.data.password, demoPassword)) {
     return NextResponse.json(
@@ -35,7 +47,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const user = await db.user.findUnique({ where: { email: DEMO_EMAIL } });
+  const user = await db.user.findUnique({ where: { email: account.email } });
   if (!user) {
     return NextResponse.json(
       { error: "Demo account not found — run the seed script first." },

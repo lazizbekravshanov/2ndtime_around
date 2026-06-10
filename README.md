@@ -31,27 +31,27 @@ No `.env` is required for local dev — a SQLite `DATABASE_URL` is written
 automatically. To customize, copy `.env.example` to `.env` and set
 `NEXTAUTH_SECRET` (any random string) for stable sessions across restarts.
 
-### Showcase sign-in (demo account)
+### Signing in (demo mode)
 
-For demos and grading there's a password sign-in that skips email entirely:
-open **`/demo`** (also linked from the sign-in page), enter the demo
-password, and you're in as **Alex Demo** — an account staged with active
-listings, a draft, unread messages, a meetup proposal to accept, a pending
-lost & found claim to approve, and an open rating prompt.
+The platform currently runs in **demo mode**: `/signin` is a persona
+picker with two pre-created accounts sharing one demo password
+(`DEMO_PASSWORD` env var):
 
-It's enabled only when the `DEMO_PASSWORD` env var is set (it creates a
-normal database session, so sign-out and auth guards behave exactly like a
-magic-link session). Unset the variable to turn it off.
+- **Alex Demo** — staged with active listings, a draft, unread messages, a
+  meetup proposal to accept, a pending lost & found claim to approve, and
+  an open rating prompt.
+- **Professor** — a clean reviewer account for exploring freely.
 
-### Signing in locally
+Persona sign-in creates a normal database session (same Session table
+NextAuth uses), so auth guards and sign-out behave exactly like a real
+session. The endpoint only accepts emails on the published persona list and
+is disabled entirely when `DEMO_PASSWORD` is unset.
 
-No email server is configured in dev, so **the magic link is printed to the
-terminal running `npm run dev`**. Enter any `@uc.edu` / `@mail.uc.edu`
-address on the sign-in page (the seeded demo users work great, e.g.
-`claybornm@mail.uc.edu`), then click the link from the terminal.
-Non-UC domains are rejected both client-side and in the NextAuth `signIn`
-callback — the inline error on the form is a courtesy; the server is the
-gate.
+**Open registration is deliberately out of scope for now.** The UC-only
+magic-link flow (email form, `@uc.edu` domain gate in the NextAuth `signIn`
+callback, console-logged links in dev) is fully implemented server-side —
+re-enabling it is a UI change plus an `EMAIL_SERVER` env var, not a
+rebuild.
 
 ### Environment variables
 
@@ -83,13 +83,17 @@ S3/Vercel Blob — the app already talks to an `UploadService` interface
 > [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) · full architecture in
 > [`docs/SYSTEM_DESIGN.md`](docs/SYSTEM_DESIGN.md)
 
-| Landing | Browse (Marketplace) |
+| Landing | Sign in (demo mode) |
 | --- | --- |
-| ![Landing page](docs/screenshots/landing.png) | ![Browse marketplace](docs/screenshots/browse-marketplace.png) |
+| ![Landing page](docs/screenshots/landing.png) | ![Persona picker](docs/screenshots/signin-picker.png) |
 
-| Lost & Found | Listing detail |
+| Browse (Marketplace) | Lost & Found |
 | --- | --- |
-| ![Lost and found tab](docs/screenshots/browse-lostfound.png) | ![Listing detail](docs/screenshots/listing-detail.png) |
+| ![Browse marketplace](docs/screenshots/browse-marketplace.png) | ![Lost and found tab](docs/screenshots/browse-lostfound.png) |
+
+| Listing detail | Mobile browse |
+| --- | --- |
+| ![Listing detail](docs/screenshots/listing-detail.png) | ![Mobile browse](docs/screenshots/mobile-browse.png) |
 
 | Sell wizard | My items |
 | --- | --- |
@@ -99,9 +103,9 @@ S3/Vercel Blob — the app already talks to an `UploadService` interface
 | --- | --- |
 | ![Meetup proposal](docs/screenshots/thread-meetup.png) | ![Ownership claim](docs/screenshots/thread-claim.png) |
 
-| Campus impact | Mobile browse |
+| Campus impact | |
 | --- | --- |
-| ![Impact page](docs/screenshots/impact.png) | ![Mobile browse](docs/screenshots/mobile-browse.png) |
+| ![Impact page](docs/screenshots/impact.png) | |
 
 ## Architecture overview
 
