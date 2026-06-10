@@ -201,9 +201,11 @@ Indexes: (type, status, category, createdAt) · (ownerId) · (conversationId, cr
 Constraints: unique (listingId, starterId) · unique (fromUserId, listingId)
 ```
 
-Categories currently ship as a validated string enum (cheap, type-safe). The
-section-2 taxonomy maps to a `Category(id, name, parentId?, sortOrder)` table
-when subcategories and per-category fields (course code, bike serial) arrive.
+The 13 top-level categories from section 2 ship as a validated string enum
+(cheap, type-safe; one list drives the Zod schema, the browse filter, and
+the sell wizard). The taxonomy maps to a
+`Category(id, name, parentId?, sortOrder)` table when subcategories and
+per-category fields (course code, bike serial) arrive.
 
 ---
 

@@ -72,7 +72,7 @@ async function main() {
     type: "SELL", title: "Calculus: Early Transcendentals (8th ed)",
     description:
       "Stewart's calculus, used for MATH 1061/1062. Clean pages, no highlighting, binding solid. Saves you $200 vs the bookstore.",
-    category: "Textbooks", condition: "Like new", price: 45,
+    category: "Textbooks & Course Materials", condition: "Like new", price: 45,
     photos: ["/seed/calc-textbook.svg"], ownerId: maya.id,
     createdAt: daysAgo(2), viewCount: 38,
   });
@@ -80,7 +80,7 @@ async function main() {
     type: "SELL", title: "Organic Chemistry textbook + model kit",
     description:
       "Klein 4th edition with the molecular model kit thrown in. A few chapters have neat pencil notes (honestly helpful).",
-    category: "Textbooks", condition: "Good", price: 60,
+    category: "Textbooks & Course Materials", condition: "Good", price: 60,
     photos: ["/seed/chem-textbook.svg"], ownerId: priya.id,
     createdAt: daysAgo(4), viewCount: 22,
   });
@@ -104,7 +104,7 @@ async function main() {
     type: "SELL", title: "Mini fridge (3.2 cu ft)",
     description:
       "Cold, quiet, ice tray included. Moving off campus to a place with a real fridge. Pickup at Calhoun garage is easiest.",
-    category: "Dorm", condition: "Good", price: 70,
+    category: "Dorm & Apartment Essentials", condition: "Good", price: 70,
     photos: ["/seed/mini-fridge.svg"], ownerId: devon.id,
     createdAt: daysAgo(3), viewCount: 55,
   });
@@ -128,7 +128,7 @@ async function main() {
     type: "SELL", title: "UC Bearcats hoodie, size M",
     description:
       "Official bookstore hoodie, worn a handful of times. Too small for me now. No stains, no pilling.",
-    category: "Clothing", condition: "Like new", price: 20,
+    category: "Clothing & Accessories", condition: "Like new", price: 20,
     photos: ["/seed/uc-hoodie.svg"], ownerId: sam.id,
     createdAt: daysAgo(2, 5), viewCount: 12,
   });
@@ -136,7 +136,7 @@ async function main() {
     type: "SELL", title: "Bearcats basketball tickets (2) — Saturday",
     description:
       "Two student-section tickets for Saturday's home game. Can't make it anymore. Face value, no markup.",
-    category: "Tickets", condition: "New", price: 30,
+    category: "Tickets & Events", condition: "New", price: 30,
     photos: ["/seed/bball-tickets.svg"], ownerId: jordan.id,
     createdAt: daysAgo(1, 8), viewCount: 64,
   });
@@ -144,7 +144,7 @@ async function main() {
     type: "SELL", title: "5x7 area rug, neutral pattern",
     description:
       "Makes a dorm room instantly less echoey. Spot-cleaned, ready to go. Rolled up for easy carry.",
-    category: "Dorm", condition: "Good", price: 25,
+    category: "Dorm & Apartment Essentials", condition: "Good", price: 25,
     photos: ["/seed/rug.svg"], ownerId: devon.id,
     createdAt: daysAgo(9), viewCount: 19,
   });
@@ -153,21 +153,21 @@ async function main() {
     type: "SELL", title: "Road bike — 54cm, recently tuned",
     description:
       "Commuter road bike, new brake pads, rides smooth. Selling because I'm studying abroad in the spring.",
-    category: "Other", condition: "Good", price: 140,
+    category: "Bikes & Transit", condition: "Good", price: 140,
     photos: ["/seed/bike.svg"], ownerId: jordan.id,
     status: "SOLD", createdAt: daysAgo(30), updatedAt: daysAgo(28), viewCount: 88,
   });
   const soldPsych = await L({
     type: "SELL", title: "PSYC 1001 textbook bundle",
     description: "Both required books for intro psych, good condition.",
-    category: "Textbooks", condition: "Good", price: 38,
+    category: "Textbooks & Course Materials", condition: "Good", price: 38,
     photos: ["/seed/psych-textbook.svg"], ownerId: priya.id,
     status: "SOLD", createdAt: daysAgo(45), updatedAt: daysAgo(42), viewCount: 51,
   });
   await L({
     type: "SELL", title: "Winter coat, women's S",
     description: "Warm parka, perfect for the walk up the hill in January.",
-    category: "Clothing", condition: "Good", price: 28,
+    category: "Clothing & Accessories", condition: "Good", price: 28,
     photos: ["/seed/winter-coat.svg"], ownerId: maya.id,
     status: "SOLD", createdAt: daysAgo(60), updatedAt: daysAgo(55), viewCount: 47,
   });
@@ -177,7 +177,7 @@ async function main() {
     type: "DONATE", title: "Desk lamp with USB port",
     description:
       "Works great, just have two. LED bulb included. First come, first served — grab it before finals week.",
-    category: "Dorm", condition: "Good",
+    category: "Dorm & Apartment Essentials", condition: "Good",
     photos: ["/seed/desk-lamp.svg"], ownerId: maya.id,
     createdAt: daysAgo(1, 3), viewCount: 26,
   });
@@ -185,7 +185,7 @@ async function main() {
     type: "DONATE", title: "String lights (2 sets, warm white)",
     description:
       "Both sets work, every bulb checked. Make your dorm cozy for free.",
-    category: "Dorm", condition: "Like new",
+    category: "Dorm & Apartment Essentials", condition: "Like new",
     photos: ["/seed/string-lights.svg"], ownerId: sam.id,
     createdAt: daysAgo(3, 6), viewCount: 14,
   });
@@ -193,7 +193,7 @@ async function main() {
     type: "DONATE", title: "Intro psych study guides + flashcards",
     description:
       "Handwritten study guides and two boxes of flashcards from PSYC 1001. Helped me get an A — pay it forward.",
-    category: "Textbooks", condition: "Good",
+    category: "Textbooks & Course Materials", condition: "Good",
     photos: ["/seed/psych-textbook.svg"], ownerId: priya.id,
     createdAt: daysAgo(7), viewCount: 9,
   });
@@ -226,7 +226,7 @@ async function main() {
     type: "LOST", title: "Black JanSport backpack",
     description:
       "Lost Tuesday afternoon. Has a laptop sleeve, a red carabiner on the top handle, and chem notes inside. Reward: coffee on me.",
-    category: "Other", locationNote: "Braunstein Hall, room 300",
+    category: "Clothing & Accessories", locationNote: "Braunstein Hall, room 300",
     photos: ["/seed/backpack.svg"], ownerId: sam.id,
     createdAt: daysAgo(1, 2), viewCount: 42,
   });
@@ -252,7 +252,7 @@ async function main() {
     type: "FOUND", title: "Teal water bottle (32oz)",
     description:
       "Found on a bench outside the CRC after the 6pm rush. Has a couple of stickers on it — describe them and it's yours.",
-    category: "Other", locationNote: "CRC main entrance benches",
+    category: "Sports & Fitness", locationNote: "CRC main entrance benches",
     photos: ["/seed/water-bottle.svg"], ownerId: jordan.id,
     createdAt: daysAgo(1, 6), viewCount: 27,
   });
@@ -484,7 +484,7 @@ async function main() {
     type: "DONATE", title: "Closet organizer + 30 hangers",
     description:
       "Hanging fabric organizer plus a big stack of matching hangers. Free — just come grab it before move-out.",
-    category: "Dorm", condition: "Good",
+    category: "Dorm & Apartment Essentials", condition: "Good",
     photos: ["/seed/hangers.svg"], ownerId: demo.id,
     createdAt: daysAgo(5, 4), viewCount: 13,
   });
@@ -500,7 +500,7 @@ async function main() {
     type: "FOUND", title: "Gray knit beanie",
     description:
       "Found a gray beanie left on a table in the TUC food court on Thursday evening. Describe the brand or any marks and it's yours.",
-    category: "Clothing", locationNote: "TUC food court",
+    category: "Clothing & Accessories", locationNote: "TUC food court",
     photos: ["/seed/beanie.svg"], ownerId: demo.id,
     createdAt: daysAgo(2, 1), viewCount: 15,
   });
@@ -508,14 +508,14 @@ async function main() {
     type: "SELL", title: "Skateboard, barely used",
     description:
       "8.0 deck, smooth wheels. Realized I'm more of a bus person. Draft until I take real photos.",
-    category: "Other", condition: "Like new", price: 35,
+    category: "Bikes & Transit", condition: "Like new", price: 35,
     photos: ["/seed/skateboard.svg"], ownerId: demo.id,
     status: "DRAFT", createdAt: daysAgo(0, -4), viewCount: 0,
   });
   const demoMicrowave = await L({
     type: "SELL", title: "Microwave (0.7 cu ft)",
     description: "Dorm-size microwave, works perfectly. Sold to Jordan.",
-    category: "Dorm", condition: "Good", price: 25,
+    category: "Dorm & Apartment Essentials", condition: "Good", price: 25,
     photos: ["/seed/microwave.svg"], ownerId: demo.id,
     status: "SOLD", createdAt: daysAgo(20), updatedAt: daysAgo(18), viewCount: 37,
   });
@@ -611,7 +611,7 @@ async function main() {
     type: "SELL", title: "Physics 2001 textbook",
     description:
       "University Physics vol. 1, used one semester. Light highlighting in two chapters, otherwise clean.",
-    category: "Textbooks", condition: "Good", price: 30,
+    category: "Textbooks & Course Materials", condition: "Good", price: 30,
     photos: ["/seed/chem-textbook.svg"], ownerId: priya.id,
     createdAt: daysAgo(3, 9), viewCount: 18,
   });
@@ -619,7 +619,7 @@ async function main() {
     type: "SELL", title: "Electric kettle, 1.7L",
     description:
       "Boils fast, auto shutoff. Essential for ramen and all-nighters. Descaled last month.",
-    category: "Dorm", condition: "Good", price: 12,
+    category: "Kitchen & Appliances", condition: "Good", price: 12,
     photos: ["/seed/kettle.svg"], ownerId: sam.id,
     createdAt: daysAgo(4, 6), viewCount: 21,
   });
@@ -627,7 +627,7 @@ async function main() {
     type: "SELL", title: "MainStreet concert tickets (2)",
     description:
       "Two tickets for Friday's show at MainStreet. Can't go anymore — face value.",
-    category: "Tickets", condition: "New", price: 25,
+    category: "Tickets & Events", condition: "New", price: 25,
     photos: ["/seed/bball-tickets.svg"], ownerId: devon.id,
     createdAt: daysAgo(0, -7), viewCount: 33,
   });
@@ -635,7 +635,7 @@ async function main() {
     type: "SELL", title: "Women's rain jacket, size M",
     description:
       "Packable rain shell, great for the walk between Langsam and TUC. Zips into its own pocket.",
-    category: "Clothing", condition: "Like new", price: 18,
+    category: "Clothing & Accessories", condition: "Like new", price: 18,
     photos: ["/seed/winter-coat.svg"], ownerId: maya.id,
     createdAt: daysAgo(6, 3), viewCount: 10,
   });
@@ -651,7 +651,7 @@ async function main() {
     type: "DONATE", title: "Full-length mirror",
     description:
       "Door-hanging mirror, no cracks. Too heavy to ship home — free for pickup near campus.",
-    category: "Dorm", condition: "Good",
+    category: "Dorm & Apartment Essentials", condition: "Good",
     photos: ["/seed/mirror.svg"], ownerId: maya.id,
     createdAt: daysAgo(5, 8), viewCount: 25,
   });
@@ -663,6 +663,48 @@ async function main() {
     photos: ["/seed/ring.svg"], ownerId: sam.id,
     createdAt: daysAgo(3, 5), viewCount: 29,
   });
+  // One active listing per remaining category — no filter dead-ends.
+  await L({
+    type: "SELL", title: "Yamaha acoustic guitar + soft case",
+    description:
+      "FG800, great starter guitar. New strings last month. Selling because I upgraded — CCM friends, this one's honest.",
+    category: "Music & Instruments", condition: "Good", price: 90,
+    photos: ["/seed/guitar.svg"], ownerId: devon.id,
+    createdAt: daysAgo(2, 8), viewCount: 22,
+  });
+  await L({
+    type: "SELL", title: "Copic marker set (24, mostly new)",
+    description:
+      "24-color set from my first DAAP studio cycle. Three markers half-used, the rest barely touched. Huge savings vs the bookstore.",
+    category: "Art & Design Supplies", condition: "Like new", price: 40,
+    photos: ["/seed/markers.svg"], ownerId: devon.id,
+    createdAt: daysAgo(1, 7), viewCount: 28,
+  });
+  await L({
+    type: "SELL", title: "Yoga mat + two blocks",
+    description:
+      "Thick mat, wiped down, with cork blocks. Perfect for CRC classes or dorm-room stretching.",
+    category: "Sports & Fitness", condition: "Good", price: 10,
+    photos: ["/seed/yoga-mat.svg"], ownerId: priya.id,
+    createdAt: daysAgo(3, 7), viewCount: 9,
+  });
+  await L({
+    type: "SELL", title: "U-lock + bike lights set",
+    description:
+      "Kryptonite U-lock with two keys plus front/rear USB lights. Sold my bike, keeping you and yours safe instead.",
+    category: "Bikes & Transit", condition: "Good", price: 15,
+    photos: ["/seed/bike-lock.svg"], ownerId: jordan.id,
+    createdAt: daysAgo(2, 6), viewCount: 14,
+  });
+  await L({
+    type: "DONATE", title: "Desk organizer + planner bundle",
+    description:
+      "Mesh desk organizer, an unused 2026 planner, and a stack of sticky notes. Free to a fellow over-organizer.",
+    category: "School & Office Supplies", condition: "Like new",
+    photos: ["/seed/planner.svg"], ownerId: sam.id,
+    createdAt: daysAgo(1, 1), viewCount: 11,
+  });
+
   await L({
     type: "FOUND", title: "TI calculator in a green case",
     description:

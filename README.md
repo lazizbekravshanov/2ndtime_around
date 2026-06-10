@@ -145,6 +145,12 @@ interactive cards with inline Accept/Decline and Approve/Deny.
 
 ## Notable design decisions
 
+- **Categories** are the 13-item campus taxonomy from
+  [`docs/SYSTEM_DESIGN.md`](docs/SYSTEM_DESIGN.md) §2 (Textbooks & Course
+  Materials, Bikes & Transit, Music & Instruments for CCM, Art & Design
+  Supplies for DAAP, …), implemented as one validated string enum that
+  drives the Zod schema, browse filters, and the sell wizard. Subcategories
+  stay search keywords for now — depth kills mobile filter UX.
 - **`DRAFT` listing status** was added beyond the spec's four statuses so
   the My Items → Drafts tab has real backing (wizard offers "Save as draft").
 - **`Conversation.starterId`** exists alongside the spec's `participantIds`

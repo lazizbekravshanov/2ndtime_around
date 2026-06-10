@@ -12,13 +12,21 @@ export const LISTING_STATUSES = [
 ] as const;
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
 
+// Campus-life taxonomy — see docs/SYSTEM_DESIGN.md §2 for the full design
+// (subcategories, UC-specific rationale, prohibited items).
 export const CATEGORIES = [
-  "Textbooks",
-  "Furniture",
+  "Textbooks & Course Materials",
   "Electronics",
-  "Clothing",
-  "Dorm",
-  "Tickets",
+  "Furniture",
+  "Dorm & Apartment Essentials",
+  "Kitchen & Appliances",
+  "Clothing & Accessories",
+  "Tickets & Events",
+  "Bikes & Transit",
+  "Sports & Fitness",
+  "School & Office Supplies",
+  "Music & Instruments",
+  "Art & Design Supplies",
   "Other",
 ] as const;
 export type Category = (typeof CATEGORIES)[number];
