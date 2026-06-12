@@ -55,7 +55,13 @@ implemented and waiting on one env var + a UI toggle.
 | `NEXTAUTH_SECRET` | prod only | `openssl rand -base64 32` |
 | `NEXTAUTH_URL` | prod only | your deployed origin |
 | `DEMO_PASSWORD` | for demo mode | gates the persona sign-in |
-| `EMAIL_SERVER` / `EMAIL_FROM` | later | SMTP for real magic links |
+| `EMAIL_SERVER` / `EMAIL_FROM` | later | SMTP for real magic links + activity notifications |
+
+> **Secrets live in env vars only — never in `public/`.** Anything under
+> `public/` is served at the site root, so a secret there is a public secret.
+> Set `DEMO_PASSWORD`, `NEXTAUTH_SECRET`, and `DATABASE_URL` in the shell or the
+> Vercel project, not in any committed or served file. `/api/demo-login` also
+> self-disables when `VERCEL_ENV=production`.
 
 ## deploy
 

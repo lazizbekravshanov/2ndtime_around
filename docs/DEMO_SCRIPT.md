@@ -93,6 +93,37 @@ every exchange keeps something out of a dumpster at move-out.*
 
 ---
 
+## V2 walkthrough — the killer features (3 minutes)
+
+Run after the core demo, still signed in as **Alex Demo**.
+
+1. **Instant search + filters.** On **Browse**, type in the search box — results
+   update as you type. Add a category and condition; watch the dismissible
+   filter pills appear and the result count update. Everything lives in the URL.
+2. **Save the search.** With filters active, tap **Save this search** → name it,
+   keep notify on. Open the user menu → **Saved** to see it under *Searches*.
+3. **Favorites.** Tap the heart on any card (or on a listing page). Open
+   **Saved → Items** to see your watchlist. Price drops and sold items notify you.
+4. **Notifications.** The bell shows a dot — open **Notifications** to see the
+   seeded saved-search hit and message, grouped by day. Tap one to jump to it.
+5. **Want ad.** Browse → **Wanted** tab shows the "Looking for a mini fridge"
+   post. From a seller's view the CTA reads **I have this**.
+6. **Real-time chat.** Open the unread thread; in a second browser (or as the
+   other persona) send a message — it appears in ~1–2s with a **Seen** marker.
+   Propose a meetup with the spot picker, accept it, then **Add to calendar**.
+7. **Move-out mode.** **Post item → Moving out? Post in bulk** → add a few rows,
+   mark one **Free**, post. You land on the shareable move-out sale page.
+8. **Price suggestion.** Start a normal **Sell** listing; on the price step,
+   pick a category with history (e.g. Electronics) and see the suggested range.
+9. **Trust & safety.** On a listing, open the **⋯** menu → **Report**. On a
+   profile, **Block**. Then sign in as **Professor** (a moderator) and open
+   **Moderation** to action the seeded report.
+10. **Badges & impact.** Your profile shows the **Good Samaritan** badge (from a
+    returned found item); **Campus impact** adds a personal panel with progress
+    toward the rest.
+
+---
+
 ## If something goes sideways
 
 - **Used up the claim/meetup during practice?** `npm run db:seed` resets
