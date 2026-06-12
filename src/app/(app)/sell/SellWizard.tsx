@@ -22,6 +22,7 @@ import {
 } from "@/lib/constants";
 import { createListing } from "@/lib/actions/listings";
 import { formatPrice } from "@/lib/format";
+import { PriceHint } from "./PriceHint";
 
 const STEPS = ["Type", "Photos", "Details", "Review"] as const;
 
@@ -106,8 +107,11 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<Details>({ resolver: zodResolver(schema) });
+  const watchedCategory = watch("category");
 
   const isLostFound = type === "LOST" || type === "FOUND";
 
@@ -309,6 +313,12 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
                     {...register("price", { valueAsNumber: true })}
                   />
                 </div>
+                <PriceHint
+                  category={watchedCategory}
+                  onUse={(v) =>
+                    setValue("price", v, { shouldValidate: true })
+                  }
+                />
               </Field>
             )}
 
