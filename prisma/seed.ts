@@ -15,6 +15,11 @@ const daysAgo = (n: number, hourOffset = 0) =>
 
 async function main() {
   // Wipe in dependency order — this is a demo database.
+  await db.notification.deleteMany();
+  await db.savedSearch.deleteMany();
+  await db.favorite.deleteMany();
+  await db.report.deleteMany();
+  await db.block.deleteMany();
   await db.rating.deleteMany();
   await db.message.deleteMany();
   await db.conversation.deleteMany();
@@ -464,13 +469,15 @@ async function main() {
     },
   });
 
-  // Reviewer persona — clean account for exploring freely.
-  await db.user.create({
+  // Reviewer persona — clean account for exploring freely. Also a moderator
+  // so the moderation queue is demonstrable.
+  const professor = await db.user.create({
     data: {
       email: "professor@mail.uc.edu",
       displayName: "Professor",
       createdAt: daysAgo(1),
       emailVerified: daysAgo(1),
+      isModerator: true,
     },
   });
 
@@ -724,12 +731,104 @@ async function main() {
     createdAt: daysAgo(1, 4), viewCount: 12,
   });
 
+  // ================= V2 showcase data =================
+
+  // A returned found item earns the demo user the "Good Samaritan" badge.
+  await L({
+    type: "FOUND", title: "Returned: blue Nalgene bottle",
+    description: "Found near Langsam and reunited with its owner the same day.",
+    category: "Sports & Fitness", locationNote: "Langsam Library",
+    photos: ["/seed/water-bottle.svg"], ownerId: demo.id,
+    status: "RESOLVED", createdAt: daysAgo(14), updatedAt: daysAgo(14), viewCount: 8,
+  });
+
+  // A "Looking for" want ad so the Wanted tab isn't empty.
+  await L({
+    type: "WANTED", title: "Looking for a mini fridge",
+    description:
+      "Moving into a single and need a small fridge (3–4 cu ft). Can pick up anywhere on campus. Reasonable price or free is amazing.",
+    category: "Dorm & Apartment Essentials", ownerId: devon.id,
+    createdAt: daysAgo(0, -2), viewCount: 9,
+  });
+
+  // A move-out batch (Sam clearing out) — shareable at /moveout/<batchId>.
+  const moveoutBatchId = "demo-moveout-001";
+  await Promise.all([
+    L({
+      type: "SELL", title: "Desk fan", description: "Quiet, two speeds. Move-out sale.",
+      category: "Dorm & Apartment Essentials", condition: "Good", price: 8,
+      photos: [], ownerId: sam.id, moveoutBatchId, createdAt: daysAgo(0, -1),
+    }),
+    L({
+      type: "DONATE", title: "Stack of textbooks (free)",
+      description: "Free — grab them before move-out.",
+      category: "Textbooks & Course Materials", condition: "Fair",
+      photos: [], ownerId: sam.id, moveoutBatchId, createdAt: daysAgo(0, -1),
+    }),
+    L({
+      type: "SELL", title: "Shoe rack", description: "Holds 12 pairs. Move-out sale.",
+      category: "Dorm & Apartment Essentials", condition: "Good", price: 10,
+      photos: [], ownerId: sam.id, moveoutBatchId, createdAt: daysAgo(0, -1),
+    }),
+  ]);
+
+  // Demo user's favorites, a notify-on saved search, and seeded notifications.
+  await db.favorite.createMany({
+    data: [
+      { userId: demo.id, listingId: calcBook.id },
+      { userId: demo.id, listingId: chair.id },
+    ],
+  });
+  await db.savedSearch.create({
+    data: {
+      userId: demo.id,
+      label: "Calculators under $80",
+      q: "calculator",
+      category: "Electronics",
+      type: "SELL",
+      maxPrice: 80,
+      notify: true,
+    },
+  });
+  await db.notification.createMany({
+    data: [
+      {
+        userId: demo.id, kind: "SAVED_SEARCH_HIT",
+        title: "New match: TI-84 Plus CE graphing calculator",
+        body: "Matches your saved search “Calculators under $80”.",
+        href: "/browse?q=calculator", createdAt: daysAgo(0, -3),
+      },
+      {
+        userId: demo.id, kind: "MESSAGE",
+        title: "New message from Maya C.",
+        body: "Would you take $70? I can meet anywhere on campus this week.",
+        href: `/messages/${demoConvo1.id}`, createdAt: daysAgo(0, -1),
+      },
+    ],
+  });
+
+  // An open report for the moderator (Professor) to review.
+  await db.report.create({
+    data: {
+      reporterId: maya.id,
+      listingId: chair.id,
+      reason: "SPAM",
+      detail: "Looks like a duplicate repost.",
+      status: "OPEN",
+      createdAt: daysAgo(0, -4),
+    },
+  });
+
   const counts = {
     users: await db.user.count(),
     listings: await db.listing.count(),
     conversations: await db.conversation.count(),
     messages: await db.message.count(),
     ratings: await db.rating.count(),
+    favorites: await db.favorite.count(),
+    savedSearches: await db.savedSearch.count(),
+    notifications: await db.notification.count(),
+    reports: await db.report.count(),
   };
   console.log("Seeded:", counts);
 }

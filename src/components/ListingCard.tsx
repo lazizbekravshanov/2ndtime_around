@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { PinIcon } from "@/components/icons";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { formatPrice, photoList, timeAgo } from "@/lib/format";
 import type { ListingStatus, ListingType } from "@/lib/constants";
 
@@ -17,16 +18,27 @@ export type ListingCardData = {
   owner: { displayName: string | null };
 };
 
-export function ListingCard({ listing }: { listing: ListingCardData }) {
+export function ListingCard({
+  listing,
+  favorited,
+}: {
+  listing: ListingCardData;
+  /** undefined hides the heart (e.g. own items); boolean shows its state. */
+  favorited?: boolean;
+}) {
   const photos = photoList(listing.photos);
   const isLostFound = listing.type === "LOST" || listing.type === "FOUND";
+  const isWanted = listing.type === "WANTED";
   const done = listing.status === "SOLD" || listing.status === "RESOLVED";
 
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group overflow-hidden rounded-xl border border-line bg-surface transition-colors hover:border-faint/50"
+      className="group relative overflow-hidden rounded-xl border border-line bg-surface transition-colors hover:border-faint/50"
     >
+      {favorited !== undefined && (
+        <FavoriteButton listingId={listing.id} initial={favorited} />
+      )}
       <div className="relative aspect-[4/3] overflow-hidden bg-paper">
         {photos[0] ? (
           // Plain <img>: uploads land in /public at runtime, which
@@ -39,7 +51,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-faint">
-            No photo
+            {isWanted ? "Looking for this" : "No photo"}
           </div>
         )}
         <div className="absolute left-2 top-2 flex gap-1.5">
@@ -48,6 +60,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           )}
           {listing.type === "LOST" && <Badge tone="accent">Lost</Badge>}
           {listing.type === "FOUND" && <Badge tone="neutral">Found</Badge>}
+          {isWanted && !done && <Badge tone="outline">Looking for</Badge>}
           {done && (
             <Badge tone="success">
               {listing.status === "SOLD" ? "Sold" : "Resolved"}

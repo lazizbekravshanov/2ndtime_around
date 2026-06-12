@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,6 +22,7 @@ import {
 } from "@/lib/constants";
 import { createListing } from "@/lib/actions/listings";
 import { formatPrice } from "@/lib/format";
+import { PriceHint } from "./PriceHint";
 
 const STEPS = ["Type", "Photos", "Details", "Review"] as const;
 
@@ -31,6 +33,7 @@ const TYPE_OPTIONS: {
 }[] = [
   { type: "SELL", title: "Sell something", body: "Set a price, meet on campus, get paid." },
   { type: "DONATE", title: "Donate it", body: "Give it away free to another Bearcat." },
+  { type: "WANTED", title: "Looking for something", body: "Post what you need and let sellers find you." },
   { type: "LOST", title: "I lost something", body: "Post it so the finder can reach you." },
   { type: "FOUND", title: "I found something", body: "Help it get back to its owner." },
 ];
@@ -88,10 +91,10 @@ function ProgressBar({ step }: { step: number }) {
   );
 }
 
-export function SellWizard() {
+export function SellWizard({ initialType }: { initialType?: ListingType }) {
   const router = useRouter();
-  const [step, setStep] = useState(0);
-  const [type, setType] = useState<ListingType | null>(null);
+  const [step, setStep] = useState(initialType ? 1 : 0);
+  const [type, setType] = useState<ListingType | null>(initialType ?? null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [details, setDetails] = useState<Details | null>(null);
   const [submitting, setSubmitting] = useState<"publish" | "draft" | null>(null);
@@ -104,8 +107,11 @@ export function SellWizard() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<Details>({ resolver: zodResolver(schema) });
+  const watchedCategory = watch("category");
 
   const isLostFound = type === "LOST" || type === "FOUND";
 
@@ -164,6 +170,17 @@ export function SellWizard() {
               </button>
             ))}
           </div>
+          <Link
+            href="/sell/moveout"
+            className="mt-4 block rounded-xl border border-dashed border-line p-4 text-left transition-colors hover:border-faint"
+          >
+            <span className="block text-sm font-semibold">
+              Moving out? Post in bulk →
+            </span>
+            <span className="mt-0.5 block text-sm text-faint">
+              List everything at once and share one move-out sale page.
+            </span>
+          </Link>
         </fieldset>
       )}
 
@@ -171,12 +188,18 @@ export function SellWizard() {
       {step === 1 && type && (
         <div className="mt-8">
           <h1 className="text-2xl font-semibold">
-            {type === "LOST" ? "Got a photo of it?" : "Add some photos"}
+            {type === "LOST"
+              ? "Got a photo of it?"
+              : type === "WANTED"
+                ? "Add a reference photo?"
+                : "Add some photos"}
           </h1>
           <p className="mt-1 text-sm text-faint">
             {type === "LOST"
               ? "A photo makes your item much easier to recognize. Skip if you don't have one."
-              : "Listings with photos get far more replies. You can skip for now."}
+              : type === "WANTED"
+                ? "A photo of something similar helps sellers know what you're after. Totally optional."
+                : "Listings with photos get far more replies. You can skip for now."}
           </p>
           <div className="mt-5">
             <PhotoUploader photos={photos} onChange={setPhotos} />
@@ -290,6 +313,12 @@ export function SellWizard() {
                     {...register("price", { valueAsNumber: true })}
                   />
                 </div>
+                <PriceHint
+                  category={watchedCategory}
+                  onUse={(v) =>
+                    setValue("price", v, { shouldValidate: true })
+                  }
+                />
               </Field>
             )}
 

@@ -5,6 +5,8 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { listingSchema } from "@/lib/validation";
+import { notify } from "@/lib/notify";
+import { matchSavedSearches } from "@/lib/savedSearchMatch";
 
 export type ActionResult<T = undefined> =
   | (T extends undefined ? { ok: true } : { ok: true; data: T })
@@ -53,6 +55,7 @@ export async function createListing(
   });
 
   revalidatePath("/browse");
+  if (!asDraft) void matchSavedSearches(listing);
   return { ok: true, data: { id: listing.id } };
 }
 
@@ -83,23 +86,60 @@ export async function updateListing(
   }
 
   const d = parsed.data;
-  await db.listing.update({
+  const newPrice = existing.type === "SELL" ? (d.price ?? null) : null;
+  const willPublish = publish && existing.status === "DRAFT";
+
+  // Price drop: fire at most once per new low, only for already-active sales.
+  const isDrop =
+    existing.type === "SELL" &&
+    existing.status === "ACTIVE" &&
+    newPrice !== null &&
+    existing.price !== null &&
+    newPrice < existing.price &&
+    newPrice < (existing.lastNotifiedPrice ?? Infinity);
+
+  const updated = await db.listing.update({
     where: { id: listingId },
     data: {
       title: d.title,
       description: d.description,
       category: d.category,
       condition: d.condition ?? null,
-      price: existing.type === "SELL" ? (d.price ?? null) : null,
+      price: newPrice,
       locationNote: d.locationNote ?? null,
       photos: d.photos,
-      ...(publish && existing.status === "DRAFT" ? { status: "ACTIVE" } : {}),
+      ...(willPublish ? { status: "ACTIVE" } : {}),
+      ...(isDrop ? { lastNotifiedPrice: newPrice } : {}),
     },
   });
 
   revalidatePath("/browse");
   revalidatePath(`/listing/${listingId}`);
+
+  if (isDrop && newPrice !== null) {
+    void notifyFavoriters(listingId, {
+      kind: "PRICE_DROP",
+      title: `Price drop: ${d.title}`,
+      body: `Now $${newPrice} (was $${existing.price}).`,
+    });
+  }
+  if (willPublish) void matchSavedSearches(updated);
+
   return { ok: true, data: { id: listingId } };
+}
+
+/** Notify everyone who favorited a listing (excluding its owner). */
+async function notifyFavoriters(
+  listingId: string,
+  payload: { kind: "PRICE_DROP" | "FAVORITE_SOLD"; title: string; body: string }
+): Promise<void> {
+  const favs = await db.favorite.findMany({
+    where: { listingId },
+    select: { userId: true },
+  });
+  for (const f of favs) {
+    void notify({ userId: f.userId, ...payload, href: `/listing/${listingId}` });
+  }
 }
 
 const statusChangeSchema = z.object({
@@ -132,5 +172,14 @@ export async function setListingStatus(input: unknown): Promise<ActionResult> {
   revalidatePath("/browse");
   revalidatePath(`/listing/${listing.id}`);
   revalidatePath("/my-items");
+
+  // Let watchers know a saved item is gone.
+  if (parsed.data.status === "SOLD" || parsed.data.status === "RESOLVED") {
+    void notifyFavoriters(listing.id, {
+      kind: "FAVORITE_SOLD",
+      title: `A saved item is no longer available`,
+      body: `${listing.title} was just marked ${parsed.data.status.toLowerCase()}.`,
+    });
+  }
   return { ok: true };
 }

@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SearchIcon } from "@/components/icons";
 import { inputClasses, selectClasses } from "@/components/ui/Field";
-import { CATEGORIES } from "@/lib/constants";
+import { CATEGORIES, CONDITIONS } from "@/lib/constants";
 
 /**
  * Filter row — every control writes to the URL, so filtered views are
@@ -70,6 +70,22 @@ export function BrowseFilters({ tab }: { tab: string }) {
             ))}
           </select>
 
+          {(tab === "market" || tab === "donations") && (
+            <select
+              aria-label="Condition"
+              value={searchParams.get("condition") ?? ""}
+              onChange={(e) => setParam("condition", e.target.value)}
+              className={`${selectClasses} w-auto`}
+            >
+              <option value="">Any condition</option>
+              {CONDITIONS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
+
           {tab === "market" && (
             <select
               aria-label="Sort"
@@ -79,6 +95,7 @@ export function BrowseFilters({ tab }: { tab: string }) {
             >
               <option value="">Newest</option>
               <option value="price-asc">Price: low → high</option>
+              <option value="price-desc">Price: high → low</option>
             </select>
           )}
         </div>

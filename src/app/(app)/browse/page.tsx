@@ -1,90 +1,45 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import type { Prisma } from "@prisma/client";
 import { ListingCard, ListingCardSkeleton } from "@/components/ListingCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ButtonLink } from "@/components/ui/Button";
-import { CATEGORIES } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { getSessionUser } from "@/lib/session";
+import { blockedUserIds } from "@/lib/actions/safety";
+import { favoritedListingIds } from "@/lib/actions/favorites";
+import {
+  BROWSE_TABS,
+  buildListingWhere,
+  buildOrderBy,
+  parseTab,
+  activeFilterChips,
+  type BrowseParams,
+} from "@/lib/search";
 import { BrowseFilters } from "./BrowseFilters";
+import { ActiveFilters } from "./ActiveFilters";
+import { SaveSearchButton } from "./SaveSearchButton";
 
 export const metadata = { title: "Browse" };
 
-const TABS = [
-  { key: "market", label: "Marketplace" },
-  { key: "donations", label: "Donations" },
-  { key: "lostfound", label: "Lost & Found" },
-] as const;
-
-type TabKey = (typeof TABS)[number]["key"];
-
-type SearchParams = {
-  tab?: string;
-  q?: string;
-  category?: string;
-  min?: string;
-  max?: string;
-  sort?: string;
-  lf?: string;
-};
-
-function parseTab(value?: string): TabKey {
-  return TABS.some((t) => t.key === value) ? (value as TabKey) : "market";
-}
-
-async function Results({ params }: { params: SearchParams }) {
+async function Results({ params }: { params: BrowseParams }) {
   const tab = parseTab(params.tab);
+  const user = await getSessionUser();
+  const [blockedIds, favIds] = user
+    ? await Promise.all([blockedUserIds(user.id), favoritedListingIds(user.id)])
+    : [[], new Set<string>()];
 
-  const where: Prisma.ListingWhereInput = { status: "ACTIVE" };
-  if (tab === "market") where.type = "SELL";
-  if (tab === "donations") where.type = "DONATE";
-  if (tab === "lostfound") {
-    where.type =
-      params.lf === "lost"
-        ? "LOST"
-        : params.lf === "found"
-          ? "FOUND"
-          : { in: ["LOST", "FOUND"] };
-  }
-  if (params.q) {
-    // SQLite's LIKE is already case-insensitive; Postgres needs the
-    // explicit mode (which the SQLite client doesn't type, hence the cast).
-    const onPostgres = process.env.DATABASE_URL?.startsWith("postgres");
-    const match = onPostgres
-      ? { contains: params.q, mode: "insensitive" }
-      : { contains: params.q };
-    where.OR = [
-      { title: match },
-      { description: match },
-    ] as Prisma.ListingWhereInput[];
-  }
-  if (params.category && (CATEGORIES as readonly string[]).includes(params.category)) {
-    where.category = params.category;
-  }
-  if (tab === "market") {
-    const min = Number(params.min);
-    const max = Number(params.max);
-    if (params.min && !Number.isNaN(min)) where.price = { gte: min };
-    if (params.max && !Number.isNaN(max)) {
-      where.price = {
-        ...(typeof where.price === "object" ? where.price : {}),
-        lte: max,
-      };
-    }
-  }
-
+  const where = buildListingWhere(params, { blockedIds });
   const listings = await db.listing.findMany({
     where,
     include: { owner: { select: { displayName: true } } },
-    orderBy:
-      params.sort === "price-asc"
-        ? [{ price: "asc" }, { createdAt: "desc" }]
-        : { createdAt: "desc" },
+    orderBy: buildOrderBy(params.sort),
     take: 60,
   });
 
   if (listings.length === 0) {
-    const hasFilters = Boolean(params.q || params.category || params.min || params.max);
+    const hasFilters = Boolean(
+      params.q || params.category || params.condition || params.min || params.max
+    );
     return (
       <EmptyState
         title={hasFilters ? "Nothing matches those filters" : "Nothing here yet"}
@@ -93,7 +48,9 @@ async function Results({ params }: { params: SearchParams }) {
             ? "Try a broader search or clear a filter — new items show up all day."
             : tab === "lostfound"
               ? "No lost or found items reported right now. Hopefully it stays that way!"
-              : "Be the first — posting takes under a minute."
+              : tab === "wanted"
+                ? "No want ads yet. Post what you're looking for and let sellers find you."
+                : "Be the first — posting takes under a minute."
         }
         action={
           hasFilters ? (
@@ -101,7 +58,9 @@ async function Results({ params }: { params: SearchParams }) {
               Clear filters
             </ButtonLink>
           ) : (
-            <ButtonLink href="/sell">Post the first item</ButtonLink>
+            <ButtonLink href={tab === "wanted" ? "/sell?type=WANTED" : "/sell"}>
+              {tab === "wanted" ? "Post a want ad" : "Post the first item"}
+            </ButtonLink>
           )
         }
       />
@@ -109,41 +68,54 @@ async function Results({ params }: { params: SearchParams }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-      {listings.map((l) => (
-        <ListingCard
-          key={l.id}
-          listing={{
-            ...l,
-            type: l.type as never,
-            status: l.status as never,
-          }}
-        />
-      ))}
-    </div>
+    <>
+      <p className="mb-3 text-xs text-faint">
+        {listings.length} {listings.length === 1 ? "item" : "items"}
+        {listings.length === 60 ? "+" : ""}
+      </p>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {listings.map((l) => (
+          <ListingCard
+            key={l.id}
+            listing={{
+              ...l,
+              type: l.type as never,
+              status: l.status as never,
+            }}
+            favorited={
+              user && l.ownerId !== user.id ? favIds.has(l.id) : undefined
+            }
+          />
+        ))}
+      </div>
+    </>
   );
 }
 
 export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: Promise<SearchParams>;
+  searchParams: Promise<BrowseParams>;
 }) {
   const params = await searchParams;
   const tab = parseTab(params.tab);
+  const chips = activeFilterChips(params);
 
   return (
     <div>
       <h1 className="sr-only">Browse</h1>
 
-      {/* Tab bar — the three worlds of the app */}
-      <nav aria-label="Sections" className="flex gap-1 border-b border-line">
-        {TABS.map((t) => (
+      {/* Tab bar — the worlds of the app */}
+      <nav
+        aria-label="Sections"
+        className="flex gap-1 overflow-x-auto border-b border-line"
+      >
+        {BROWSE_TABS.map((t) => (
           <Link
             key={t.key}
             href={t.key === "market" ? "/browse" : `/browse?tab=${t.key}`}
             aria-current={tab === t.key ? "page" : undefined}
-            className={`relative px-3 py-2.5 text-sm font-medium transition-colors ${
+            className={`relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors ${
               tab === t.key ? "text-ink" : "text-faint hover:text-ink"
             }`}
           >
@@ -158,6 +130,13 @@ export default async function BrowsePage({
       <div className="mt-4">
         <BrowseFilters tab={tab} />
       </div>
+
+      {chips.length > 0 && (
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <ActiveFilters chips={chips} />
+          <SaveSearchButton params={params} />
+        </div>
+      )}
 
       <div className="mt-5">
         <Suspense

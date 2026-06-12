@@ -1,5 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { ToastProvider } from "@/components/ui/Toast";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
@@ -12,27 +13,38 @@ export default async function AppLayout({
 }) {
   const user = await requireUser();
 
-  const unreadCount = await db.message.count({
-    where: {
-      readAt: null,
-      senderId: { not: user.id },
-      conversation: {
-        OR: [{ starterId: user.id }, { listing: { ownerId: user.id } }],
+  const [unreadCount, notifCount, mod] = await Promise.all([
+    db.message.count({
+      where: {
+        readAt: null,
+        senderId: { not: user.id },
+        conversation: {
+          OR: [{ starterId: user.id }, { listing: { ownerId: user.id } }],
+        },
       },
-    },
-  });
+    }),
+    db.notification.count({ where: { userId: user.id, readAt: null } }),
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { isModerator: true },
+    }),
+  ]);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header
-        userId={user.id}
-        displayName={user.displayName ?? user.email}
-        unreadCount={unreadCount}
-      />
-      <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-6">
-        {children}
-      </main>
-      <Footer />
-    </div>
+    <ToastProvider>
+      <div className="flex min-h-screen flex-col">
+        <Header
+          userId={user.id}
+          displayName={user.displayName ?? user.email}
+          unreadCount={unreadCount}
+          notifCount={notifCount}
+          isModerator={mod?.isModerator ?? false}
+        />
+        <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-6">
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </ToastProvider>
   );
 }

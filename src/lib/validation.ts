@@ -4,7 +4,7 @@ import {
   CONDITIONS,
   LISTING_TYPES,
   MAX_PHOTOS,
-  MEETUP_SPOTS,
+  MEETUP_SPOT_NAMES,
 } from "@/lib/constants";
 
 // Every mutation validates its input with one of these schemas on the
@@ -80,7 +80,7 @@ export const messageSchema = z.object({
 
 export const meetupProposalSchema = z.object({
   conversationId: z.string().min(1),
-  spot: z.enum(MEETUP_SPOTS),
+  spot: z.enum(MEETUP_SPOT_NAMES),
   datetime: z
     .string()
     .refine((v) => !Number.isNaN(Date.parse(v)), "Pick a valid date and time.")
@@ -97,6 +97,38 @@ export const claimSchema = z.object({
     .trim()
     .min(10, "Describe a detail only the owner would know (at least 10 characters).")
     .max(500, "Keep it under 500 characters."),
+});
+
+export const moveoutItemSchema = z
+  .object({
+    title: z
+      .string()
+      .trim()
+      .min(3, "Title needs at least 3 characters.")
+      .max(80, "Keep the title under 80 characters."),
+    category: z.enum(CATEGORIES),
+    condition: z.enum(CONDITIONS).optional(),
+    free: z.boolean().default(false),
+    price: z.number().min(0).max(10000).optional(),
+    photos: z.array(z.string().min(1)).max(MAX_PHOTOS).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.free && data.price === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["price"],
+        message: "Set a price or mark it free.",
+      });
+    }
+  });
+
+export const moveoutBatchSchema = z.object({
+  items: z.array(moveoutItemSchema).min(1, "Add at least one item.").max(15),
+  locationNote: z
+    .string()
+    .trim()
+    .max(120, "Keep the location under 120 characters.")
+    .optional(),
 });
 
 export const ratingSchema = z.object({

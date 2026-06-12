@@ -43,6 +43,7 @@ export async function GET(
       body: m.body,
       kind: m.kind,
       meta: m.meta,
+      readAt: m.readAt ? m.readAt.toISOString() : null,
       createdAt: m.createdAt.toISOString(),
     })),
   });

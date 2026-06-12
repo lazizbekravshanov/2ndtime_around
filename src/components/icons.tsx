@@ -117,6 +117,96 @@ export function CheckIcon(p: IconProps) {
   );
 }
 
+export function HeartIcon({ filled, ...p }: IconProps & { filled?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={p.className ?? "h-5 w-5"}
+    >
+      <path d="M12 20s-7-4.5-9.3-9A5 5 0 0 1 12 6a5 5 0 0 1 9.3 5C19 15.5 12 20 12 20z" />
+    </svg>
+  );
+}
+
+export function BellIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+    </Svg>
+  );
+}
+
+export function XIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </Svg>
+  );
+}
+
+export function ShareIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+    </Svg>
+  );
+}
+
+export function CalendarIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="3" y="4.5" width="18" height="16" rx="2" />
+      <path d="M3 9h18M8 3v3M16 3v3" />
+    </Svg>
+  );
+}
+
+export function DotsIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="5" cy="12" r="1" />
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="19" cy="12" r="1" />
+    </Svg>
+  );
+}
+
+export function FlagIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M5 21V4M5 4h11l-1.5 4L16 12H5" />
+    </Svg>
+  );
+}
+
+export function TagIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M3 12V4h8l9 9-7 7-9-9z" />
+      <circle cx="7.5" cy="7.5" r="1.2" />
+    </Svg>
+  );
+}
+
+export function BadgeIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="9" r="6" />
+      <path d="M9 14.5L8 22l4-2 4 2-1-7.5" />
+    </Svg>
+  );
+}
+
 /** Brand mark: a circular "second time around" arrow in UC Red. */
 export function LogoMark({ className = "h-6 w-6" }: IconProps) {
   return (

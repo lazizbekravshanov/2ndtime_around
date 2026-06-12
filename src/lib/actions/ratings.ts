@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { ratingSchema } from "@/lib/validation";
+import { notify } from "@/lib/notify";
 import type { ActionResult } from "@/lib/actions/listings";
 
 /**
@@ -67,5 +68,12 @@ export async function submitRating(input: unknown): Promise<ActionResult> {
   }
 
   revalidatePath(`/profile/${toUserId}`);
+  void notify({
+    userId: toUserId,
+    kind: "RATING",
+    title: `${user.displayName ?? "Someone"} rated you ${stars}★`,
+    body: comment || undefined,
+    href: `/profile/${toUserId}`,
+  });
   return { ok: true };
 }

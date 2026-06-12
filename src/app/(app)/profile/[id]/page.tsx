@@ -5,6 +5,10 @@ import { StarRating } from "@/components/ui/Stars";
 import { db } from "@/lib/db";
 import { monthYear, timeAgo } from "@/lib/format";
 import { requireUser } from "@/lib/session";
+import { isBlockedBetween } from "@/lib/actions/safety";
+import { getUserStats, computeBadges } from "@/lib/badges";
+import { BadgeShelf } from "@/components/BadgeShelf";
+import { ProfileMenu } from "./ProfileMenu";
 
 export const metadata = { title: "Profile" };
 
@@ -29,6 +33,8 @@ export default async function ProfilePage({
   if (!profile || !profile.displayName) notFound();
 
   const isSelf = viewer.id === profile.id;
+  const blocked = isSelf ? false : await isBlockedBetween(viewer.id, profile.id);
+  const badges = computeBadges(await getUserStats(profile.id));
 
   const [listings, ratings, ratingAgg, completedCount] = await Promise.all([
     db.listing.findMany({
@@ -75,9 +81,23 @@ export default async function ProfilePage({
             </p>
           </div>
         </div>
-        {ratingAgg._count > 0 && (
-          <StarRating value={ratingAgg._avg.stars ?? 0} count={ratingAgg._count} />
-        )}
+        <div className="flex items-center gap-3">
+          {ratingAgg._count > 0 && (
+            <StarRating value={ratingAgg._avg.stars ?? 0} count={ratingAgg._count} />
+          )}
+          {!isSelf && (
+            <ProfileMenu
+              userId={profile.id}
+              name={profile.displayName}
+              initialBlocked={blocked}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Badges */}
+      <div className="mt-6">
+        <BadgeShelf badges={badges} showLocked={isSelf} />
       </div>
 
       {/* Active listings */}

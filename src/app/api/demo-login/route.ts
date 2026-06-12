@@ -22,6 +22,10 @@ function safeEqual(a: string, b: string): boolean {
  * a magic-link session. Disabled entirely unless DEMO_PASSWORD is set.
  */
 export async function POST(request: Request) {
+  // Never expose the persona backdoor on a real production tenant.
+  if (process.env.VERCEL_ENV === "production") {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
   const demoPassword = process.env.DEMO_PASSWORD;
   if (!demoPassword) {
     return NextResponse.json({ error: "Demo sign-in is disabled." }, { status: 404 });

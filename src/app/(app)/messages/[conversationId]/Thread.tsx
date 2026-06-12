@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { selectClasses, inputClasses } from "@/components/ui/Field";
-import { CheckIcon, PinIcon } from "@/components/icons";
+import { inputClasses } from "@/components/ui/Field";
+import { CalendarIcon, CheckIcon, PinIcon, ShareIcon } from "@/components/icons";
 import { MEETUP_SPOTS, type ListingType } from "@/lib/constants";
 import { meetupTime } from "@/lib/format";
 import {
@@ -19,6 +19,7 @@ export type ThreadMessage = {
   body: string;
   kind: string;
   meta: Record<string, unknown> | null;
+  readAt?: string | null;
   createdAt: string;
 };
 
@@ -40,17 +41,31 @@ function MeetupCard({
   message,
   mine,
   busy,
+  otherName,
   onRespond,
 }: {
   message: ThreadMessage;
   mine: boolean;
   busy: boolean;
+  otherName: string;
   onRespond: (messageId: string, response: "ACCEPTED" | "DECLINED") => void;
 }) {
   const meta = message.meta ?? {};
   const spot = String(meta.spot ?? "");
   const datetime = String(meta.datetime ?? "");
   const status = String(meta.status ?? "PENDING");
+
+  async function share() {
+    const text = `Meeting ${otherName} at ${spot}${
+      datetime ? ` on ${meetupTime(datetime)}` : ""
+    } — check on me!`;
+    try {
+      if (navigator.share) await navigator.share({ text });
+      else await navigator.clipboard.writeText(text);
+    } catch {
+      // user dismissed the share sheet — nothing to do
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-sm rounded-xl border border-line bg-surface p-4">
@@ -84,10 +99,29 @@ function MeetupCard({
         <p className="mt-3 text-xs text-faint">Waiting for a response…</p>
       )}
       {status === "ACCEPTED" && (
-        <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-success">
-          <CheckIcon className="h-4 w-4" />
-          Meetup confirmed — see you there!
-        </p>
+        <>
+          <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-success">
+            <CheckIcon className="h-4 w-4" />
+            Meetup confirmed — see you there!
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={`/api/meetups/${message.id}/ics`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-faint transition-colors hover:text-ink"
+            >
+              <CalendarIcon className="h-4 w-4" />
+              Add to calendar
+            </a>
+            <button
+              type="button"
+              onClick={share}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-faint transition-colors hover:text-ink"
+            >
+              <ShareIcon className="h-4 w-4" />
+              Share with a friend
+            </button>
+          </div>
+        </>
       )}
       {status === "DECLINED" && (
         <p className="mt-3 text-sm text-faint">
@@ -204,7 +238,7 @@ export function Thread({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [meetupOpen, setMeetupOpen] = useState(false);
-  const [meetupSpot, setMeetupSpot] = useState<string>(MEETUP_SPOTS[0]);
+  const [meetupSpot, setMeetupSpot] = useState<string>(MEETUP_SPOTS[0].name);
   const [meetupTimeValue, setMeetupTimeValue] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const countRef = useRef(initialMessages.length);
@@ -220,7 +254,24 @@ export function Thread({
     }
   }, [conversationId]);
 
-  // Poll every 5 seconds — simple and plenty for campus coordination.
+  // Near-real-time: Server-Sent Events push updates within ~1s. The browser
+  // auto-reconnects when the bounded stream closes. Polling below is the
+  // guaranteed fallback if SSE is blocked or unsupported.
+  useEffect(() => {
+    if (typeof EventSource === "undefined") return;
+    const es = new EventSource(`/api/conversations/${conversationId}/stream`);
+    es.onmessage = (e) => {
+      try {
+        const json = JSON.parse(e.data) as { messages: ThreadMessage[] };
+        setMessages(json.messages);
+      } catch {
+        // ignore malformed frame
+      }
+    };
+    return () => es.close();
+  }, [conversationId]);
+
+  // Poll every 5 seconds — fallback / source of truth for read receipts.
   useEffect(() => {
     const interval = setInterval(refresh, 5000);
     return () => clearInterval(interval);
@@ -247,6 +298,7 @@ export function Thread({
       body,
       kind: "TEXT",
       meta: null,
+      readAt: null,
       createdAt: new Date().toISOString(),
     };
     setPendingSends((p) => [...p, temp]);
@@ -310,6 +362,10 @@ export function Thread({
   }
 
   const all = [...messages, ...pendingSends];
+  // Last message I sent that the other person has read — for the "Seen" line.
+  const lastSeenMineId = [...messages]
+    .reverse()
+    .find((m) => m.senderId === currentUserId && m.readAt)?.id;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -330,6 +386,7 @@ export function Thread({
                 message={m}
                 mine={mine}
                 busy={busy}
+                otherName={otherUser.displayName}
                 onRespond={handleMeetupResponse}
               />
             );
@@ -349,20 +406,22 @@ export function Thread({
             );
           }
           return (
-            <div
-              key={m.id}
-              className={`flex ${mine ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[75%] px-3.5 py-2 text-sm ${
-                  mine
-                    ? "rounded-2xl rounded-br-md bg-ink text-white"
-                    : "rounded-2xl rounded-bl-md border border-line bg-surface"
-                } ${m.id.startsWith("tmp-") ? "opacity-60" : ""}`}
-              >
-                <p className="whitespace-pre-line break-words">{m.body}</p>
-                <Timestamp iso={m.createdAt} />
+            <div key={m.id} className="space-y-0.5">
+              <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[75%] px-3.5 py-2 text-sm ${
+                    mine
+                      ? "rounded-2xl rounded-br-md bg-ink text-white"
+                      : "rounded-2xl rounded-bl-md border border-line bg-surface"
+                  } ${m.id.startsWith("tmp-") ? "opacity-60" : ""}`}
+                >
+                  <p className="whitespace-pre-line break-words">{m.body}</p>
+                  <Timestamp iso={m.createdAt} />
+                </div>
               </div>
+              {m.id === lastSeenMineId && (
+                <p className="pr-1 text-right text-[11px] text-faint">Seen</p>
+              )}
             </div>
           );
         })}
@@ -383,27 +442,44 @@ export function Thread({
             className="mb-3 rounded-xl border border-line bg-surface p-3"
           >
             <p className="text-sm font-medium">Propose a safe meetup</p>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-              <select
-                aria-label="Meetup spot"
-                value={meetupSpot}
-                onChange={(e) => setMeetupSpot(e.target.value)}
-                className={`${selectClasses} flex-1`}
-              >
-                {MEETUP_SPOTS.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="datetime-local"
-                aria-label="Meetup time"
-                value={meetupTimeValue}
-                onChange={(e) => setMeetupTimeValue(e.target.value)}
-                className={`${inputClasses} sm:w-56`}
-              />
+            <p className="mt-0.5 text-xs text-faint">
+              Pick a busy, well-lit campus spot.
+            </p>
+            <div
+              role="radiogroup"
+              aria-label="Meetup spot"
+              className="mt-2 grid grid-cols-2 gap-2"
+            >
+              {MEETUP_SPOTS.map((s) => (
+                <button
+                  key={s.name}
+                  type="button"
+                  role="radio"
+                  aria-checked={meetupSpot === s.name}
+                  onClick={() => setMeetupSpot(s.name)}
+                  className={`rounded-lg border p-2.5 text-left transition-colors ${
+                    meetupSpot === s.name
+                      ? "border-ink"
+                      : "border-line hover:bg-paper"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 text-sm font-medium">
+                    <PinIcon className="h-3.5 w-3.5 shrink-0 text-accent" />
+                    {s.name}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-faint">
+                    {s.blurb}
+                  </span>
+                </button>
+              ))}
             </div>
+            <input
+              type="datetime-local"
+              aria-label="Meetup time"
+              value={meetupTimeValue}
+              onChange={(e) => setMeetupTimeValue(e.target.value)}
+              className={`${inputClasses} mt-2`}
+            />
             <div className="mt-2 flex gap-2">
               <Button type="submit" size="sm" disabled={busy}>
                 {busy ? "Sending…" : "Send proposal"}
@@ -420,6 +496,10 @@ export function Thread({
           </form>
         )}
 
+        <p className="mb-2 text-center text-[11px] text-faint">
+          Meet at a busy campus spot in daylight. Never share your dorm or
+          financial info.
+        </p>
         <form onSubmit={handleSend} className="flex items-center gap-2">
           {(listingType === "SELL" || listingType === "DONATE") && (
             <button

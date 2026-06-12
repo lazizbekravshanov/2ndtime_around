@@ -2,6 +2,8 @@ import type { Prisma } from "@prisma/client";
 import { LeafIcon } from "@/components/icons";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { getUserStats, computeBadges } from "@/lib/badges";
+import { BadgeShelf } from "@/components/BadgeShelf";
 
 export const metadata = { title: "Campus impact" };
 
@@ -23,8 +25,10 @@ const REUSED_WHERE: Prisma.ListingWhereInput = {
 };
 
 export default async function ImpactPage() {
-  await requireUser();
+  const user = await requireUser();
   const semester = currentSemester();
+  const myStats = await getUserStats(user.id);
+  const myBadges = computeBadges(myStats);
 
   const [reusedAllTime, reusedThisSemester, returnedCount, byCategory] =
     await Promise.all([
@@ -72,6 +76,21 @@ export default async function ImpactPage() {
           <p className="text-sm text-faint">lost items back with owners</p>
         </div>
       </div>
+
+      {/* Your impact + badges */}
+      <section className="mt-10">
+        <h2 className="text-base font-semibold">Your impact</h2>
+        <p className="mt-1 text-sm text-faint">
+          You&apos;ve kept{" "}
+          <span className="font-medium text-ink">{myStats.itemsRehomed}</span>{" "}
+          {myStats.itemsRehomed === 1 ? "item" : "items"} in use and made{" "}
+          <span className="font-medium text-ink">{myStats.donations}</span>{" "}
+          {myStats.donations === 1 ? "donation" : "donations"}.
+        </p>
+        <div className="mt-4">
+          <BadgeShelf badges={myBadges} showLocked />
+        </div>
+      </section>
 
       {/* Reuse by category — simple proportional bars */}
       <section className="mt-10">
