@@ -22,10 +22,10 @@ function safeEqual(a: string, b: string): boolean {
  * a magic-link session. Disabled entirely unless DEMO_PASSWORD is set.
  */
 export async function POST(request: Request) {
-  // Never expose the persona backdoor on a real production tenant.
-  if (process.env.VERCEL_ENV === "production") {
-    return NextResponse.json({ error: "Not found." }, { status: 404 });
-  }
+  // Persona sign-in is the intended door for this showcase deployment. It is
+  // gated by DEMO_PASSWORD (a real env secret) and a fixed persona allowlist —
+  // to lock the app down for real users, unset DEMO_PASSWORD and that disables
+  // this route entirely.
   const demoPassword = process.env.DEMO_PASSWORD;
   if (!demoPassword) {
     return NextResponse.json({ error: "Demo sign-in is disabled." }, { status: 404 });
