@@ -60,8 +60,9 @@ implemented and waiting on one env var + a UI toggle.
 > **Secrets live in env vars only — never in `public/`.** Anything under
 > `public/` is served at the site root, so a secret there is a public secret.
 > Set `DEMO_PASSWORD`, `NEXTAUTH_SECRET`, and `DATABASE_URL` in the shell or the
-> Vercel project, not in any committed or served file. `/api/demo-login` also
-> self-disables when `VERCEL_ENV=production`.
+> Vercel project, not in any committed or served file. `/api/demo-login` is
+> enabled only while `DEMO_PASSWORD` is set — unset it to turn persona sign-in
+> off entirely (e.g. for a real-users launch).
 
 ## deploy
 
