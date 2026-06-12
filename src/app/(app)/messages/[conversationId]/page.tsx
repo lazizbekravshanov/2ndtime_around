@@ -128,6 +128,7 @@ export default async function ConversationPage({
           body: m.body,
           kind: m.kind,
           meta: m.meta as Record<string, unknown> | null,
+          readAt: m.readAt ? m.readAt.toISOString() : null,
           createdAt: m.createdAt.toISOString(),
         }))}
       />

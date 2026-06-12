@@ -19,6 +19,7 @@ export type ThreadMessage = {
   body: string;
   kind: string;
   meta: Record<string, unknown> | null;
+  readAt?: string | null;
   createdAt: string;
 };
 
@@ -220,7 +221,24 @@ export function Thread({
     }
   }, [conversationId]);
 
-  // Poll every 5 seconds — simple and plenty for campus coordination.
+  // Near-real-time: Server-Sent Events push updates within ~1s. The browser
+  // auto-reconnects when the bounded stream closes. Polling below is the
+  // guaranteed fallback if SSE is blocked or unsupported.
+  useEffect(() => {
+    if (typeof EventSource === "undefined") return;
+    const es = new EventSource(`/api/conversations/${conversationId}/stream`);
+    es.onmessage = (e) => {
+      try {
+        const json = JSON.parse(e.data) as { messages: ThreadMessage[] };
+        setMessages(json.messages);
+      } catch {
+        // ignore malformed frame
+      }
+    };
+    return () => es.close();
+  }, [conversationId]);
+
+  // Poll every 5 seconds — fallback / source of truth for read receipts.
   useEffect(() => {
     const interval = setInterval(refresh, 5000);
     return () => clearInterval(interval);
@@ -247,6 +265,7 @@ export function Thread({
       body,
       kind: "TEXT",
       meta: null,
+      readAt: null,
       createdAt: new Date().toISOString(),
     };
     setPendingSends((p) => [...p, temp]);
@@ -310,6 +329,10 @@ export function Thread({
   }
 
   const all = [...messages, ...pendingSends];
+  // Last message I sent that the other person has read — for the "Seen" line.
+  const lastSeenMineId = [...messages]
+    .reverse()
+    .find((m) => m.senderId === currentUserId && m.readAt)?.id;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -349,20 +372,22 @@ export function Thread({
             );
           }
           return (
-            <div
-              key={m.id}
-              className={`flex ${mine ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[75%] px-3.5 py-2 text-sm ${
-                  mine
-                    ? "rounded-2xl rounded-br-md bg-ink text-white"
-                    : "rounded-2xl rounded-bl-md border border-line bg-surface"
-                } ${m.id.startsWith("tmp-") ? "opacity-60" : ""}`}
-              >
-                <p className="whitespace-pre-line break-words">{m.body}</p>
-                <Timestamp iso={m.createdAt} />
+            <div key={m.id} className="space-y-0.5">
+              <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[75%] px-3.5 py-2 text-sm ${
+                    mine
+                      ? "rounded-2xl rounded-br-md bg-ink text-white"
+                      : "rounded-2xl rounded-bl-md border border-line bg-surface"
+                  } ${m.id.startsWith("tmp-") ? "opacity-60" : ""}`}
+                >
+                  <p className="whitespace-pre-line break-words">{m.body}</p>
+                  <Timestamp iso={m.createdAt} />
+                </div>
               </div>
+              {m.id === lastSeenMineId && (
+                <p className="pr-1 text-right text-[11px] text-faint">Seen</p>
+              )}
             </div>
           );
         })}
