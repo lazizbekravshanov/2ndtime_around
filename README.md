@@ -100,6 +100,49 @@ ceremony.
 | --- | --- |
 | ![Impact page](docs/screenshots/impact.png) | |
 
+## v1 → v2: what changed
+
+v2 keeps the same calm, one-accent look and adds eleven features across
+discovery, engagement, trust & safety, and campus-native moments — without
+adding a second accent color or a single spinner.
+
+| area | v1 | v2 |
+| --- | --- | --- |
+| **discovery** | 3 tabs, category + price filters | **Wanted** tab (a 5th "looking for" listing type), condition filter, sort high→low, dismissible filter pills, live result count |
+| **saved searches** | — | follow a search and get notified when a match is posted |
+| **favorites** | — | one-tap heart on every card + watchlist, with price-drop and sold nudges |
+| **notifications** | unread dot on Messages only | full notifications center (bell + email) for messages, claims, meetups, ratings, saved-search hits, price drops |
+| **chat** | 5s polling | near-real-time (SSE) with optimistic send + **Seen**, add-to-calendar and share on accepted meetups |
+| **trust & safety** | — | report & block (both-way), plus a moderator queue |
+| **move-out mode** | — | bulk-list everything at once → one shareable move-out sale page |
+| **impact** | campus totals | + personal panel and earned badges (Trusted Trader, Quick Replier, Good Samaritan, …) |
+| **pricing** | type a number | smart suggestion from recent comparable listings while you post |
+
+**Browse — before / after.** Note the new **Wanted** tab, condition filter,
+result count, the favorite hearts on every card, and the heart + bell in the
+header.
+
+| v1 | v2 |
+| --- | --- |
+| ![Browse v1](docs/screenshots/v1-browse.png) | ![Browse v2](docs/screenshots/v2-browse.png) |
+
+**Listing detail — before / after.** v2 adds a save (favorite) button, a
+report/block overflow menu, and safety blurbs on the suggested meetup spots.
+
+| v1 | v2 |
+| --- | --- |
+| ![Listing v1](docs/screenshots/v1-listing.png) | ![Listing v2](docs/screenshots/v2-listing.png) |
+
+**New screens in v2.**
+
+| Notifications | Saved (favorites + searches) |
+| --- | --- |
+| ![Notifications](docs/screenshots/v2-notifications.png) | ![Saved](docs/screenshots/v2-saved.png) |
+
+| Move-out sale (shareable) | Moderation queue |
+| --- | --- |
+| ![Move-out batch](docs/screenshots/v2-moveout.png) | ![Moderation](docs/screenshots/v2-moderation.png) |
+
 ## how it's laid out
 
 ```
