@@ -47,14 +47,46 @@ export const CONDITIONS = [
 export type Condition = (typeof CONDITIONS)[number];
 
 // Suggested safe on-campus meetup spots — well-lit, staffed, high-traffic.
+// Coords are approximate, used only to render a static pin/illustration.
 export const MEETUP_SPOTS = [
-  "TUC main entrance",
-  "Langsam Library lobby",
-  "CRC front desk",
-  "MarketPointe entrance",
-  "Steger Student Life Center",
+  {
+    name: "TUC main entrance",
+    blurb: "Busy, staffed, cameras",
+    lat: 39.131,
+    lng: -84.5169,
+  },
+  {
+    name: "Langsam Library lobby",
+    blurb: "Open late, security desk",
+    lat: 39.1318,
+    lng: -84.5159,
+  },
+  {
+    name: "CRC front desk",
+    blurb: "Staffed, high-traffic",
+    lat: 39.1297,
+    lng: -84.5142,
+  },
+  {
+    name: "MarketPointe entrance",
+    blurb: "Dining hall, always busy",
+    lat: 39.1284,
+    lng: -84.5151,
+  },
+  {
+    name: "Steger Student Life Center",
+    blurb: "Central, well-lit",
+    lat: 39.1305,
+    lng: -84.5163,
+  },
 ] as const;
 export type MeetupSpot = (typeof MEETUP_SPOTS)[number];
+
+/** Just the spot names — for Zod enums and select options. */
+export const MEETUP_SPOT_NAMES = MEETUP_SPOTS.map((s) => s.name) as [
+  string,
+  ...string[],
+];
 
 export const ALLOWED_EMAIL_DOMAINS = ["uc.edu", "mail.uc.edu"] as const;
 

@@ -244,11 +244,14 @@ export default async function ListingPage({
               <ul className="mt-3 space-y-1.5">
                 {MEETUP_SPOTS.map((spot) => (
                   <li
-                    key={spot}
+                    key={spot.name}
                     className="flex items-center gap-2 text-sm text-faint"
                   >
                     <PinIcon className="h-3.5 w-3.5 shrink-0 text-accent" />
-                    {spot}
+                    <span>
+                      {spot.name}
+                      <span className="text-faint/70"> · {spot.blurb}</span>
+                    </span>
                   </li>
                 ))}
               </ul>

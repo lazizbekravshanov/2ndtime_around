@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -165,6 +166,17 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
               </button>
             ))}
           </div>
+          <Link
+            href="/sell/moveout"
+            className="mt-4 block rounded-xl border border-dashed border-line p-4 text-left transition-colors hover:border-faint"
+          >
+            <span className="block text-sm font-semibold">
+              Moving out? Post in bulk →
+            </span>
+            <span className="mt-0.5 block text-sm text-faint">
+              List everything at once and share one move-out sale page.
+            </span>
+          </Link>
         </fieldset>
       )}
 
