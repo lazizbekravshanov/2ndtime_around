@@ -27,3 +27,6 @@ prisma/dev.db-journal
 *.pem
 *.tsbuildinfo
 .vercel
+
+# brainstorm visual companion
+.superpowers/

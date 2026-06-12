@@ -8,6 +8,8 @@ import { TYPE_LABELS, MEETUP_SPOTS, type ListingType } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { formatPrice, monthYear, photoList, timeAgo } from "@/lib/format";
 import { requireUser } from "@/lib/session";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { ListingMenu } from "./ListingMenu";
 import { ClaimButton } from "./ClaimButton";
 import { MessageSellerButton } from "./MessageSellerButton";
 import { OwnerActions } from "./OwnerActions";
@@ -56,7 +58,16 @@ export default async function ListingPage({
   const type = listing.type as ListingType;
   const photos = photoList(listing.photos);
   const isLostFound = type === "LOST" || type === "FOUND";
+  const isWanted = type === "WANTED";
   const done = listing.status === "SOLD" || listing.status === "RESOLVED";
+  const showMeetup = (type === "SELL" || type === "DONATE") && !done;
+
+  const favorited = isOwner
+    ? false
+    : (await db.favorite.findUnique({
+        where: { userId_listingId: { userId: user.id, listingId: id } },
+        select: { id: true },
+      })) !== null;
 
   return (
     <div>
@@ -172,10 +183,24 @@ export default async function ListingPage({
                 status={listing.status}
               />
             ) : done ? (
-              <p className="rounded-xl border border-line bg-surface p-4 text-sm text-faint">
-                This {isLostFound ? "item" : "listing"} has been{" "}
-                {listing.status === "SOLD" ? "sold" : "resolved"}.
-              </p>
+              <div className="space-y-3">
+                <p className="rounded-xl border border-line bg-surface p-4 text-sm text-faint">
+                  This {isLostFound ? "item" : "listing"} has been{" "}
+                  {listing.status === "SOLD" ? "sold" : "resolved"}.
+                </p>
+                <div className="flex items-center gap-2">
+                  <FavoriteButton
+                    listingId={listing.id}
+                    initial={favorited}
+                    variant="inline"
+                  />
+                  <ListingMenu
+                    listingId={listing.id}
+                    ownerId={listing.owner.id}
+                    ownerName={listing.owner.displayName ?? "this user"}
+                  />
+                </div>
+              </div>
             ) : (
               <>
                 {type === "FOUND" && <ClaimButton listingId={listing.id} />}
@@ -186,16 +211,30 @@ export default async function ListingPage({
                       ? "Message finder"
                       : type === "LOST"
                         ? "I think I found it — message them"
-                        : "Message seller"
+                        : isWanted
+                          ? "I have this"
+                          : "Message seller"
                   }
                   secondary={type === "FOUND"}
                 />
+                <div className="flex items-center gap-2">
+                  <FavoriteButton
+                    listingId={listing.id}
+                    initial={favorited}
+                    variant="inline"
+                  />
+                  <ListingMenu
+                    listingId={listing.id}
+                    ownerId={listing.owner.id}
+                    ownerName={listing.owner.displayName ?? "this user"}
+                  />
+                </div>
               </>
             )}
           </div>
 
           {/* Safe meetup spots — selectable later, inside the chat */}
-          {!isLostFound && !done && (
+          {showMeetup && (
             <div className="mt-6 rounded-xl border border-line bg-surface p-4">
               <p className="text-sm font-medium">Suggested safe meetup spots</p>
               <p className="mt-0.5 text-xs text-faint">

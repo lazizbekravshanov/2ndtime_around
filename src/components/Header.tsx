@@ -5,13 +5,16 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import {
+  BellIcon,
   BoxIcon,
   ChatIcon,
   GridIcon,
+  HeartIcon,
   LogoMark,
   PlusIcon,
 } from "@/components/icons";
 import { buttonClasses } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
 
 const NAV = [
   { href: "/browse", label: "Browse", icon: GridIcon },
@@ -22,9 +25,11 @@ const NAV = [
 function UserMenu({
   userId,
   displayName,
+  isModerator,
 }: {
   userId: string;
   displayName: string;
+  isModerator: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -73,12 +78,38 @@ function UserMenu({
           </Link>
           <Link
             role="menuitem"
+            href="/saved"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm hover:bg-paper"
+          >
+            Saved
+          </Link>
+          <Link
+            role="menuitem"
+            href="/notifications"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm hover:bg-paper"
+          >
+            Notifications
+          </Link>
+          <Link
+            role="menuitem"
             href="/impact"
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm hover:bg-paper"
           >
             Campus impact
           </Link>
+          {isModerator && (
+            <Link
+              role="menuitem"
+              href="/moderation"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm hover:bg-paper"
+            >
+              Moderation
+            </Link>
+          )}
           <button
             role="menuitem"
             type="button"
@@ -97,10 +128,14 @@ export function Header({
   userId,
   displayName,
   unreadCount,
+  notifCount,
+  isModerator,
 }: {
   userId: string;
   displayName: string;
   unreadCount: number;
+  notifCount: number;
+  isModerator: boolean;
 }) {
   const pathname = usePathname();
   const isActive = (href: string) =>
@@ -142,12 +177,38 @@ export function Header({
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
-            <Link href="/sell" className={buttonClasses("primary", "sm")}>
+          <div className="flex items-center gap-2">
+            <Link href="/saved" aria-label="Saved" className="hidden sm:block">
+              <IconButton aria-label="Saved" tabIndex={-1}>
+                <HeartIcon className="h-5 w-5" />
+              </IconButton>
+            </Link>
+            <Link
+              href="/notifications"
+              aria-label={
+                notifCount > 0 ? `${notifCount} notifications` : "Notifications"
+              }
+              className="relative hidden sm:block"
+            >
+              <IconButton aria-label="Notifications" tabIndex={-1}>
+                <BellIcon className="h-5 w-5" />
+              </IconButton>
+              {notifCount > 0 && (
+                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent" />
+              )}
+            </Link>
+            <Link
+              href="/sell"
+              className={`${buttonClasses("primary", "sm")} ml-1`}
+            >
               <PlusIcon className="h-4 w-4" />
               Post item
             </Link>
-            <UserMenu userId={userId} displayName={displayName} />
+            <UserMenu
+              userId={userId}
+              displayName={displayName}
+              isModerator={isModerator}
+            />
           </div>
         </div>
       </header>

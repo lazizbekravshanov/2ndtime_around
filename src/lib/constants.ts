@@ -1,4 +1,10 @@
-export const LISTING_TYPES = ["SELL", "DONATE", "LOST", "FOUND"] as const;
+export const LISTING_TYPES = [
+  "SELL",
+  "DONATE",
+  "LOST",
+  "FOUND",
+  "WANTED",
+] as const;
 export type ListingType = (typeof LISTING_TYPES)[number];
 
 // DRAFT extends the spec's status set so unfinished posts can live in
@@ -62,6 +68,7 @@ export const TYPE_LABELS: Record<ListingType, string> = {
   DONATE: "Donation",
   LOST: "Lost item",
   FOUND: "Found item",
+  WANTED: "Looking for",
 };
 
 export const MAX_PHOTOS = 4;

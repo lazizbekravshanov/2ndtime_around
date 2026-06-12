@@ -31,6 +31,7 @@ const TYPE_OPTIONS: {
 }[] = [
   { type: "SELL", title: "Sell something", body: "Set a price, meet on campus, get paid." },
   { type: "DONATE", title: "Donate it", body: "Give it away free to another Bearcat." },
+  { type: "WANTED", title: "Looking for something", body: "Post what you need and let sellers find you." },
   { type: "LOST", title: "I lost something", body: "Post it so the finder can reach you." },
   { type: "FOUND", title: "I found something", body: "Help it get back to its owner." },
 ];
@@ -88,10 +89,10 @@ function ProgressBar({ step }: { step: number }) {
   );
 }
 
-export function SellWizard() {
+export function SellWizard({ initialType }: { initialType?: ListingType }) {
   const router = useRouter();
-  const [step, setStep] = useState(0);
-  const [type, setType] = useState<ListingType | null>(null);
+  const [step, setStep] = useState(initialType ? 1 : 0);
+  const [type, setType] = useState<ListingType | null>(initialType ?? null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [details, setDetails] = useState<Details | null>(null);
   const [submitting, setSubmitting] = useState<"publish" | "draft" | null>(null);
@@ -171,12 +172,18 @@ export function SellWizard() {
       {step === 1 && type && (
         <div className="mt-8">
           <h1 className="text-2xl font-semibold">
-            {type === "LOST" ? "Got a photo of it?" : "Add some photos"}
+            {type === "LOST"
+              ? "Got a photo of it?"
+              : type === "WANTED"
+                ? "Add a reference photo?"
+                : "Add some photos"}
           </h1>
           <p className="mt-1 text-sm text-faint">
             {type === "LOST"
               ? "A photo makes your item much easier to recognize. Skip if you don't have one."
-              : "Listings with photos get far more replies. You can skip for now."}
+              : type === "WANTED"
+                ? "A photo of something similar helps sellers know what you're after. Totally optional."
+                : "Listings with photos get far more replies. You can skip for now."}
           </p>
           <div className="mt-5">
             <PhotoUploader photos={photos} onChange={setPhotos} />

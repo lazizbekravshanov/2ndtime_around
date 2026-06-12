@@ -9,6 +9,8 @@ import {
   meetupProposalSchema,
   messageSchema,
 } from "@/lib/validation";
+import { notify } from "@/lib/notify";
+import { isBlockedBetween } from "@/lib/actions/safety";
 import type { ActionResult } from "@/lib/actions/listings";
 
 /** True if the user is one of the two people in this conversation. */
@@ -22,6 +24,16 @@ async function loadConversationFor(userId: string, conversationId: string) {
     conversation.starterId === userId ||
     conversation.listing.ownerId === userId;
   return isParticipant ? conversation : null;
+}
+
+/** The other participant's user id, given one side of a loaded conversation. */
+function otherParticipant(
+  conversation: { starterId: string; listing: { ownerId: string } },
+  userId: string
+): string {
+  return userId === conversation.starterId
+    ? conversation.listing.ownerId
+    : conversation.starterId;
 }
 
 /**
@@ -40,6 +52,9 @@ export async function startConversation(
   }
   if (listing.ownerId === user.id) {
     return { ok: false, error: "This is your own listing." };
+  }
+  if (await isBlockedBetween(user.id, listing.ownerId)) {
+    return { ok: false, error: "This conversation isn't available." };
   }
 
   const existing = await db.conversation.findUnique({
@@ -74,6 +89,11 @@ export async function sendMessage(input: unknown): Promise<ActionResult> {
   );
   if (!conversation) return { ok: false, error: "Conversation not found." };
 
+  const recipientId = otherParticipant(conversation, user.id);
+  if (await isBlockedBetween(user.id, recipientId)) {
+    return { ok: false, error: "This conversation isn't available." };
+  }
+
   await db.$transaction([
     db.message.create({
       data: {
@@ -90,6 +110,14 @@ export async function sendMessage(input: unknown): Promise<ActionResult> {
   ]);
 
   revalidatePath(`/messages/${conversation.id}`);
+  void notify({
+    userId: recipientId,
+    kind: "MESSAGE",
+    title: `New message from ${user.displayName ?? "someone"}`,
+    body: parsed.data.body.slice(0, 120),
+    href: `/messages/${conversation.id}`,
+    dedupe: true,
+  });
   return { ok: true };
 }
 
@@ -129,6 +157,13 @@ export async function proposeMeetup(input: unknown): Promise<ActionResult> {
   ]);
 
   revalidatePath(`/messages/${conversation.id}`);
+  void notify({
+    userId: otherParticipant(conversation, user.id),
+    kind: "MEETUP",
+    title: `${user.displayName ?? "Someone"} proposed a meetup`,
+    body: parsed.data.spot,
+    href: `/messages/${conversation.id}`,
+  });
   return { ok: true };
 }
 
@@ -168,6 +203,13 @@ export async function respondToMeetup(input: unknown): Promise<ActionResult> {
   });
 
   revalidatePath(`/messages/${conversation.id}`);
+  void notify({
+    userId: message.senderId,
+    kind: "MEETUP",
+    title: `Meetup ${parsed.data.response.toLowerCase()}`,
+    body: `${user.displayName ?? "They"} ${parsed.data.response === "ACCEPTED" ? "accepted" : "declined"} your meetup.`,
+    href: `/messages/${conversation.id}`,
+  });
   return { ok: true };
 }
 
@@ -198,6 +240,9 @@ export async function submitClaim(
   if (listing.ownerId === user.id) {
     return { ok: false, error: "You posted this item." };
   }
+  if (await isBlockedBetween(user.id, listing.ownerId)) {
+    return { ok: false, error: "This conversation isn't available." };
+  }
 
   const conversation = await db.conversation.upsert({
     where: {
@@ -222,6 +267,13 @@ export async function submitClaim(
   });
 
   revalidatePath(`/messages/${conversation.id}`);
+  void notify({
+    userId: listing.ownerId,
+    kind: "CLAIM",
+    title: `Someone claims your found item`,
+    body: listing.title,
+    href: `/messages/${conversation.id}`,
+  });
   return { ok: true, data: { conversationId: conversation.id } };
 }
 
@@ -273,6 +325,13 @@ export async function respondToClaim(input: unknown): Promise<ActionResult> {
 
   revalidatePath(`/messages/${message.conversationId}`);
   revalidatePath(`/listing/${message.conversation.listingId}`);
+  void notify({
+    userId: message.senderId,
+    kind: "CLAIM",
+    title: `Your claim was ${approved ? "approved" : "declined"}`,
+    body: message.conversation.listing.title,
+    href: `/messages/${message.conversationId}`,
+  });
   return { ok: true };
 }
 
