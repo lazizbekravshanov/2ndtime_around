@@ -33,6 +33,14 @@ export default async function AppLayout({
   return (
     <ToastProvider>
       <div className="flex min-h-screen flex-col">
+        {/* Keyboard users can jump past the nav straight to content
+            (WCAG 2.4.1 Bypass Blocks). Hidden until focused. */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+        >
+          Skip to content
+        </a>
         <Header
           userId={user.id}
           displayName={user.displayName ?? user.email}
@@ -40,7 +48,10 @@ export default async function AppLayout({
           notifCount={notifCount}
           isModerator={mod?.isModerator ?? false}
         />
-        <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-6">
+        <main
+          id="main-content"
+          className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-6"
+        >
           {children}
         </main>
         <Footer />
