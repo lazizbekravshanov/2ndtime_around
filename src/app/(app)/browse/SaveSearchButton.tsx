@@ -49,7 +49,7 @@ export function SaveSearchButton({ params }: { params: BrowseParams }) {
         notify,
       });
       if (!res.ok) {
-        toast(res.error);
+        toast(res.error, { type: "error" });
         return;
       }
       setOpen(false);

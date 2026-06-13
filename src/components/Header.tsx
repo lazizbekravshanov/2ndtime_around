@@ -14,13 +14,26 @@ import {
   PlusIcon,
 } from "@/components/icons";
 import { buttonClasses } from "@/components/ui/Button";
-import { IconButton } from "@/components/ui/IconButton";
 
 const NAV = [
   { href: "/browse", label: "Browse", icon: GridIcon },
   { href: "/messages", label: "Messages", icon: ChatIcon },
   { href: "/my-items", label: "My items", icon: BoxIcon },
 ];
+
+// Mobile bottom bar: Notifications joins the primary nav so its unread state
+// is visible without opening the account menu (it was previously buried there).
+const MOBILE_NAV = [
+  { href: "/browse", label: "Browse", icon: GridIcon },
+  { href: "/messages", label: "Messages", icon: ChatIcon },
+  { href: "/notifications", label: "Alerts", icon: BellIcon },
+  { href: "/my-items", label: "My items", icon: BoxIcon },
+];
+
+// 44px-tall icon link (WCAG 2.5.5), focusable in its own right — no nested
+// button stealing the tab stop.
+const iconLinkClasses =
+  "flex h-11 w-11 items-center justify-center rounded-lg text-faint transition-colors hover:bg-line/50 hover:text-ink";
 
 function UserMenu({
   userId,
@@ -178,23 +191,26 @@ export function Header({
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link href="/saved" aria-label="Saved" className="hidden sm:block">
-              <IconButton aria-label="Saved" tabIndex={-1}>
-                <HeartIcon className="h-5 w-5" />
-              </IconButton>
+            <Link
+              href="/saved"
+              aria-label="Saved"
+              className={`hidden sm:flex ${iconLinkClasses}`}
+            >
+              <HeartIcon className="h-5 w-5" />
             </Link>
             <Link
               href="/notifications"
               aria-label={
                 notifCount > 0 ? `${notifCount} notifications` : "Notifications"
               }
-              className="relative hidden sm:block"
+              className={`relative hidden sm:flex ${iconLinkClasses}`}
             >
-              <IconButton aria-label="Notifications" tabIndex={-1}>
-                <BellIcon className="h-5 w-5" />
-              </IconButton>
+              <BellIcon className="h-5 w-5" />
               {notifCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent" />
+                <span
+                  className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent"
+                  aria-hidden="true"
+                />
               )}
             </Link>
             <Link
@@ -218,23 +234,31 @@ export function Header({
         aria-label="Main mobile"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface md:hidden"
       >
-        <div className="grid grid-cols-3">
-          {NAV.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-current={isActive(href) ? "page" : undefined}
-              className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${
-                isActive(href) ? "text-accent" : "text-faint"
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-              {href === "/messages" && unreadCount > 0 && (
-                <span className="absolute right-[calc(50%-16px)] top-1.5 h-2 w-2 rounded-full bg-accent" />
-              )}
-            </Link>
-          ))}
+        <div className="grid grid-cols-4">
+          {MOBILE_NAV.map(({ href, label, icon: Icon }) => {
+            const dot =
+              (href === "/messages" && unreadCount > 0) ||
+              (href === "/notifications" && notifCount > 0);
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={isActive(href) ? "page" : undefined}
+                className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${
+                  isActive(href) ? "text-accent" : "text-faint"
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                {label}
+                {dot && (
+                  <span
+                    className="absolute right-[calc(50%-16px)] top-1.5 h-2 w-2 rounded-full bg-accent"
+                    aria-hidden="true"
+                  />
+                )}
+              </Link>
+            );
+          })}
         </div>
       </nav>
     </>

@@ -242,6 +242,23 @@ export function Thread({
   const [meetupTimeValue, setMeetupTimeValue] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const countRef = useRef(initialMessages.length);
+  const spotRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Arrow-key navigation for the meetup-spot radio group (WAI-ARIA pattern);
+  // only the selected spot is in the tab order (roving tabindex).
+  function onSpotKey(e: React.KeyboardEvent, index: number) {
+    let next = index;
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+      next = (index + 1) % MEETUP_SPOTS.length;
+    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      next = (index - 1 + MEETUP_SPOTS.length) % MEETUP_SPOTS.length;
+    } else {
+      return;
+    }
+    e.preventDefault();
+    setMeetupSpot(MEETUP_SPOTS[next].name);
+    spotRefs.current[next]?.focus();
+  }
 
   const refresh = useCallback(async () => {
     try {
@@ -314,10 +331,23 @@ export function Thread({
     setPendingSends((p) => p.filter((m) => m.id !== temp.id));
   }
 
+  // For the datetime-local min attribute: "now" formatted as the local
+  // wall-clock string the input expects (YYYY-MM-DDTHH:mm).
+  const minDateTime = (() => {
+    const d = new Date(Date.now());
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  })();
+
   async function handlePropose(e: React.FormEvent) {
     e.preventDefault();
     if (!meetupTimeValue) {
       setError("Pick a date and time for the meetup.");
+      return;
+    }
+    // Prevent proposing a meetup in the past (the server rejects it too).
+    if (new Date(meetupTimeValue).getTime() <= Date.now()) {
+      setError("Pick a time in the future.");
       return;
     }
     setBusy(true);
@@ -367,9 +397,23 @@ export function Thread({
     .reverse()
     .find((m) => m.senderId === currentUserId && m.readAt)?.id;
 
+  // Announce only the newest *incoming* message to screen readers, instead of
+  // marking the whole transcript a live region (which re-reads everything on
+  // each SSE/poll snapshot). WCAG 4.1.3.
+  const lastMessage = all[all.length - 1];
+  const announcement =
+    lastMessage && lastMessage.senderId !== currentUserId
+      ? lastMessage.kind === "TEXT"
+        ? `New message from ${otherUser.displayName}: ${lastMessage.body}`
+        : `New update from ${otherUser.displayName}`
+      : "";
+
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex-1 space-y-3 py-5" aria-live="polite">
+      <p className="sr-only" role="status" aria-live="polite">
+        {announcement}
+      </p>
+      <div className="flex-1 space-y-3 py-5">
         {all.length === 0 && (
           <p className="py-10 text-center text-sm text-faint">
             Say hi to {otherUser.displayName} — keep everything in the app
@@ -450,12 +494,17 @@ export function Thread({
               aria-label="Meetup spot"
               className="mt-2 grid grid-cols-2 gap-2"
             >
-              {MEETUP_SPOTS.map((s) => (
+              {MEETUP_SPOTS.map((s, i) => (
                 <button
                   key={s.name}
+                  ref={(el) => {
+                    spotRefs.current[i] = el;
+                  }}
                   type="button"
                   role="radio"
                   aria-checked={meetupSpot === s.name}
+                  tabIndex={meetupSpot === s.name ? 0 : -1}
+                  onKeyDown={(e) => onSpotKey(e, i)}
                   onClick={() => setMeetupSpot(s.name)}
                   className={`rounded-lg border p-2.5 text-left transition-colors ${
                     meetupSpot === s.name
@@ -476,6 +525,7 @@ export function Thread({
             <input
               type="datetime-local"
               aria-label="Meetup time"
+              min={minDateTime}
               value={meetupTimeValue}
               onChange={(e) => setMeetupTimeValue(e.target.value)}
               className={`${inputClasses} mt-2`}
@@ -521,6 +571,7 @@ export function Thread({
             aria-label="Message"
             placeholder={`Message ${otherUser.displayName}…`}
             value={draft}
+            maxLength={2000}
             onChange={(e) => setDraft(e.target.value)}
             className={inputClasses}
           />

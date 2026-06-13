@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { PhotoUploader } from "@/components/PhotoUploader";
@@ -114,6 +114,22 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
   const watchedCategory = watch("category");
 
   const isLostFound = type === "LOST" || type === "FOUND";
+
+  // Warn before a refresh/close/tab-away once there's real work in the wizard
+  // (a type chosen, photos added, or details entered) — prevents silent loss
+  // of an in-progress post. Cleared while actually submitting.
+  useEffect(() => {
+    const hasWork =
+      submitting === null &&
+      (step > 0 || photos.length > 0 || details !== null);
+    if (!hasWork) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [step, photos.length, details, submitting]);
 
   async function submit(asDraft: boolean) {
     if (!type || !details) return;
@@ -236,6 +252,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
                     ? "e.g. Black Hydro Flask, 32oz"
                     : "e.g. IKEA desk lamp"
                 }
+                aria-required
                 aria-invalid={errors.title ? true : undefined}
                 className={inputClasses}
                 {...register("title")}
@@ -250,6 +267,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
               <select
                 id="category"
                 defaultValue=""
+                aria-required
                 aria-invalid={errors.category ? true : undefined}
                 className={selectClasses}
                 {...register("category")}
@@ -274,6 +292,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
                 <select
                   id="condition"
                   defaultValue=""
+                  aria-required
                   aria-invalid={errors.condition ? true : undefined}
                   className={selectClasses}
                   {...register("condition")}
@@ -308,6 +327,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
                     step="0.01"
                     min="0"
                     placeholder="25"
+                    aria-required
                     aria-invalid={errors.price ? true : undefined}
                     className={`${inputClasses} pl-7`}
                     {...register("price", { valueAsNumber: true })}
@@ -331,6 +351,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
                 <input
                   id="locationNote"
                   placeholder="e.g. Langsam Library, 4th floor study room"
+                  aria-required
                   aria-invalid={errors.locationNote ? true : undefined}
                   className={inputClasses}
                   {...register("locationNote")}
@@ -351,6 +372,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
                     ? "Describe it: color, brand, stickers, anything distinctive. When did you lose/find it?"
                     : "What is it, how old, any flaws? Honest details build trust."
                 }
+                aria-required
                 aria-invalid={errors.description ? true : undefined}
                 className={textareaClasses}
                 {...register("description")}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PlusIcon } from "@/components/icons";
+import { PlusIcon, XIcon } from "@/components/icons";
 import { MAX_PHOTOS } from "@/lib/constants";
 
 type Slot = { id: number; url?: string; uploading: boolean };
@@ -70,9 +70,9 @@ export function PhotoUploader({
               type="button"
               aria-label={`Remove photo ${i + 1}`}
               onClick={() => onChange(photos.filter((p) => p !== url))}
-              className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-ink/70 text-xs text-white hover:bg-ink"
+              className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-ink/70 text-white hover:bg-ink"
             >
-              ✕
+              <XIcon className="h-4 w-4" />
             </button>
           </div>
         ))}

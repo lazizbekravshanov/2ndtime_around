@@ -29,7 +29,7 @@ export function ProfileMenu({
     startTransition(async () => {
       const res = next ? await blockUser(userId) : await unblockUser(userId);
       if (!res.ok) {
-        toast(res.error);
+        toast(res.error, { type: "error" });
         return;
       }
       setBlocked(next);

@@ -39,12 +39,14 @@ export function ItemRowActions({
   if (confirming) {
     return (
       <div className="flex shrink-0 items-center gap-1.5">
-        <span className="hidden text-xs text-faint sm:inline">Delete?</span>
+        <span className="hidden text-xs text-faint sm:inline">
+          Delete for good?
+        </span>
         <Button variant="danger" size="sm" disabled={pending} onClick={() => change("DELETED")}>
-          {pending ? "…" : "Yes"}
+          {pending ? "Deleting…" : "Yes, delete"}
         </Button>
         <Button variant="ghost" size="sm" onClick={() => setConfirming(false)}>
-          No
+          Cancel
         </Button>
       </div>
     );

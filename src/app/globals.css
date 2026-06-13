@@ -8,7 +8,7 @@
   --color-paper: #fafaf9; /* app background */
   --color-surface: #ffffff; /* cards */
   --color-ink: #1c1917; /* primary text */
-  --color-faint: #78716c; /* secondary text */
+  --color-faint: #57534e; /* secondary text — darkened to clear WCAG 1.4.3 (≈7:1 on paper) */
   --color-accent: #e00122; /* UC Red — buttons, active states, badges only */
   --color-line: #e7e5e4; /* borders */
   --color-success: #16a34a; /* confirmations only */
@@ -23,11 +23,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Visible focus for keyboard users — accessibility requirement. */
+/*
+ * Visible focus for keyboard users (WCAG 2.4.7 / 2.4.11). A two-tone ring:
+ * a light gap (box-shadow) sits between the element and a dark ink outline, so
+ * the indicator stays visible on ANY background — including the red primary
+ * button and the dark ink message bubbles, where a single ink outline washed out.
+ * `outline` is never clipped by `overflow-hidden` parents (e.g. cards), so the
+ * ring survives even if the box-shadow halo is clipped.
+ */
 :focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
-  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--color-surface);
+  border-radius: 6px;
 }
 
 /* Skeleton loading shimmer — we use skeletons, never spinners. */
@@ -45,4 +53,20 @@ body {
   background-color: var(--color-line);
   border-radius: 8px;
   animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+/*
+ * Respect the OS "reduce motion" setting (WCAG 2.3.3). Disables the infinite
+ * skeleton pulse, hover transforms, and color transitions for users who are
+ * motion-sensitive — they still get instant state changes, just no animation.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

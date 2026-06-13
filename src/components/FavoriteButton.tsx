@@ -22,26 +22,33 @@ export function FavoriteButton({
   const [pending, startTransition] = useTransition();
   const toast = useToast();
 
-  function onClick(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    const next = !favorited;
-    setFavorited(next); // optimistic
+  // Functional updates keep this correct even when re-invoked from an Undo
+  // toast (the server toggles from current state regardless of stale closures).
+  function doToggle() {
+    setFavorited((v) => !v); // optimistic
     startTransition(async () => {
       const res = await toggleFavorite(listingId);
       if (!res.ok) {
-        setFavorited(!next); // revert
-        toast(res.error);
+        setFavorited((v) => !v); // revert
+        toast(res.error, { type: "error" });
         return;
       }
       setFavorited(res.data.favorited);
-      toast(res.data.favorited ? "Saved" : "Removed");
+      toast(res.data.favorited ? "Saved" : "Removed", {
+        action: { label: "Undo", onClick: doToggle },
+      });
     });
+  }
+
+  function onClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    doToggle();
   }
 
   const base =
     variant === "overlay"
-      ? "absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-surface/90 backdrop-blur transition-colors"
+      ? "absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-surface/90 backdrop-blur transition-colors"
       : "inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-4 text-sm font-medium transition-colors hover:bg-paper";
 
   return (

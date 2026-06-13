@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { LogoMark } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 import { Field, inputClasses } from "@/components/ui/Field";
@@ -20,6 +20,23 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const personaRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Arrow keys move selection within the radio group (WAI-ARIA radiogroup
+  // pattern); only the selected option is in the tab order (roving tabindex).
+  function onPersonaKey(e: React.KeyboardEvent, index: number) {
+    let next = index;
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+      next = (index + 1) % DEMO_ACCOUNTS.length;
+    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      next = (index - 1 + DEMO_ACCOUNTS.length) % DEMO_ACCOUNTS.length;
+    } else {
+      return;
+    }
+    e.preventDefault();
+    setEmail(DEMO_ACCOUNTS[next].email);
+    personaRefs.current[next]?.focus();
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,14 +78,19 @@ export default function SignInPage() {
 
       <form onSubmit={handleSubmit} noValidate className="w-full max-w-sm">
         <div role="radiogroup" aria-label="Account" className="space-y-3">
-          {DEMO_ACCOUNTS.map((account) => {
+          {DEMO_ACCOUNTS.map((account, i) => {
             const selected = email === account.email;
             return (
               <button
                 key={account.email}
+                ref={(el) => {
+                  personaRefs.current[i] = el;
+                }}
                 type="button"
                 role="radio"
                 aria-checked={selected}
+                tabIndex={selected ? 0 : -1}
+                onKeyDown={(e) => onPersonaKey(e, i)}
                 onClick={() => setEmail(account.email)}
                 className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
                   selected
