@@ -12,7 +12,9 @@ import {
   buildListingWhere,
   buildOrderBy,
   parseTab,
+  parsePage,
   activeFilterChips,
+  PAGE_SIZE,
   type BrowseParams,
 } from "@/lib/search";
 import { BrowseFilters } from "./BrowseFilters";
@@ -20,6 +22,22 @@ import { ActiveFilters } from "./ActiveFilters";
 import { SaveSearchButton } from "./SaveSearchButton";
 
 export const metadata = { title: "Browse" };
+
+/** Build a /browse link for a given page, preserving the active filters. */
+function pageHref(params: BrowseParams, p: number): string {
+  const sp = new URLSearchParams();
+  if (params.tab && params.tab !== "market") sp.set("tab", params.tab);
+  if (params.q) sp.set("q", params.q);
+  if (params.category) sp.set("category", params.category);
+  if (params.condition) sp.set("condition", params.condition);
+  if (params.min) sp.set("min", params.min);
+  if (params.max) sp.set("max", params.max);
+  if (params.sort) sp.set("sort", params.sort);
+  if (params.lf) sp.set("lf", params.lf);
+  if (p > 1) sp.set("page", String(p));
+  const qs = sp.toString();
+  return qs ? `/browse?${qs}` : "/browse";
+}
 
 async function Results({ params }: { params: BrowseParams }) {
   const tab = parseTab(params.tab);
@@ -29,12 +47,17 @@ async function Results({ params }: { params: BrowseParams }) {
     : [[], new Set<string>()];
 
   const where = buildListingWhere(params, { blockedIds });
-  const listings = await db.listing.findMany({
+  const page = parsePage(params.page);
+  // Fetch one extra row to know whether a next page exists, without a count().
+  const rows = await db.listing.findMany({
     where,
     include: { owner: { select: { displayName: true } } },
     orderBy: buildOrderBy(params.sort),
-    take: 60,
+    skip: (page - 1) * PAGE_SIZE,
+    take: PAGE_SIZE + 1,
   });
+  const hasNext = rows.length > PAGE_SIZE;
+  const listings = rows.slice(0, PAGE_SIZE);
 
   if (listings.length === 0) {
     const hasFilters = Boolean(
@@ -67,11 +90,14 @@ async function Results({ params }: { params: BrowseParams }) {
     );
   }
 
+  const start = (page - 1) * PAGE_SIZE + 1;
+  const end = (page - 1) * PAGE_SIZE + listings.length;
+
   return (
     <>
       <p className="mb-3 text-xs text-faint">
-        {listings.length} {listings.length === 1 ? "item" : "items"}
-        {listings.length === 60 ? "+" : ""}
+        Items {start}–{end}
+        {hasNext ? "+" : ""}
       </p>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {listings.map((l) => (
@@ -88,6 +114,29 @@ async function Results({ params }: { params: BrowseParams }) {
           />
         ))}
       </div>
+
+      {(page > 1 || hasNext) && (
+        <nav
+          aria-label="Pagination"
+          className="mt-8 flex items-center justify-between"
+        >
+          {page > 1 ? (
+            <ButtonLink variant="secondary" href={pageHref(params, page - 1)}>
+              ← Previous
+            </ButtonLink>
+          ) : (
+            <span />
+          )}
+          <span className="text-sm text-faint">Page {page}</span>
+          {hasNext ? (
+            <ButtonLink variant="secondary" href={pageHref(params, page + 1)}>
+              Next →
+            </ButtonLink>
+          ) : (
+            <span />
+          )}
+        </nav>
+      )}
     </>
   );
 }

@@ -46,12 +46,16 @@ export async function getUserStats(userId: string): Promise<UserStats> {
         listing: { status: { in: ["SOLD", "RESOLVED"] }, ownerId: { not: userId } },
       },
     }),
-    // Threads on this user's listings, to estimate first-reply speed.
+    // Threads on this user's listings, to estimate first-reply speed. We only
+    // need the first inbound message and the owner's first reply, so cap the
+    // per-thread message load — without this, a busy thread pulls hundreds of
+    // rows on every profile view.
     db.conversation.findMany({
       where: { listing: { ownerId: userId } },
       select: {
         messages: {
           orderBy: { createdAt: "asc" },
+          take: 12,
           select: { senderId: true, createdAt: true },
         },
       },
