@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
@@ -27,12 +28,24 @@ export async function toggleFavorite(
   });
 
   if (existing) {
-    await db.favorite.delete({ where: { id: existing.id } });
+    // deleteMany is idempotent — a concurrent double-tap that already removed
+    // it won't throw P2025.
+    await db.favorite.deleteMany({ where: { userId: user.id, listingId } });
     revalidatePath("/saved");
     return { ok: true, data: { favorited: false } };
   }
 
-  await db.favorite.create({ data: { userId: user.id, listingId } });
+  try {
+    await db.favorite.create({ data: { userId: user.id, listingId } });
+  } catch (e) {
+    // Two near-simultaneous taps both saw no row and both tried to create;
+    // the unique constraint rejects the loser. It's already favorited — fine.
+    if (
+      !(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")
+    ) {
+      throw e;
+    }
+  }
   revalidatePath("/saved");
   return { ok: true, data: { favorited: true } };
 }

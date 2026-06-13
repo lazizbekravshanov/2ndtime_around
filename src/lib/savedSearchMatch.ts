@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { notify } from "@/lib/notify";
+import { blockedUserIds } from "@/lib/actions/safety";
 
 type MatchableListing = {
   id: string;
@@ -27,8 +28,11 @@ function textMatches(q: string, listing: MatchableListing): boolean {
 export async function matchSavedSearches(
   listing: MatchableListing
 ): Promise<void> {
+  // Never notify the owner, nor anyone in a block relationship with them —
+  // a blocked user shouldn't get pinged about (or a link to) this seller.
+  const blocked = await blockedUserIds(listing.ownerId);
   const searches = await db.savedSearch.findMany({
-    where: { notify: true, userId: { not: listing.ownerId } },
+    where: { notify: true, userId: { notIn: [listing.ownerId, ...blocked] } },
     take: 500,
   });
 

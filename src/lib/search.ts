@@ -37,7 +37,17 @@ export type BrowseParams = {
   max?: string;
   sort?: string;
   lf?: string;
+  page?: string;
 };
+
+/** Listings shown per browse page. */
+export const PAGE_SIZE = 48;
+
+/** Parse the 1-based page number from params, clamped to a sane minimum. */
+export function parsePage(value?: string): number {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 1 ? n : 1;
+}
 
 /** Tabs where a price range / condition / sort make sense. */
 export const PRICED_TABS: TabKey[] = ["market"];

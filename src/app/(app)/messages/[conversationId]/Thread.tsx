@@ -233,6 +233,7 @@ export function Thread({
   initialMessages: ThreadMessage[];
 }) {
   const [messages, setMessages] = useState<ThreadMessage[]>(initialMessages);
+  const [listingStatus, setListingStatus] = useState(initialListingStatus);
   const [pendingSends, setPendingSends] = useState<ThreadMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -260,39 +261,60 @@ export function Thread({
     spotRefs.current[next]?.focus();
   }
 
+  type ThreadPayload = { messages: ThreadMessage[]; listingStatus?: string };
+
   const refresh = useCallback(async () => {
     try {
       const res = await fetch(`/api/conversations/${conversationId}/messages`);
       if (!res.ok) return;
-      const json = (await res.json()) as { messages: ThreadMessage[] };
+      const json = (await res.json()) as ThreadPayload;
       setMessages(json.messages);
+      if (json.listingStatus) setListingStatus(json.listingStatus);
     } catch {
-      // Network hiccup — the next poll will catch up.
+      // Network hiccup — the next tick will catch up.
     }
   }, [conversationId]);
 
-  // Near-real-time: Server-Sent Events push updates within ~1s. The browser
-  // auto-reconnects when the bounded stream closes. Polling below is the
-  // guaranteed fallback if SSE is blocked or unsupported.
+  // Near-real-time via Server-Sent Events. The 5s poll is a TRUE fallback: it
+  // only runs while SSE is unavailable or disconnected, so a healthy stream
+  // isn't doubled by a redundant poll (which previously ran constantly,
+  // doubling DB load on every open thread).
   useEffect(() => {
-    if (typeof EventSource === "undefined") return;
+    let pollId: ReturnType<typeof setInterval> | undefined;
+    const startPolling = () => {
+      if (pollId === undefined) pollId = setInterval(refresh, 5000);
+    };
+    const stopPolling = () => {
+      if (pollId !== undefined) {
+        clearInterval(pollId);
+        pollId = undefined;
+      }
+    };
+
+    if (typeof EventSource === "undefined") {
+      // No SSE support — polling is the only mechanism.
+      startPolling();
+      return stopPolling;
+    }
+
     const es = new EventSource(`/api/conversations/${conversationId}/stream`);
+    es.onopen = stopPolling; // stream healthy → no need to poll
     es.onmessage = (e) => {
       try {
-        const json = JSON.parse(e.data) as { messages: ThreadMessage[] };
+        const json = JSON.parse(e.data) as ThreadPayload;
         setMessages(json.messages);
+        if (json.listingStatus) setListingStatus(json.listingStatus);
       } catch {
         // ignore malformed frame
       }
     };
-    return () => es.close();
-  }, [conversationId]);
+    es.onerror = startPolling; // stream dropped → poll until it recovers
 
-  // Poll every 5 seconds — fallback / source of truth for read receipts.
-  useEffect(() => {
-    const interval = setInterval(refresh, 5000);
-    return () => clearInterval(interval);
-  }, [refresh]);
+    return () => {
+      es.close();
+      stopPolling();
+    };
+  }, [conversationId, refresh]);
 
   // Keep the newest message in view when something arrives.
   const totalCount = messages.length + pendingSends.length;
@@ -471,6 +493,16 @@ export function Thread({
         })}
         <div ref={bottomRef} />
       </div>
+
+      {/* Live status: updates from SSE/poll without a page reload. */}
+      {(listingStatus === "SOLD" || listingStatus === "RESOLVED") && (
+        <p
+          role="status"
+          className="mb-2 rounded-lg border border-line bg-surface px-3 py-2 text-center text-xs text-faint"
+        >
+          This listing was marked {listingStatus.toLowerCase()}.
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="pb-2 text-sm text-accent">

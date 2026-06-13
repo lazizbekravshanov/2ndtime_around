@@ -57,15 +57,14 @@ export async function startConversation(
     return { ok: false, error: "This conversation isn't available." };
   }
 
-  const existing = await db.conversation.findUnique({
+  // upsert (not findUnique-then-create) so two simultaneous "Message seller"
+  // taps can't both miss and race the unique [listingId, starterId] into a 500.
+  const conversation = await db.conversation.upsert({
     where: {
       listingId_starterId: { listingId, starterId: user.id },
     },
-  });
-  if (existing) return { ok: true, data: { conversationId: existing.id } };
-
-  const conversation = await db.conversation.create({
-    data: {
+    update: {},
+    create: {
       listingId,
       starterId: user.id,
       participantIds: [user.id, listing.ownerId],
@@ -315,8 +314,11 @@ export async function respondToClaim(input: unknown): Promise<ActionResult> {
     }),
     ...(approved
       ? [
-          db.listing.update({
-            where: { id: message.conversation.listingId },
+          // Compare-and-set: only an still-ACTIVE listing flips to RESOLVED, so
+          // a claim approval can't override an owner who already marked it
+          // SOLD/DELETED between our read and this write.
+          db.listing.updateMany({
+            where: { id: message.conversation.listingId, status: "ACTIVE" },
             data: { status: "RESOLVED" },
           }),
         ]

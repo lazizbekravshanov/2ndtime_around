@@ -50,7 +50,9 @@ export default async function SavedPage({
 
   const [favorites, searches] = await Promise.all([
     db.favorite.findMany({
-      where: { userId: user.id },
+      // Don't surface listings that have since been removed (owner- or
+      // moderator-deleted) — they'd link to a 404.
+      where: { userId: user.id, listing: { status: { not: "DELETED" } } },
       orderBy: { createdAt: "desc" },
       include: {
         listing: { include: { owner: { select: { displayName: true } } } },

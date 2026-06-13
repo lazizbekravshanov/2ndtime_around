@@ -7,6 +7,7 @@ import { getSessionUser } from "@/lib/session";
 import { listingSchema } from "@/lib/validation";
 import { notify } from "@/lib/notify";
 import { matchSavedSearches } from "@/lib/savedSearchMatch";
+import { blockedUserIds } from "@/lib/actions/safety";
 
 export type ActionResult<T = undefined> =
   | (T extends undefined ? { ok: true } : { ok: true; data: T })
@@ -98,6 +99,14 @@ export async function updateListing(
     newPrice < existing.price &&
     newPrice < (existing.lastNotifiedPrice ?? Infinity);
 
+  // Raising the price clears the "last notified" floor, so a later genuine
+  // drop from the new higher price notifies again instead of being suppressed.
+  const isIncrease =
+    existing.type === "SELL" &&
+    newPrice !== null &&
+    existing.price !== null &&
+    newPrice > existing.price;
+
   const updated = await db.listing.update({
     where: { id: listingId },
     data: {
@@ -109,7 +118,11 @@ export async function updateListing(
       locationNote: d.locationNote ?? null,
       photos: d.photos,
       ...(willPublish ? { status: "ACTIVE" } : {}),
-      ...(isDrop ? { lastNotifiedPrice: newPrice } : {}),
+      ...(isDrop
+        ? { lastNotifiedPrice: newPrice }
+        : isIncrease
+          ? { lastNotifiedPrice: null }
+          : {}),
     },
   });
 
@@ -117,7 +130,7 @@ export async function updateListing(
   revalidatePath(`/listing/${listingId}`);
 
   if (isDrop && newPrice !== null) {
-    void notifyFavoriters(listingId, {
+    void notifyFavoriters(listingId, existing.ownerId, {
       kind: "PRICE_DROP",
       title: `Price drop: ${d.title}`,
       body: `Now $${newPrice} (was $${existing.price}).`,
@@ -128,13 +141,19 @@ export async function updateListing(
   return { ok: true, data: { id: listingId } };
 }
 
-/** Notify everyone who favorited a listing (excluding its owner). */
+/**
+ * Notify everyone who favorited a listing, excluding its owner and anyone in a
+ * block relationship with the owner (a blocked user shouldn't keep getting
+ * price-drop / sold pings from someone they blocked).
+ */
 async function notifyFavoriters(
   listingId: string,
+  ownerId: string,
   payload: { kind: "PRICE_DROP" | "FAVORITE_SOLD"; title: string; body: string }
 ): Promise<void> {
+  const blocked = await blockedUserIds(ownerId);
   const favs = await db.favorite.findMany({
-    where: { listingId },
+    where: { listingId, userId: { notIn: [ownerId, ...blocked] } },
     select: { userId: true },
   });
   for (const f of favs) {
@@ -164,18 +183,29 @@ export async function setListingStatus(input: unknown): Promise<ActionResult> {
     return { ok: false, error: "Only the owner can change this listing." };
   }
 
-  await db.listing.update({
-    where: { id: listing.id },
+  // No-op if the status didn't actually change — prevents re-firing the
+  // "no longer available" blast every time the owner re-taps Mark as sold.
+  if (listing.status === parsed.data.status) return { ok: true };
+
+  // Compare-and-set on the prior status: if a concurrent action already moved
+  // it, this matches zero rows and we skip the (now-stale) notification.
+  const result = await db.listing.updateMany({
+    where: { id: listing.id, status: listing.status },
     data: { status: parsed.data.status },
   });
+  if (result.count === 0) return { ok: true };
 
   revalidatePath("/browse");
   revalidatePath(`/listing/${listing.id}`);
   revalidatePath("/my-items");
 
-  // Let watchers know a saved item is gone.
-  if (parsed.data.status === "SOLD" || parsed.data.status === "RESOLVED") {
-    void notifyFavoriters(listing.id, {
+  // Notify watchers only on a genuine transition INTO sold/resolved from an
+  // available state — never when it was already completed.
+  const becameUnavailable =
+    (parsed.data.status === "SOLD" || parsed.data.status === "RESOLVED") &&
+    (listing.status === "ACTIVE" || listing.status === "DRAFT");
+  if (becameUnavailable) {
+    void notifyFavoriters(listing.id, listing.ownerId, {
       kind: "FAVORITE_SOLD",
       title: `A saved item is no longer available`,
       body: `${listing.title} was just marked ${parsed.data.status.toLowerCase()}.`,
