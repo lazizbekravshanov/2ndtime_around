@@ -27,7 +27,13 @@ type OtherUser = { id: string; displayName: string; email: string };
 
 function Timestamp({ iso }: { iso: string }) {
   return (
-    <time dateTime={iso} className="mt-1 block text-[11px] text-faint">
+    <time
+      dateTime={iso}
+      // Server renders in UTC, client in the viewer's timezone — an expected,
+      // benign difference. Suppress the hydration warning rather than mismatch.
+      suppressHydrationWarning
+      className="mt-1 block text-[11px] text-faint"
+    >
       {new Date(iso).toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
@@ -74,7 +80,9 @@ function MeetupCard({
         Meetup proposal
       </p>
       <p className="mt-2 text-sm font-medium">{spot}</p>
-      <p className="text-sm text-faint">{datetime ? meetupTime(datetime) : ""}</p>
+      <p className="text-sm text-faint" suppressHydrationWarning>
+        {datetime ? meetupTime(datetime) : ""}
+      </p>
 
       {status === "PENDING" && !mine && (
         <div className="mt-3 flex gap-2">
