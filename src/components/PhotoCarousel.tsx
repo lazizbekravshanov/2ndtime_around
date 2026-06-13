@@ -38,24 +38,26 @@ export function PhotoCarousel({
               onClick={() =>
                 setIndex((i) => (i - 1 + photos.length) % photos.length)
               }
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border border-line bg-surface/90 p-1.5 hover:bg-surface"
+              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface/90 hover:bg-surface"
             >
-              <ChevronLeftIcon className="h-4 w-4" />
+              <ChevronLeftIcon className="h-5 w-5" />
             </button>
             <button
               type="button"
               aria-label="Next photo"
               onClick={() => setIndex((i) => (i + 1) % photos.length)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-line bg-surface/90 p-1.5 hover:bg-surface"
+              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface/90 hover:bg-surface"
             >
-              <ChevronRightIcon className="h-4 w-4" />
+              <ChevronRightIcon className="h-5 w-5" />
             </button>
           </>
         )}
       </div>
       {photos.length > 1 && (
-        <div className="mt-3 flex justify-center gap-2" role="tablist">
+        <div className="mt-1 flex justify-center gap-1" role="tablist">
           {photos.map((_, i) => (
+            // The visible dot stays small, but the tap target is a full
+            // 44px-tall hit area (WCAG 2.5.5) so it's thumb-reachable.
             <button
               key={i}
               type="button"
@@ -63,10 +65,14 @@ export function PhotoCarousel({
               aria-selected={i === index}
               aria-label={`Photo ${i + 1}`}
               onClick={() => setIndex(i)}
-              className={`h-2 w-2 rounded-full transition-colors ${
-                i === index ? "bg-accent" : "bg-line hover:bg-faint"
-              }`}
-            />
+              className="flex h-11 w-8 items-center justify-center"
+            >
+              <span
+                className={`block h-2 w-2 rounded-full transition-colors ${
+                  i === index ? "bg-accent" : "bg-line"
+                }`}
+              />
+            </button>
           ))}
         </div>
       )}

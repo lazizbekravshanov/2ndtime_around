@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 function Star({ filled }: { filled: boolean }) {
   return (
@@ -52,6 +52,21 @@ export function StarPicker({
 }) {
   const [hover, setHover] = useState(0);
   const shown = hover || value;
+  const starRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Arrow keys raise/lower the rating; only the active star is tab-focusable
+  // (roving tabindex) per the WAI-ARIA radiogroup pattern.
+  function onKey(e: React.KeyboardEvent, n: number) {
+    let next = n;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") next = Math.min(5, n + 1);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown")
+      next = Math.max(1, n - 1);
+    else return;
+    e.preventDefault();
+    onChange(next);
+    starRefs.current[next - 1]?.focus();
+  }
+
   return (
     <div
       role="radiogroup"
@@ -62,10 +77,15 @@ export function StarPicker({
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
+          ref={(el) => {
+            starRefs.current[n - 1] = el;
+          }}
           type="button"
           role="radio"
           aria-checked={value === n}
           aria-label={`${n} star${n > 1 ? "s" : ""}`}
+          tabIndex={value === n || (value === 0 && n === 1) ? 0 : -1}
+          onKeyDown={(e) => onKey(e, n)}
           onMouseEnter={() => setHover(n)}
           onClick={() => onChange(n)}
           className="rounded p-1 hover:bg-line/50"

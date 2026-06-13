@@ -41,7 +41,7 @@ export function ReportSheet({
           ? await reportListing({ listingId: target.listingId, reason, detail })
           : await reportUser({ reportedUserId: target.userId, reason, detail });
       if (!res.ok) {
-        toast(res.error);
+        toast(res.error, { type: "error" });
         return;
       }
       setReason("");

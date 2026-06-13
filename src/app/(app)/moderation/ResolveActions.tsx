@@ -16,7 +16,7 @@ export function ResolveActions({ reportId }: { reportId: string }) {
     startTransition(async () => {
       const res = await resolveReport({ reportId, status });
       if (!res.ok) {
-        toast(res.error);
+        toast(res.error, { type: "error" });
         return;
       }
       setDone(true);

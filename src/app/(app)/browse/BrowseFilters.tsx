@@ -55,12 +55,14 @@ export function BrowseFilters({ tab }: { tab: string }) {
           />
         </div>
 
-        <div className="flex gap-2">
+        {/* On phones the selects stack into full-width tap targets (Fitts's
+            Law); they collapse to inline auto-width from sm: up. */}
+        <div className="grid grid-cols-2 gap-2 sm:flex">
           <select
             aria-label="Category"
             value={searchParams.get("category") ?? ""}
             onChange={(e) => setParam("category", e.target.value)}
-            className={`${selectClasses} w-auto`}
+            className={`${selectClasses} sm:w-auto`}
           >
             <option value="">All categories</option>
             {CATEGORIES.map((c) => (
@@ -75,7 +77,7 @@ export function BrowseFilters({ tab }: { tab: string }) {
               aria-label="Condition"
               value={searchParams.get("condition") ?? ""}
               onChange={(e) => setParam("condition", e.target.value)}
-              className={`${selectClasses} w-auto`}
+              className={`${selectClasses} sm:w-auto`}
             >
               <option value="">Any condition</option>
               {CONDITIONS.map((c) => (
@@ -91,7 +93,7 @@ export function BrowseFilters({ tab }: { tab: string }) {
               aria-label="Sort"
               value={searchParams.get("sort") ?? ""}
               onChange={(e) => setParam("sort", e.target.value)}
-              className={`${selectClasses} w-auto`}
+              className={`${selectClasses} sm:w-auto`}
             >
               <option value="">Newest</option>
               <option value="price-asc">Price: low → high</option>

@@ -42,7 +42,7 @@ export function SavedSearchRow({ search }: { search: SavedSearchRowData }) {
               const res = await toggleSavedSearchNotify(search.id);
               if (!res.ok) {
                 setNotify(!next);
-                toast(res.error);
+                toast(res.error, { type: "error" });
               }
             });
           }}
@@ -55,7 +55,7 @@ export function SavedSearchRow({ search }: { search: SavedSearchRowData }) {
               const res = await deleteSavedSearch(search.id);
               if (!res.ok) {
                 setRemoved(false);
-                toast(res.error);
+                toast(res.error, { type: "error" });
               } else {
                 toast("Deleted");
               }

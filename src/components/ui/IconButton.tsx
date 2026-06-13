@@ -9,7 +9,7 @@ export function IconButton({
   return (
     <button
       type="button"
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors disabled:opacity-50 ${
+      className={`inline-flex h-11 w-11 items-center justify-center rounded-lg transition-colors disabled:opacity-50 ${
         active ? "text-ink" : "text-faint hover:bg-line/50 hover:text-ink"
       } ${className}`}
       {...props}
