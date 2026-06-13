@@ -80,6 +80,10 @@ ceremony.
 | --- | --- |
 | ![Landing page](docs/screenshots/landing.png) | ![Persona picker](docs/screenshots/signin-picker.png) |
 
+| Landing on mobile | |
+| --- | --- |
+| ![Landing on mobile](docs/screenshots/landing-mobile.png) | |
+
 | Browse (Marketplace) | Lost & Found |
 | --- | --- |
 | ![Browse marketplace](docs/screenshots/browse-marketplace.png) | ![Lost and found tab](docs/screenshots/browse-lostfound.png) |
