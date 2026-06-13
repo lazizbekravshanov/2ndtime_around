@@ -65,7 +65,7 @@ export function NotificationRow({ n }: { n: NotificationRowData }) {
           {!n.read && <span className="h-2 w-2 shrink-0 rounded-full bg-accent" />}
         </span>
         {n.body && <span className="block truncate text-sm text-faint">{n.body}</span>}
-        <span className="mt-0.5 block text-xs text-faint">
+        <span className="mt-0.5 block text-xs text-faint" suppressHydrationWarning>
           {timeAgo(n.createdAt)}
         </span>
       </span>
