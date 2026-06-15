@@ -4,8 +4,8 @@ import { ChatIcon, LeafIcon, LogoMark, PinIcon } from "@/components/icons";
 import { buttonClasses } from "@/components/ui/Button";
 import { ListingCard } from "@/components/ListingCard";
 import { db } from "@/lib/db";
-import { photoList } from "@/lib/format";
-import { getImpactCount } from "@/lib/impact";
+import { formatPrice, photoList } from "@/lib/format";
+import { getImpactStats } from "@/lib/impact";
 import { getSessionUser } from "@/lib/session";
 
 const TRUST = [
@@ -19,7 +19,8 @@ export default async function LandingPage() {
   const user = await getSessionUser();
   if (user) redirect("/browse");
 
-  // Pull a few real, recent listings so the page shows live campus activity.
+  // Pull a few real, recent listings so the page shows live campus activity,
+  // plus the real campus-impact numbers for the hero band.
   const [recent, impact] = await Promise.all([
     db.listing.findMany({
       where: { status: "ACTIVE" },
@@ -27,7 +28,7 @@ export default async function LandingPage() {
       orderBy: { createdAt: "desc" },
       take: 12,
     }),
-    getImpactCount(),
+    getImpactStats(),
   ]);
 
   // Prefer listings with photos for the preview; fall back to recent if needed.
@@ -68,16 +69,11 @@ export default async function LandingPage() {
               in-app, meet at safe campus spots, and keep good stuff out of the
               dumpster.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+            <div className="mt-7">
               <Link href="/signin" className={buttonClasses("primary", "lg")}>
                 Get started
                 <span aria-hidden="true">→</span>
               </Link>
-              <span className="inline-flex items-center gap-2 text-sm text-faint">
-                <LeafIcon className="h-4 w-4 text-success" />
-                <strong className="font-semibold text-ink">{impact}</strong>
-                {impact === 1 ? "item" : "items"} kept out of landfills
-              </span>
             </div>
           </div>
 
@@ -103,8 +99,40 @@ export default async function LandingPage() {
           )}
         </div>
 
+        {/* Campus impact — real numbers; the city-level "why this matters". */}
+        <section className="rounded-2xl border border-line bg-surface px-6 py-8">
+          <p className="text-center text-xs font-medium uppercase tracking-wide text-faint">
+            <LeafIcon className="mr-1.5 inline h-4 w-4 text-success" />
+            What Bearcats keep in circulation
+          </p>
+          <dl className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <div className="flex flex-col-reverse gap-1 text-center">
+              <dt className="text-sm text-faint">
+                items kept out of Cincinnati landfills
+              </dt>
+              <dd className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                {impact.itemsKept}
+              </dd>
+            </div>
+            <div className="flex flex-col-reverse gap-1 text-center">
+              <dt className="text-sm text-faint">
+                traded between students, not big retail
+              </dt>
+              <dd className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                {formatPrice(impact.soldValue)}
+              </dd>
+            </div>
+            <div className="flex flex-col-reverse gap-1 text-center">
+              <dt className="text-sm text-faint">items given away free</dt>
+              <dd className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                {impact.donated}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
         {/* Trust row */}
-        <ul className="flex flex-col items-center justify-center gap-4 border-t border-line py-8 text-sm sm:flex-row sm:gap-10">
+        <ul className="mt-4 flex flex-col items-center justify-center gap-4 border-t border-line py-8 text-sm sm:flex-row sm:gap-10">
           {TRUST.map(({ icon: Icon, label }) => (
             <li
               key={label}
