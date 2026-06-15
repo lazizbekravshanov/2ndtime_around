@@ -1,8 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { Button } from "@/components/ui/Button";
 import {
@@ -45,12 +47,50 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
   const [photos, setPhotos] = useState<string[]>(listing.photos);
   const [serverError, setServerError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+
+  const isLostFound = listing.type === "LOST" || listing.type === "FOUND";
+  const isDraft = listing.status === "DRAFT";
+
+  // Client-side validation for parity with the Sell wizard — catch problems
+  // before a server round-trip (Nielsen #5: error prevention). The server
+  // still re-validates with the full schema; this is the first line of defense.
+  const schema = z
+    .object({
+      title: z
+        .string()
+        .trim()
+        .min(3, "Title needs at least 3 characters.")
+        .max(80, "Keep the title under 80 characters."),
+      description: z
+        .string()
+        .trim()
+        .min(10, "Add a little more detail (at least 10 characters).")
+        .max(2000, "Keep the description under 2000 characters."),
+      category: z.string().min(1, "Pick a category."),
+      condition: z.string().optional(),
+      price: z.number().min(0, "Price can't be negative.").max(10000, "Price must be under $10,000.").optional(),
+      locationNote: z.string().optional(),
+    })
+    .superRefine((val, ctx) => {
+      if (listing.type === "SELL" && (val.price === undefined || Number.isNaN(val.price))) {
+        ctx.addIssue({ path: ["price"], code: "custom", message: "A sale listing needs a price." });
+      }
+      if (isLostFound && (!val.locationNote || val.locationNote.trim().length < 3)) {
+        ctx.addIssue({
+          path: ["locationNote"],
+          code: "custom",
+          message: listing.type === "LOST" ? "Where did you last see it?" : "Where did you find it?",
+        });
+      }
+    });
+
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
+    resolver: zodResolver(schema),
     defaultValues: {
       title: listing.title,
       description: listing.description,
@@ -60,9 +100,6 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
       locationNote: listing.locationNote ?? "",
     },
   });
-
-  const isLostFound = listing.type === "LOST" || listing.type === "FOUND";
-  const isDraft = listing.status === "DRAFT";
 
   function makeSubmit(publish: boolean) {
     return handleSubmit(async (data) => {
@@ -115,6 +152,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
       <Field label="Title" htmlFor="title" error={errors.title?.message}>
         <input
           id="title"
+          aria-required
           aria-invalid={errors.title ? true : undefined}
           className={inputClasses}
           {...register("title")}
@@ -122,7 +160,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
       </Field>
 
       <Field label="Category" htmlFor="category" error={errors.category?.message}>
-        <select id="category" className={selectClasses} {...register("category")}>
+        <select id="category" aria-required className={selectClasses} {...register("category")}>
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -160,6 +198,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
               inputMode="decimal"
               step="0.01"
               min="0"
+              aria-required
               aria-invalid={errors.price ? true : undefined}
               className={`${inputClasses} pl-7`}
               {...register("price", { valueAsNumber: true })}
@@ -176,6 +215,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
         >
           <input
             id="locationNote"
+            aria-required
             aria-invalid={errors.locationNote ? true : undefined}
             className={inputClasses}
             {...register("locationNote")}
@@ -191,6 +231,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
         <textarea
           id="description"
           rows={4}
+          aria-required
           aria-invalid={errors.description ? true : undefined}
           className={textareaClasses}
           {...register("description")}
