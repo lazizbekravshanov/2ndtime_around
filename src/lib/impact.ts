@@ -21,3 +21,36 @@ export const getImpactCount = unstable_cache(
   ["impact-count"],
   { revalidate: 300 }
 );
+
+export type ImpactStats = {
+  itemsKept: number; // completed sales + donations — diverted from landfill
+  soldValue: number; // total $ of completed sales — money kept among students
+  donated: number; // completed donations — items given away free
+};
+
+/**
+ * Headline campus-impact numbers for the landing page — all derived from real
+ * completed listings. Cached 5 min (slow-moving, runs on a public page).
+ */
+export const getImpactStats = unstable_cache(
+  async (): Promise<ImpactStats> => {
+    const [itemsKept, soldAgg, donated] = await Promise.all([
+      db.listing.count({
+        where: {
+          type: { in: ["SELL", "DONATE"] },
+          status: { in: ["SOLD", "RESOLVED"] },
+        },
+      }),
+      db.listing.aggregate({
+        where: { type: "SELL", status: "SOLD" },
+        _sum: { price: true },
+      }),
+      db.listing.count({
+        where: { type: "DONATE", status: { in: ["SOLD", "RESOLVED"] } },
+      }),
+    ]);
+    return { itemsKept, soldValue: soldAgg._sum.price ?? 0, donated };
+  },
+  ["impact-stats"],
+  { revalidate: 300 }
+);
