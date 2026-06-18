@@ -49,14 +49,14 @@ export function Sheet({
       aria-label={title}
     >
       <div
-        className="absolute inset-0 bg-ink/30"
+        className="absolute inset-0 bg-ink/30 [animation:fade-in_0.2s_ease-out]"
         onClick={onClose}
         aria-hidden="true"
       />
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative w-full max-w-md rounded-t-2xl border border-line bg-surface p-5 shadow-lg outline-none sm:rounded-2xl"
+        className="relative w-full max-w-md rounded-t-2xl border border-line bg-surface p-5 shadow-float outline-none [animation:sheet-in_0.28s_cubic-bezier(0.16,1,0.3,1)] sm:rounded-2xl"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold">{title}</h2>
