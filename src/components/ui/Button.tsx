@@ -6,7 +6,7 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 // One accent color, used sparingly: primary actions only. Everything else
 // stays neutral so the red always means "the main thing to do here".
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap";
+  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-[transform,background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 whitespace-nowrap";
 
 const sizes = {
   sm: "h-8 px-3",
@@ -15,8 +15,12 @@ const sizes = {
 };
 
 const variants: Record<Variant, string> = {
-  primary: "bg-accent text-white hover:bg-accent/90",
-  secondary: "border border-line bg-surface text-ink hover:bg-paper",
+  // Primary carries a soft accent-tinted glow that deepens on hover — the one
+  // place depth and color combine to pull the eye to the main action.
+  primary:
+    "bg-accent text-white shadow-[0_2px_8px_rgba(224,1,34,0.18)] hover:bg-accent/90 hover:shadow-[0_4px_16px_rgba(224,1,34,0.28)]",
+  secondary:
+    "border border-line bg-surface text-ink hover:bg-paper hover:border-faint/30",
   ghost: "text-faint hover:text-ink hover:bg-line/50",
   danger: "border border-line bg-surface text-accent hover:border-accent/40",
 };

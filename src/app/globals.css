@@ -14,6 +14,12 @@
   --color-success: #16a34a; /* confirmations only */
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  /* Elevation — soft, warm-tinted, layered (depth from light, not lines). */
+  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.04), 0 2px 8px rgba(28, 25, 23, 0.05);
+  --shadow-card-hover: 0 2px 6px rgba(28, 25, 23, 0.06), 0 14px 30px rgba(28, 25, 23, 0.1);
+  --shadow-float: 0 12px 48px rgba(28, 25, 23, 0.18);
 }
 
 body {
@@ -53,6 +59,56 @@ body {
   background-color: var(--color-line);
   border-radius: 8px;
   animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+/*
+ * Motion system — one expressive ease (a soft "expo-out" that feels physical),
+ * used for entrance reveals and floating surfaces. All of this is neutralized
+ * by the prefers-reduced-motion block below, so it's accessible by default.
+ */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Staggered entrance — set --reveal-delay inline per element. */
+.reveal {
+  animation: reveal-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
 }
 
 /*

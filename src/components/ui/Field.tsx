@@ -42,10 +42,10 @@ export function Field({
 
 // Placeholders use full --color-faint (no /70 opacity) so they clear WCAG 1.4.3.
 export const inputClasses =
-  "h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm placeholder:text-faint focus:border-ink";
+  "h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm placeholder:text-faint transition-colors focus:border-ink";
 
 export const textareaClasses =
-  "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm placeholder:text-faint focus:border-ink";
+  "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm placeholder:text-faint transition-colors focus:border-ink";
 
 export const selectClasses =
-  "h-10 w-full appearance-none rounded-lg border border-line bg-surface px-3 text-sm focus:border-ink";
+  "h-10 w-full appearance-none rounded-lg border border-line bg-surface px-3 text-sm transition-colors focus:border-ink";

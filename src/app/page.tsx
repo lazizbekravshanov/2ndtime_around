@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChatIcon, LeafIcon, LogoMark, PinIcon } from "@/components/icons";
@@ -52,24 +53,38 @@ export default async function LandingPage() {
         </Link>
       </header>
 
-      <main className="mx-auto w-full max-w-[1100px] flex-1 px-4">
+      <main className="relative mx-auto w-full max-w-[1100px] flex-1 px-4">
+        {/* Soft warm atmosphere behind the hero — depth from light, kept quiet. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(70%_55%_at_78%_12%,rgba(224,1,34,0.05),transparent_72%)]"
+        />
         <div className="grid items-center gap-10 py-12 lg:grid-cols-2 lg:gap-12 lg:py-20">
           {/* Pitch */}
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-faint">
+            <span className="reveal inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-faint shadow-card">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               University of Cincinnati
             </span>
-            <h1 className="mt-5 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+            <h1
+              className="reveal mt-5 font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.02em] sm:text-6xl"
+              style={{ "--reveal-delay": "80ms" } as CSSProperties}
+            >
               Buy, sell &amp; donate{" "}
               <span className="text-accent">right on campus.</span>
             </h1>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-faint">
+            <p
+              className="reveal mt-5 max-w-md text-base leading-relaxed text-faint"
+              style={{ "--reveal-delay": "160ms" } as CSSProperties}
+            >
               The UC-only marketplace. Every account is a verified Bearcat — chat
               in-app, meet at safe campus spots, and keep good stuff out of the
               dumpster.
             </p>
-            <div className="mt-7">
+            <div
+              className="reveal mt-8"
+              style={{ "--reveal-delay": "240ms" } as CSSProperties}
+            >
               <Link href="/signin" className={buttonClasses("primary", "lg")}>
                 Get started
                 <span aria-hidden="true">→</span>
@@ -81,18 +96,26 @@ export default async function LandingPage() {
           {preview.length > 0 && (
             <div>
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                {preview.map((l) => (
-                  <ListingCard
+                {preview.map((l, i) => (
+                  <div
                     key={l.id}
-                    listing={{
-                      ...l,
-                      type: l.type as never,
-                      status: l.status as never,
-                    }}
-                  />
+                    className="reveal"
+                    style={{ "--reveal-delay": `${220 + i * 90}ms` } as CSSProperties}
+                  >
+                    <ListingCard
+                      listing={{
+                        ...l,
+                        type: l.type as never,
+                        status: l.status as never,
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
-              <p className="mt-3 text-center text-xs text-faint">
+              <p
+                className="reveal mt-3 text-center text-xs text-faint"
+                style={{ "--reveal-delay": "580ms" } as CSSProperties}
+              >
                 Live from campus, updated all day
               </p>
             </div>
@@ -100,31 +123,31 @@ export default async function LandingPage() {
         </div>
 
         {/* Campus impact — real numbers; the city-level "why this matters". */}
-        <section className="rounded-2xl border border-line bg-surface px-6 py-8">
-          <p className="text-center text-xs font-medium uppercase tracking-wide text-faint">
+        <section className="reveal rounded-2xl border border-line bg-surface px-6 py-10 shadow-card sm:py-12">
+          <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
             <LeafIcon className="mr-1.5 inline h-4 w-4 text-success" />
             What Bearcats keep in circulation
           </p>
-          <dl className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-            <div className="flex flex-col-reverse gap-1 text-center">
+          <dl className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3">
+            <div className="flex flex-col-reverse gap-1.5 text-center">
               <dt className="text-sm text-faint">
                 items kept out of Cincinnati landfills
               </dt>
-              <dd className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              <dd className="font-display text-5xl font-medium tracking-tight sm:text-6xl">
                 {impact.itemsKept}
               </dd>
             </div>
-            <div className="flex flex-col-reverse gap-1 text-center">
+            <div className="flex flex-col-reverse gap-1.5 text-center">
               <dt className="text-sm text-faint">
                 traded between students, not big retail
               </dt>
-              <dd className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              <dd className="font-display text-5xl font-medium tracking-tight sm:text-6xl">
                 {formatPrice(impact.soldValue)}
               </dd>
             </div>
-            <div className="flex flex-col-reverse gap-1 text-center">
+            <div className="flex flex-col-reverse gap-1.5 text-center">
               <dt className="text-sm text-faint">items given away free</dt>
-              <dd className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              <dd className="font-display text-5xl font-medium tracking-tight sm:text-6xl">
                 {impact.donated}
               </dd>
             </div>
