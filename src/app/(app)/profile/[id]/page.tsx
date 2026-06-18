@@ -68,10 +68,12 @@ export default async function ProfilePage({
             {profile.displayName.charAt(0)}
           </span>
           <div>
-            <h1 className="text-2xl font-semibold">
+            <h1 className="font-display text-3xl font-medium tracking-tight">
               {profile.displayName}
               {isSelf && (
-                <span className="ml-2 text-sm font-normal text-faint">(you)</span>
+                <span className="ml-2 font-sans text-sm font-normal text-faint">
+                  (you)
+                </span>
               )}
             </h1>
             <p className="text-sm text-faint">
@@ -136,7 +138,7 @@ export default async function ProfilePage({
             {ratings.map((r) => (
               <li
                 key={r.id}
-                className="rounded-xl border border-line bg-surface p-4"
+                className="rounded-xl border border-line bg-surface p-4 shadow-card"
               >
                 <div className="flex items-center justify-between gap-3">
                   <StarRating value={r.stars} />

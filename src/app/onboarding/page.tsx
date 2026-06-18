@@ -14,7 +14,9 @@ export default async function OnboardingPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 py-16">
       <LogoMark className="h-7 w-7" />
-      <h1 className="mt-6 text-2xl font-semibold">Welcome, Bearcat</h1>
+      <h1 className="mt-6 font-display text-3xl font-medium tracking-tight">
+        Welcome, Bearcat
+      </h1>
       <p className="mt-1 text-sm text-faint">
         One quick step: tell other students what to call you.
       </p>

@@ -37,7 +37,7 @@ export default async function MessagesPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-semibold">Messages</h1>
+      <h1 className="font-display text-3xl font-medium tracking-tight">Messages</h1>
 
       {conversations.length === 0 ? (
         <div className="mt-6">

@@ -163,7 +163,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
       {/* Step 1 — what kind of post is this? */}
       {step === 0 && (
         <fieldset className="mt-8">
-          <legend className="text-2xl font-semibold">
+          <legend className="font-display text-3xl font-medium tracking-tight">
             What would you like to post?
           </legend>
           <div className="mt-5 grid gap-3">
@@ -203,7 +203,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
       {/* Step 2 — photos */}
       {step === 1 && type && (
         <div className="mt-8">
-          <h1 className="text-2xl font-semibold">
+          <h1 className="font-display text-3xl font-medium tracking-tight">
             {type === "LOST"
               ? "Got a photo of it?"
               : type === "WANTED"
@@ -241,7 +241,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
             setStep(3);
           })}
         >
-          <h1 className="text-2xl font-semibold">The details</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">The details</h1>
           <div className="mt-5 space-y-5">
             <Field label="Title" htmlFor="title" error={errors.title?.message}>
               <input
@@ -392,7 +392,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
       {/* Step 4 — review & publish */}
       {step === 3 && type && details && (
         <div className="mt-8">
-          <h1 className="text-2xl font-semibold">Ready to post?</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Ready to post?</h1>
           <div className="mt-5 overflow-hidden rounded-xl border border-line bg-surface">
             {photos[0] && (
               // eslint-disable-next-line @next/next/no-img-element
