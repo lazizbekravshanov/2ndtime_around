@@ -69,7 +69,7 @@ export default async function LandingPage() {
         )}
 
         {/* Campus impact — real numbers; the city-level "why this matters". */}
-        <section className="mb-14 rounded-2xl border border-line bg-surface px-6 py-10 shadow-card sm:py-12">
+        <section className="mb-14 rounded-2xl border border-line bg-surface px-6 py-10 sm:py-12">
           <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
             <LeafIcon className="mr-1.5 inline h-4 w-4 text-success" />
             What Bearcats keep in circulation
@@ -79,7 +79,7 @@ export default async function LandingPage() {
               <dt className="text-sm text-faint">
                 items kept out of Cincinnati landfills
               </dt>
-              <dd className="font-display text-5xl font-medium tracking-tight sm:text-6xl">
+              <dd className="text-5xl font-semibold tracking-tight sm:text-6xl">
                 {impact.itemsKept}
               </dd>
             </div>
@@ -87,13 +87,13 @@ export default async function LandingPage() {
               <dt className="text-sm text-faint">
                 traded between students, not big retail
               </dt>
-              <dd className="font-display text-5xl font-medium tracking-tight sm:text-6xl">
+              <dd className="text-5xl font-semibold tracking-tight sm:text-6xl">
                 {formatPrice(impact.soldValue)}
               </dd>
             </div>
             <div className="flex flex-col-reverse gap-1.5 text-center">
               <dt className="text-sm text-faint">items given away free</dt>
-              <dd className="font-display text-5xl font-medium tracking-tight sm:text-6xl">
+              <dd className="text-5xl font-semibold tracking-tight sm:text-6xl">
                 {impact.donated}
               </dd>
             </div>

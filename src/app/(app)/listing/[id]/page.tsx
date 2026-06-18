@@ -98,7 +98,7 @@ export default async function ListingPage({
             )}
           </div>
 
-          <h1 className="mt-3 font-display text-3xl font-medium leading-tight tracking-tight">
+          <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight">
             {listing.title}
           </h1>
 
@@ -143,7 +143,7 @@ export default async function ListingPage({
           </p>
 
           {/* Seller / reporter card */}
-          <div className="mt-6 rounded-xl border border-line bg-surface p-4 shadow-card">
+          <div className="mt-6 rounded-xl border border-line bg-surface p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-faint">
               {isLostFound
                 ? type === "LOST"
@@ -237,7 +237,7 @@ export default async function ListingPage({
 
           {/* Safe meetup spots — selectable later, inside the chat */}
           {showMeetup && (
-            <div className="mt-6 rounded-xl border border-line bg-surface p-4 shadow-card">
+            <div className="mt-6 rounded-xl border border-line bg-surface p-4">
               <p className="text-sm font-medium">Suggested safe meetup spots</p>
               <p className="mt-0.5 text-xs text-faint">
                 Well-lit, staffed campus locations. You can propose one with a

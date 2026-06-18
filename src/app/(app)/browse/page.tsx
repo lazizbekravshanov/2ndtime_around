@@ -154,24 +154,25 @@ export default async function BrowsePage({
     <div>
       <h1 className="sr-only">Browse</h1>
 
-      {/* Tab bar — a segmented control. The active tab is a white pill that
-          lifts off a recessed track; red stays reserved for actions. */}
+      {/* Tab bar — minimal underline style; active marked with a UC-red
+          indicator, inactive labels muted. */}
       <nav
         aria-label="Sections"
-        className="inline-flex max-w-full gap-1 overflow-x-auto rounded-xl border border-line bg-line/40 p-1"
+        className="flex gap-1 overflow-x-auto border-b border-line"
       >
         {BROWSE_TABS.map((t) => (
           <Link
             key={t.key}
             href={t.key === "market" ? "/browse" : `/browse?tab=${t.key}`}
             aria-current={tab === t.key ? "page" : undefined}
-            className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ${
-              tab === t.key
-                ? "bg-surface text-ink shadow-[0_1px_2px_rgba(28,25,23,0.08)]"
-                : "text-faint hover:text-ink"
+            className={`relative whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${
+              tab === t.key ? "text-ink" : "text-faint hover:text-ink"
             }`}
           >
             {t.label}
+            {tab === t.key && (
+              <span className="absolute inset-x-3 -bottom-px h-0.5 bg-accent" />
+            )}
           </Link>
         ))}
       </nav>

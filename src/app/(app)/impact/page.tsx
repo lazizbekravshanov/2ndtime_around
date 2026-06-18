@@ -51,9 +51,7 @@ export default async function ImpactPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-display text-3xl font-medium tracking-tight">
-        Campus impact
-      </h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Campus impact</h1>
       <p className="mt-1 text-sm text-faint">
         Every completed sale or donation is one less thing in a dumpster at
         move-out.
@@ -61,15 +59,15 @@ export default async function ImpactPage() {
 
       {/* Headline numbers — plain and honest, no chart library */}
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-line bg-surface p-5 shadow-card">
+        <div className="rounded-xl border border-line bg-surface p-5">
           <LeafIcon className="h-5 w-5 text-success" />
-          <p className="mt-3 font-display text-4xl font-medium tracking-tight">
+          <p className="mt-3 text-4xl font-semibold tracking-tight">
             {reusedAllTime}
           </p>
           <p className="text-sm text-faint">items kept out of landfills</p>
         </div>
-        <div className="rounded-xl border border-line bg-surface p-5 shadow-card">
-          <p className="font-display text-4xl font-medium tracking-tight">
+        <div className="rounded-xl border border-line bg-surface p-5">
+          <p className="text-4xl font-semibold tracking-tight">
             {reusedThisSemester}
           </p>
           <p className="text-sm text-faint">
@@ -77,8 +75,8 @@ export default async function ImpactPage() {
             <span className="block text-xs">vs {reusedAllTime} all time</span>
           </p>
         </div>
-        <div className="rounded-xl border border-line bg-surface p-5 shadow-card">
-          <p className="font-display text-4xl font-medium tracking-tight">
+        <div className="rounded-xl border border-line bg-surface p-5">
+          <p className="text-4xl font-semibold tracking-tight">
             {returnedCount}
           </p>
           <p className="text-sm text-faint">lost items back with owners</p>

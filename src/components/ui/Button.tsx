@@ -15,10 +15,8 @@ const sizes = {
 };
 
 const variants: Record<Variant, string> = {
-  // Primary carries a soft accent-tinted glow that deepens on hover — the one
-  // place depth and color combine to pull the eye to the main action.
-  primary:
-    "bg-accent text-white shadow-[0_2px_8px_rgba(224,1,34,0.18)] hover:bg-accent/90 hover:shadow-[0_4px_16px_rgba(224,1,34,0.28)]",
+  // The one accent: solid UC Red, calm darken on hover. No glow, no shadow.
+  primary: "bg-accent text-white hover:bg-accent/90",
   secondary:
     "border border-line bg-surface text-ink hover:bg-paper hover:border-faint/30",
   ghost: "text-faint hover:text-ink hover:bg-line/50",

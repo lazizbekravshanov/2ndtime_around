@@ -48,7 +48,7 @@ export function FavoriteButton({
 
   const base =
     variant === "overlay"
-      ? "absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-surface/90 backdrop-blur transition-colors"
+      ? "absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-surface/90 transition-colors"
       : "inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-4 text-sm font-medium transition-colors hover:bg-paper";
 
   return (

@@ -94,7 +94,7 @@ function ToastRow({
 }) {
   const isError = toast.type === "error";
   return (
-    <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-surface py-2 pl-4 pr-2 text-sm font-medium shadow-card [animation:toast-in_0.25s_cubic-bezier(0.16,1,0.3,1)]">
+    <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-line bg-surface py-2 pl-4 pr-2 text-sm font-medium shadow-float [animation:toast-in_0.25s_cubic-bezier(0.16,1,0.3,1)]">
       {isError ? (
         <AlertIcon className="h-4 w-4 shrink-0 text-accent" />
       ) : (

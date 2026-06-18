@@ -154,23 +154,9 @@ export function Header({
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
 
-  // Frosted header that stays borderless at the top and separates (border +
-  // soft shadow) once the page scrolls — the Apple "material lifts off" cue.
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <>
-      <header
-        className={`sticky top-0 z-40 border-b bg-surface/80 backdrop-blur-lg transition-shadow duration-300 ${
-          scrolled ? "border-line shadow-card" : "border-transparent"
-        }`}
-      >
+      <header className="sticky top-0 z-40 border-b border-line bg-surface">
         <div className="mx-auto flex h-14 max-w-[1100px] items-center justify-between gap-4 px-4">
           <Link
             href="/browse"
@@ -246,7 +232,7 @@ export function Header({
       {/* Mobile: bottom tab bar — primary user is on a phone between classes */}
       <nav
         aria-label="Main mobile"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/80 backdrop-blur-lg md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface md:hidden"
       >
         <div className="grid grid-cols-4">
           {MOBILE_NAV.map(({ href, label, icon: Icon }) => {
