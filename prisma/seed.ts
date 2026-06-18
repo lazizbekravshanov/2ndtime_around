@@ -819,6 +819,99 @@ async function main() {
     },
   });
 
+  // ---- Completed-exchange backlog (campus-impact history) ----
+  // A realistic history of past sales and donations so the impact numbers read
+  // like a marketplace that's been running, not one seeded yesterday. These are
+  // all completed (SOLD/given), so they never show on Browse — they only feed
+  // the impact counters.
+  const owners = [maya, jordan, sam, priya, devon];
+  const soldGoods: [string, number, string][] = [
+    ["Intro Bio textbook", 42, "Textbooks & Course Materials"],
+    ["Statistics textbook (4th ed)", 35, "Textbooks & Course Materials"],
+    ["Textbook bundle (3 courses)", 60, "Textbooks & Course Materials"],
+    ["Dorm futon, charcoal", 70, "Furniture"],
+    ["Desk + chair set", 60, "Furniture"],
+    ["Bookshelf, 3-tier", 25, "Furniture"],
+    ["Mini fridge, 2.6 cu ft", 55, "Dorm & Apartment Essentials"],
+    ["Microwave, 0.7 cu ft", 30, "Dorm & Apartment Essentials"],
+    ["Brita pitcher + filters", 12, "Dorm & Apartment Essentials"],
+    ["Adjustable desk lamp", 14, "Dorm & Apartment Essentials"],
+    ["Standing fan", 18, "Dorm & Apartment Essentials"],
+    ["Area rug, 5x7", 28, "Dorm & Apartment Essentials"],
+    ["Coffee maker", 16, "Dorm & Apartment Essentials"],
+    ["Full-length mirror", 22, "Dorm & Apartment Essentials"],
+    ["TI-84 Plus CE", 65, "Electronics"],
+    ['24" monitor, 1080p', 110, "Electronics"],
+    ["Mechanical keyboard", 45, "Electronics"],
+    ["Bluetooth speaker", 22, "Electronics"],
+    ["Wireless mouse", 10, "Electronics"],
+    ["iPad (6th gen)", 150, "Electronics"],
+    ["Nintendo Switch", 170, "Electronics"],
+    ["Bearcats hoodie, M", 20, "Clothing & Accessories"],
+    ["Winter coat, women's S", 35, "Clothing & Accessories"],
+    ["Rain jacket, L", 18, "Clothing & Accessories"],
+    ["Hydro Flask, 32oz", 15, "Clothing & Accessories"],
+    ["Road bike, 54cm", 160, "Bikes & Transit"],
+    ["U-lock + lights", 20, "Bikes & Transit"],
+    ["Skateboard", 30, "Bikes & Transit"],
+    ["Acoustic guitar + case", 120, "Music & Instruments"],
+    ["Keyboard stand", 18, "Music & Instruments"],
+    ["Drawing tablet", 90, "Art & Design Supplies"],
+    ["Copic marker set (24)", 40, "Art & Design Supplies"],
+    ["Bearcats game tickets (2)", 50, "Tickets & Events"],
+    ["Concert tickets (2)", 45, "Tickets & Events"],
+  ];
+  const givenGoods: [string, string][] = [
+    ["Moving boxes (10, flattened)", "Dorm & Apartment Essentials"],
+    ["Packing paper + bubble wrap", "Dorm & Apartment Essentials"],
+    ["Closet organizer", "Dorm & Apartment Essentials"],
+    ["30 clothes hangers", "Dorm & Apartment Essentials"],
+    ["String lights (2 sets)", "Dorm & Apartment Essentials"],
+    ["Throw blanket", "Dorm & Apartment Essentials"],
+    ["Shower caddy", "Dorm & Apartment Essentials"],
+    ["Desk plant (pothos)", "Other"],
+    ["Intro psych study guides", "Textbooks & Course Materials"],
+    ["Spare phone cases", "Electronics"],
+    ["Charging cables (3)", "Electronics"],
+    ["Notebooks + pens", "Art & Design Supplies"],
+    ["Ramen + snacks (sealed)", "Other"],
+    ["Reusable water bottle", "Clothing & Accessories"],
+  ];
+  const conditions = ["Good", "Like new", "Fair", "New"];
+  await Promise.all([
+    ...soldGoods.map(([title, price, category], i) =>
+      L({
+        type: "SELL",
+        title,
+        price,
+        category,
+        condition: conditions[i % conditions.length],
+        description: `${title} — sold to a fellow Bearcat.`,
+        photos: [],
+        ownerId: owners[i % owners.length].id,
+        status: "SOLD",
+        createdAt: daysAgo(40 + i),
+        updatedAt: daysAgo(34 + i),
+        viewCount: 18 + i,
+      })
+    ),
+    ...givenGoods.map(([title, category], i) =>
+      L({
+        type: "DONATE",
+        title,
+        category,
+        condition: "Good",
+        description: `${title} — given away free to another student.`,
+        photos: [],
+        ownerId: owners[(i + 2) % owners.length].id,
+        status: "SOLD",
+        createdAt: daysAgo(28 + i),
+        updatedAt: daysAgo(24 + i),
+        viewCount: 9 + i,
+      })
+    ),
+  ]);
+
   const counts = {
     users: await db.user.count(),
     listings: await db.listing.count(),
