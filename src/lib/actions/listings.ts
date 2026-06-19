@@ -9,6 +9,9 @@ import { notify } from "@/lib/notify";
 import { matchSavedSearches } from "@/lib/savedSearchMatch";
 import { blockedUserIds } from "@/lib/actions/safety";
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const DAILY_LISTING_LIMIT = 10;
+
 export type ActionResult<T = undefined> =
   | (T extends undefined ? { ok: true } : { ok: true; data: T })
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
@@ -35,6 +38,29 @@ export async function createListing(
       ok: false,
       error: "Check the highlighted fields.",
       fieldErrors: zodFieldErrors(parsed.error),
+    };
+  }
+
+  // Anti-spam: at most 10 self-serve listings per rolling 24h. Bulk move-out
+  // posts go through createMoveoutBatch (tagged with moveoutBatchId) and are
+  // intentionally excluded from this cap.
+  const since = new Date(Date.now() - DAY_MS);
+  const recent = await db.listing.findMany({
+    where: {
+      ownerId: user.id,
+      moveoutBatchId: null,
+      status: { not: "DELETED" },
+      createdAt: { gte: since },
+    },
+    orderBy: { createdAt: "asc" },
+    select: { createdAt: true },
+  });
+  if (recent.length >= DAILY_LISTING_LIMIT) {
+    const freesUpAt = recent[0].createdAt.getTime() + DAY_MS;
+    const hours = Math.max(1, Math.ceil((freesUpAt - Date.now()) / (60 * 60 * 1000)));
+    return {
+      ok: false,
+      error: `You've posted a lot today! You can post again in about ${hours} hour${hours === 1 ? "" : "s"}.`,
     };
   }
 

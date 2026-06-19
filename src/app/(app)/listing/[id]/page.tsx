@@ -33,8 +33,27 @@ export default async function ListingPage({
   if (!listing || listing.status === "DELETED") notFound();
 
   const isOwner = listing.ownerId === user.id;
-  // Drafts are private to their owner.
-  if (listing.status === "DRAFT" && !isOwner) notFound();
+  // Only ACTIVE listings are publicly reachable by URL. The owner can still
+  // open their own draft / sold / resolved listings; everyone else hits a
+  // friendly dead end instead of the full page.
+  if (!isOwner && listing.status !== "ACTIVE") {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20 text-center">
+        <h1 className="text-xl font-semibold tracking-tight">
+          This listing is no longer available.
+        </h1>
+        <p className="mt-2 text-sm text-faint">
+          It may have been sold, claimed, or taken down.
+        </p>
+        <Link
+          href="/browse"
+          className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+        >
+          <ChevronLeftIcon className="h-4 w-4" /> Back to browse
+        </Link>
+      </div>
+    );
+  }
 
   // Count the view (not the owner's own visits) — fire and forget.
   if (!isOwner) {

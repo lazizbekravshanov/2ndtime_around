@@ -93,14 +93,17 @@ export function PhotoUploader({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept="image/jpeg,image/png,image/webp"
         multiple
         className="sr-only"
         aria-label="Choose photos"
         onChange={(e) => handleFiles(e.target.files)}
       />
       <p className="mt-2 text-xs text-faint">
-        Up to {MAX_PHOTOS} photos, 5 MB each. The first one is the cover.
+        Up to {MAX_PHOTOS} photos. The first one is the cover.
+      </p>
+      <p className="mt-1 text-xs text-faint">
+        Accepted formats: JPG, PNG, WEBP · Max 5 MB per photo
       </p>
       {error && (
         <p role="alert" className="mt-1 text-sm text-accent">

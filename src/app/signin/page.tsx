@@ -143,6 +143,11 @@ export default function SignInPage() {
           {pending ? "Signing in…" : "Sign in"}
         </Button>
       </form>
+
+      <p className="mt-8 max-w-sm text-center text-xs text-faint">
+        UC students only. Only UC email addresses (@uc.edu or @mail.uc.edu) are
+        permitted.
+      </p>
     </main>
   );
 }

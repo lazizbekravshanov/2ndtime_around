@@ -77,12 +77,20 @@ export function buildListingWhere(
   }
 
   if (params.q) {
-    const match = likeFilter(params.q);
-    where.OR = [
-      { title: match },
-      { description: match },
-      { category: match },
-    ] as Prisma.ListingWhereInput[];
+    // Tokenize so multi-word queries match regardless of order or adjacency:
+    // every token must appear in the title, description, or category. A single
+    // token still does a case-insensitive substring match (so "calc" finds
+    // "Calculus…" and "headph" finds "…headphones"), but "early calc" now also
+    // matches "Calculus: Early Transcendentals". Capped to bound query size.
+    const tokens = params.q.trim().split(/\s+/).filter(Boolean).slice(0, 6);
+    if (tokens.length > 0) {
+      where.AND = tokens.map((t) => {
+        const match = likeFilter(t);
+        return {
+          OR: [{ title: match }, { description: match }, { category: match }],
+        };
+      }) as Prisma.ListingWhereInput[];
+    }
   }
 
   if (

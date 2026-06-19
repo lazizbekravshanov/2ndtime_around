@@ -39,8 +39,8 @@ export const listingSchema = z
     condition: z.enum(CONDITIONS).optional(),
     price: z
       .number()
-      .min(0, "Price can't be negative.")
-      .max(10000, "Price must be under $10,000.")
+      .min(0.5, "Price must be between $0.50 and $9,999.")
+      .max(9999.99, "Price must be between $0.50 and $9,999.")
       .optional(),
     locationNote: z
       .string()
@@ -109,7 +109,11 @@ export const moveoutItemSchema = z
     category: z.enum(CATEGORIES),
     condition: z.enum(CONDITIONS).optional(),
     free: z.boolean().default(false),
-    price: z.number().min(0).max(10000).optional(),
+    price: z
+      .number()
+      .min(0.5, "Price must be between $0.50 and $9,999.")
+      .max(9999.99, "Price must be between $0.50 and $9,999.")
+      .optional(),
     photos: z.array(z.string().min(1)).max(MAX_PHOTOS).default([]),
   })
   .superRefine((data, ctx) => {

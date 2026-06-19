@@ -3,9 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { inputClasses } from "@/components/ui/Field";
-import { CalendarIcon, CheckIcon, PinIcon, ShareIcon } from "@/components/icons";
+import {
+  AlertIcon,
+  CalendarIcon,
+  CheckIcon,
+  PinIcon,
+  ShareIcon,
+} from "@/components/icons";
 import { MEETUP_SPOTS, type ListingType } from "@/lib/constants";
 import { meetupTime } from "@/lib/format";
+import { hasContactOrPaymentRisk } from "@/lib/safetyScan";
 import {
   proposeMeetup,
   respondToClaim,
@@ -481,6 +488,22 @@ export function Thread({
           }
           return (
             <div key={m.id} className="space-y-0.5">
+              {hasContactOrPaymentRisk(m.body) && (
+                <div
+                  className={`flex ${mine ? "justify-end" : "justify-start"}`}
+                >
+                  <p
+                    role="note"
+                    className="flex max-w-[80%] items-start gap-1.5 rounded-lg border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+                  >
+                    <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span>
+                      This message contains an external link or contact info.
+                      Never send payment before meeting in person.
+                    </span>
+                  </p>
+                </div>
+              )}
               <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[75%] px-3.5 py-2 text-sm ${

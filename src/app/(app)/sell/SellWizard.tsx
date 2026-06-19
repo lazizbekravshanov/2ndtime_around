@@ -53,8 +53,8 @@ function makeDetailsSchema(type: ListingType) {
       type === "SELL"
         ? z
             .number({ message: "A sale listing needs a price." })
-            .min(0, "Price can't be negative.")
-            .max(10000, "Price must be under $10,000.")
+            .min(0.5, "Price must be between $0.50 and $9,999.")
+            .max(9999.99, "Price must be between $0.50 and $9,999.")
         : z.number().optional(),
     locationNote:
       type === "LOST" || type === "FOUND"
@@ -186,9 +186,18 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
               </button>
             ))}
           </div>
+          {/* A distinct workflow, not another listing type — set it apart with
+              a labeled divider and a quieter outlined card. */}
+          <div className="mt-6 flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-line" />
+            <span className="text-xs font-medium uppercase tracking-[0.12em] text-faint">
+              Bulk option
+            </span>
+            <span className="h-px flex-1 bg-line" />
+          </div>
           <Link
             href="/sell/moveout"
-            className="mt-4 block rounded-xl border border-dashed border-line p-4 text-left transition-colors hover:border-faint"
+            className="mt-4 block rounded-xl border border-dashed border-faint/50 bg-paper/40 p-4 text-left transition-colors hover:border-faint"
           >
             <span className="block text-sm font-semibold">
               Moving out? Post in bulk →

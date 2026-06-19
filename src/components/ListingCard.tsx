@@ -71,9 +71,11 @@ export function ListingCard({
 
       <div className="space-y-1 p-3">
         <div className="flex items-baseline justify-between gap-2">
-          <h3 className="truncate text-sm font-medium">{listing.title}</h3>
+          <h3 className="min-w-0 flex-1 truncate text-sm font-medium">
+            {listing.title}
+          </h3>
           {listing.type === "SELL" && listing.price !== null && (
-            <span className="shrink-0 text-sm font-semibold">
+            <span className="shrink-0 whitespace-nowrap text-sm font-semibold">
               {formatPrice(listing.price)}
             </span>
           )}
