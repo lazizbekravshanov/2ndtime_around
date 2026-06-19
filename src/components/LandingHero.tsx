@@ -27,7 +27,7 @@ export function LandingHero() {
 
       <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-[1100px] flex-col justify-center px-4 py-16 sm:min-h-[78vh] sm:py-24">
         <div className="max-w-2xl">
-          <h1 className="font-display text-[2.5rem] font-medium leading-[1.04] tracking-[-0.02em] sm:text-6xl">
+          <h1 className="text-[2.5rem] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-6xl">
             Everything students need,
             <br className="hidden sm:block" /> second time around.
           </h1>

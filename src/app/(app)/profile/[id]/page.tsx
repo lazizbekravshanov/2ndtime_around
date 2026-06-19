@@ -68,7 +68,7 @@ export default async function ProfilePage({
             {profile.displayName.charAt(0)}
           </span>
           <div>
-            <h1 className="font-display text-3xl font-medium tracking-tight">
+            <h1 className="text-2xl font-semibold tracking-tight">
               {profile.displayName}
               {isSelf && (
                 <span className="ml-2 font-sans text-sm font-normal text-faint">
@@ -138,7 +138,7 @@ export default async function ProfilePage({
             {ratings.map((r) => (
               <li
                 key={r.id}
-                className="rounded-xl border border-line bg-surface p-4 shadow-card"
+                className="rounded-xl border border-line bg-surface p-4"
               >
                 <div className="flex items-center justify-between gap-3">
                   <StarRating value={r.stars} />

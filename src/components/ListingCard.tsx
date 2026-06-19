@@ -34,7 +34,7 @@ export function ListingCard({
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group relative overflow-hidden rounded-xl border border-line bg-surface shadow-card transition-[transform,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-faint/40 hover:shadow-card-hover"
+      className="group relative overflow-hidden rounded-xl border border-line bg-surface transition-colors duration-200 hover:border-faint/40"
     >
       {favorited !== undefined && (
         <FavoriteButton listingId={listing.id} initial={favorited} />
@@ -47,7 +47,7 @@ export function ListingCard({
           <img
             src={photos[0]}
             alt=""
-            className="h-full w-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-faint">

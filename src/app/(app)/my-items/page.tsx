@@ -58,7 +58,7 @@ export default async function MyItemsPage({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-display text-3xl font-medium tracking-tight">My items</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">My items</h1>
 
       <nav aria-label="Item status" className="mt-4 flex gap-1 border-b border-line">
         {TABS.map((t) => (

@@ -74,7 +74,7 @@ function MeetupCard({
   }
 
   return (
-    <div className="mx-auto w-full max-w-sm rounded-xl border border-line bg-surface p-4 shadow-card">
+    <div className="mx-auto w-full max-w-sm rounded-xl border border-line bg-surface p-4">
       <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-faint">
         <PinIcon className="h-3.5 w-3.5 text-accent" />
         Meetup proposal
@@ -161,7 +161,7 @@ function ClaimCard({
   const status = String(message.meta?.status ?? "PENDING");
 
   return (
-    <div className="mx-auto w-full max-w-sm rounded-xl border border-line bg-surface p-4 shadow-card">
+    <div className="mx-auto w-full max-w-sm rounded-xl border border-line bg-surface p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-faint">
         Ownership claim
       </p>
@@ -486,7 +486,7 @@ export function Thread({
                   className={`max-w-[75%] px-3.5 py-2 text-sm ${
                     mine
                       ? "rounded-2xl rounded-br-md bg-ink text-white"
-                      : "rounded-2xl rounded-bl-md border border-line bg-surface shadow-card"
+                      : "rounded-2xl rounded-bl-md border border-line bg-surface"
                   } ${m.id.startsWith("tmp-") ? "opacity-60" : ""}`}
                 >
                   <p className="whitespace-pre-line break-words">{m.body}</p>
