@@ -8,12 +8,15 @@ import { useToast } from "@/components/ui/Toast";
 import { reportListing, reportUser } from "@/lib/actions/safety";
 
 const REASONS = [
-  { value: "SPAM", label: "Spam or fake listing" },
-  { value: "PROHIBITED", label: "Prohibited item" },
-  { value: "HARASSMENT", label: "Harassment" },
   { value: "SCAM", label: "Scam or fraud" },
-  { value: "OTHER", label: "Something else" },
+  { value: "PROHIBITED", label: "Prohibited item" },
+  { value: "SPAM", label: "Spam or duplicate" },
+  { value: "INAPPROPRIATE", label: "Inappropriate content" },
+  { value: "HARASSMENT", label: "Harassment or abuse" },
+  { value: "OTHER", label: "Other" },
 ] as const;
+
+const DETAIL_MAX = 300;
 
 export type ReportTarget =
   | { kind: "listing"; listingId: string }
@@ -47,7 +50,7 @@ export function ReportSheet({
       setReason("");
       setDetail("");
       onClose();
-      toast("Thanks — our team will take a look");
+      toast("Report submitted. We'll review it shortly.");
     });
   }
 
@@ -81,11 +84,18 @@ export function ReportSheet({
       <textarea
         rows={3}
         value={detail}
-        onChange={(e) => setDetail(e.target.value)}
-        maxLength={500}
-        placeholder="Add any detail (optional)"
+        onChange={(e) => setDetail(e.target.value.slice(0, DETAIL_MAX))}
+        maxLength={DETAIL_MAX}
+        placeholder={
+          reason === "OTHER"
+            ? "Tell us what's wrong"
+            : "Add any detail (optional)"
+        }
         className={`${textareaClasses} mt-3`}
       />
+      <p className="mt-1 text-right text-xs text-faint">
+        {detail.length}/{DETAIL_MAX}
+      </p>
       <Button
         onClick={submit}
         disabled={!reason || pending}

@@ -21,6 +21,7 @@ export function ListingMenu({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [reportUserOpen, setReportUserOpen] = useState(false);
   const [confirmingBlock, setConfirmingBlock] = useState(false);
   const [pending, startTransition] = useTransition();
   const toast = useToast();
@@ -45,7 +46,11 @@ export function ListingMenu({
 
   return (
     <>
-      <IconButton aria-label="More options" onClick={() => setMenuOpen(true)}>
+      <IconButton
+        aria-label="More options"
+        title="More options"
+        onClick={() => setMenuOpen(true)}
+      >
         <DotsIcon className="h-5 w-5" />
       </IconButton>
 
@@ -61,6 +66,17 @@ export function ListingMenu({
           >
             <FlagIcon className="h-5 w-5 text-faint" />
             Report this listing
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              closeMenu();
+              setReportUserOpen(true);
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm hover:bg-paper"
+          >
+            <FlagIcon className="h-5 w-5 text-faint" />
+            Report {ownerName}
           </button>
           {confirmingBlock ? (
             // Blocking severs every conversation with this person, so confirm
@@ -105,6 +121,11 @@ export function ListingMenu({
         open={reportOpen}
         onClose={() => setReportOpen(false)}
         target={{ kind: "listing", listingId }}
+      />
+      <ReportSheet
+        open={reportUserOpen}
+        onClose={() => setReportUserOpen(false)}
+        target={{ kind: "user", userId: ownerId }}
       />
     </>
   );

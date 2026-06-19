@@ -6,11 +6,18 @@ import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import type { ActionResult } from "@/lib/actions/listings";
 
-const REASONS = ["SPAM", "PROHIBITED", "HARASSMENT", "SCAM", "OTHER"] as const;
+const REASONS = [
+  "SCAM",
+  "PROHIBITED",
+  "SPAM",
+  "INAPPROPRIATE",
+  "HARASSMENT",
+  "OTHER",
+] as const;
 
 const reportSchema = z.object({
   reason: z.enum(REASONS),
-  detail: z.string().trim().max(500).optional(),
+  detail: z.string().trim().max(300).optional(),
 });
 
 /** True if either user has blocked the other. Used to gate conversations. */
@@ -61,7 +68,9 @@ export async function reportListing(input: unknown): Promise<ActionResult> {
     where: { reporterId: user.id, listingId: listing.id, status: "OPEN" },
     select: { id: true },
   });
-  if (existing) return { ok: true };
+  if (existing) {
+    return { ok: false, error: "You've already reported this listing." };
+  }
 
   await db.report.create({
     data: {
@@ -93,7 +102,9 @@ export async function reportUser(input: unknown): Promise<ActionResult> {
     },
     select: { id: true },
   });
-  if (existing) return { ok: true };
+  if (existing) {
+    return { ok: false, error: "You've already reported this user." };
+  }
 
   await db.report.create({
     data: {

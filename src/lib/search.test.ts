@@ -56,10 +56,16 @@ describe("buildListingWhere", () => {
   it("ignores an invalid category", () => {
     expect(buildListingWhere({ tab: "market", category: "nope" }).category).toBeUndefined();
   });
-  it("builds a 3-field text OR on q", () => {
+  it("builds a token AND of 3-field ORs on q", () => {
     const w = buildListingWhere({ tab: "market", q: "lamp" });
-    expect(Array.isArray(w.OR)).toBe(true);
-    expect(w.OR).toHaveLength(3);
+    expect(Array.isArray(w.AND)).toBe(true);
+    expect(w.AND).toHaveLength(1);
+    const first = (w.AND as { OR: unknown[] }[])[0];
+    expect(first.OR).toHaveLength(3);
+  });
+  it("requires every token to match (multi-word)", () => {
+    const w = buildListingWhere({ tab: "market", q: "early calc" });
+    expect(w.AND).toHaveLength(2);
   });
   it("applies a price range on market", () => {
     expect(buildListingWhere({ tab: "market", min: "10", max: "50" }).price).toEqual({

@@ -14,19 +14,11 @@ import {
   PlusIcon,
 } from "@/components/icons";
 import { buttonClasses } from "@/components/ui/Button";
+import { Sheet } from "@/components/ui/Sheet";
 
 const NAV = [
   { href: "/browse", label: "Browse", icon: GridIcon },
   { href: "/messages", label: "Messages", icon: ChatIcon },
-  { href: "/my-items", label: "My items", icon: BoxIcon },
-];
-
-// Mobile bottom bar: Notifications joins the primary nav so its unread state
-// is visible without opening the account menu (it was previously buried there).
-const MOBILE_NAV = [
-  { href: "/browse", label: "Browse", icon: GridIcon },
-  { href: "/messages", label: "Messages", icon: ChatIcon },
-  { href: "/notifications", label: "Alerts", icon: BellIcon },
   { href: "/my-items", label: "My items", icon: BoxIcon },
 ];
 
@@ -153,6 +145,20 @@ export function Header({
   const pathname = usePathname();
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  // Close the mobile account sheet whenever the route changes.
+  useEffect(() => {
+    setAccountOpen(false);
+  }, [pathname]);
+
+  const accountLinks = [
+    { href: `/profile/${userId}`, label: "My profile" },
+    { href: "/saved", label: "Saved" },
+    { href: "/notifications", label: "Notifications", badge: notifCount },
+    { href: "/impact", label: "Campus impact" },
+    ...(isModerator ? [{ href: "/moderation", label: "Moderation" }] : []),
+  ];
 
   return (
     <>
@@ -229,38 +235,132 @@ export function Header({
         </div>
       </header>
 
-      {/* Mobile: bottom tab bar — primary user is on a phone between classes */}
+      {/* Mobile: bottom tab bar — primary user is on a phone between classes.
+          Browse · Messages · Post (center CTA) · My items · Account. */}
       <nav
         aria-label="Main mobile"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
       >
-        <div className="grid grid-cols-4">
-          {MOBILE_NAV.map(({ href, label, icon: Icon }) => {
-            const dot =
-              (href === "/messages" && unreadCount > 0) ||
-              (href === "/notifications" && notifCount > 0);
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={isActive(href) ? "page" : undefined}
-                className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${
-                  isActive(href) ? "text-accent" : "text-faint"
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                {label}
-                {dot && (
-                  <span
-                    className="absolute right-[calc(50%-16px)] top-1.5 h-2 w-2 rounded-full bg-accent"
-                    aria-hidden="true"
-                  />
-                )}
-              </Link>
-            );
-          })}
+        <div className="grid grid-cols-5 items-end">
+          <MobileTab
+            href="/browse"
+            label="Browse"
+            icon={GridIcon}
+            active={isActive("/browse")}
+          />
+          <MobileTab
+            href="/messages"
+            label="Messages"
+            icon={ChatIcon}
+            active={isActive("/messages")}
+            count={unreadCount}
+          />
+
+          {/* Center Post CTA — the one accent action. */}
+          <Link
+            href="/sell"
+            aria-label="Post an item"
+            className="flex flex-col items-center gap-0.5 py-1.5 text-[11px] font-medium text-ink"
+          >
+            <span className="flex h-9 w-12 items-center justify-center rounded-full bg-accent text-white">
+              <PlusIcon className="h-5 w-5" />
+            </span>
+            Post
+          </Link>
+
+          <MobileTab
+            href="/my-items"
+            label="My items"
+            icon={BoxIcon}
+            active={isActive("/my-items")}
+          />
+
+          {/* Account opens a sheet with profile / saved / notifications / etc. */}
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded={accountOpen}
+            onClick={() => setAccountOpen(true)}
+            className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${
+              accountOpen ? "text-accent" : "text-faint"
+            }`}
+          >
+            <span className="flex h-5 w-5 items-center justify-center rounded-full border border-current text-[10px] font-semibold uppercase">
+              {displayName.charAt(0)}
+            </span>
+            Account
+            {notifCount > 0 && (
+              <span
+                className="absolute right-[calc(50%-16px)] top-1.5 h-2 w-2 rounded-full bg-accent"
+                aria-hidden="true"
+              />
+            )}
+          </button>
         </div>
       </nav>
+
+      <Sheet open={accountOpen} onClose={() => setAccountOpen(false)} title="Account">
+        <div className="space-y-1">
+          {accountLinks.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              onClick={() => setAccountOpen(false)}
+              className="flex items-center justify-between rounded-lg px-3 py-3 text-sm hover:bg-paper"
+            >
+              {l.label}
+              {"badge" in l && (l.badge ?? 0) > 0 && (
+                <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-medium text-white">
+                  {l.badge}
+                </span>
+              )}
+            </Link>
+          ))}
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex w-full items-center rounded-lg px-3 py-3 text-left text-sm hover:bg-paper"
+          >
+            Sign out
+          </button>
+        </div>
+      </Sheet>
     </>
+  );
+}
+
+// 5th-of-a-row bottom tab: icon + label, with an optional unread count badge.
+function MobileTab({
+  href,
+  label,
+  icon: Icon,
+  active,
+  count,
+}: {
+  href: string;
+  label: string;
+  icon: (props: { className?: string }) => React.ReactNode;
+  active: boolean;
+  count?: number;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${
+        active ? "text-accent" : "text-faint"
+      }`}
+    >
+      <Icon className="h-5 w-5" />
+      {label}
+      {count !== undefined && count > 0 && (
+        <span
+          className="absolute right-[calc(50%-18px)] top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-white"
+          aria-label={`${count} unread`}
+        >
+          {count > 9 ? "9+" : count}
+        </span>
+      )}
+    </Link>
   );
 }

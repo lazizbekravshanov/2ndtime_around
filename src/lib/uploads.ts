@@ -12,17 +12,12 @@ export interface UploadService {
   save(file: File): Promise<string>;
 }
 
-const ALLOWED_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]);
+const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB per photo
 
 function validateAndName(file: File): string {
   if (!ALLOWED_TYPES.has(file.type)) {
-    throw new Error("Only JPEG, PNG, WebP, or GIF images are allowed.");
+    throw new Error("Only JPG, PNG, or WEBP images are allowed.");
   }
   if (file.size > MAX_BYTES) {
     throw new Error("Each photo must be under 5 MB.");

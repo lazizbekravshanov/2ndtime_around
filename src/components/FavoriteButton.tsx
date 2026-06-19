@@ -34,9 +34,10 @@ export function FavoriteButton({
         return;
       }
       setFavorited(res.data.favorited);
-      toast(res.data.favorited ? "Saved" : "Removed", {
-        action: { label: "Undo", onClick: doToggle },
-      });
+      toast(
+        res.data.favorited ? "Saved to your wishlist" : "Removed from saved",
+        { duration: 2500, action: { label: "Undo", onClick: doToggle } }
+      );
     });
   }
 

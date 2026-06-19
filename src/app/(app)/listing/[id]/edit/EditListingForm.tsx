@@ -68,7 +68,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
         .max(2000, "Keep the description under 2000 characters."),
       category: z.string().min(1, "Pick a category."),
       condition: z.string().optional(),
-      price: z.number().min(0, "Price can't be negative.").max(10000, "Price must be under $10,000.").optional(),
+      price: z.number().min(0.5, "Price must be between $0.50 and $9,999.").max(9999.99, "Price must be between $0.50 and $9,999.").optional(),
       locationNote: z.string().optional(),
     })
     .superRefine((val, ctx) => {

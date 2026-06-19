@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { z } from "zod";
-import { DEMO_ACCOUNTS } from "@/lib/constants";
+import { DEMO_ACCOUNTS, isUcEmail } from "@/lib/constants";
 import { db } from "@/lib/db";
 
 const bodySchema = z.object({
@@ -36,6 +36,17 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Pick an account and enter the demo password." },
       { status: 400 }
+    );
+  }
+  // UC-only marketplace: reject any non-UC domain up front, the same gate the
+  // magic-link flow enforces in the NextAuth signIn callback.
+  if (!isUcEmail(parsed.data.email)) {
+    return NextResponse.json(
+      {
+        error:
+          "Only UC email addresses (@uc.edu or @mail.uc.edu) are permitted.",
+      },
+      { status: 403 }
     );
   }
   // Only the published personas may sign in this way — never an arbitrary

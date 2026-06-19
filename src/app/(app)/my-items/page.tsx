@@ -152,6 +152,7 @@ export default async function MyItemsPage({
                 </div>
                 <ItemRowActions
                   listingId={l.id}
+                  title={l.title}
                   type={type}
                   status={l.status}
                 />
