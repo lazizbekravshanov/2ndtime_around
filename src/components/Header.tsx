@@ -106,14 +106,24 @@ function UserMenu({
             Campus impact
           </Link>
           {isModerator && (
-            <Link
-              role="menuitem"
-              href="/moderation"
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm hover:bg-paper"
-            >
-              Moderation
-            </Link>
+            <>
+              <Link
+                role="menuitem"
+                href="/funnel"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm hover:bg-paper"
+              >
+                Funnel
+              </Link>
+              <Link
+                role="menuitem"
+                href="/moderation"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm hover:bg-paper"
+              >
+                Moderation
+              </Link>
+            </>
           )}
           <button
             role="menuitem"
@@ -157,7 +167,12 @@ export function Header({
     { href: "/saved", label: "Saved" },
     { href: "/notifications", label: "Notifications", badge: notifCount },
     { href: "/impact", label: "Campus impact" },
-    ...(isModerator ? [{ href: "/moderation", label: "Moderation" }] : []),
+    ...(isModerator
+      ? [
+          { href: "/funnel", label: "Funnel" },
+          { href: "/moderation", label: "Moderation" },
+        ]
+      : []),
   ];
 
   return (

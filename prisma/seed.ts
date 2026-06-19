@@ -15,6 +15,7 @@ const daysAgo = (n: number, hourOffset = 0) =>
 
 async function main() {
   // Wipe in dependency order — this is a demo database.
+  await db.searchEvent.deleteMany();
   await db.notification.deleteMany();
   await db.savedSearch.deleteMany();
   await db.favorite.deleteMany();
@@ -478,6 +479,7 @@ async function main() {
       createdAt: daysAgo(1),
       emailVerified: daysAgo(1),
       isModerator: true,
+      role: "MODERATOR",
     },
   });
 
@@ -912,6 +914,66 @@ async function main() {
     ),
   ]);
 
+  // Backfill completedAt for already-completed listings (= their updatedAt),
+  // so time-to-completion analytics have data out of the box.
+  const doneListings = await db.listing.findMany({
+    where: { status: { in: ["SOLD", "RESOLVED"] } },
+    select: { id: true, updatedAt: true },
+  });
+  await Promise.all(
+    doneListings.map((l) =>
+      db.listing.update({
+        where: { id: l.id },
+        data: { completedAt: l.updatedAt },
+      })
+    )
+  );
+
+  // ================= Search analytics (powers /funnel) =================
+  // A realistic spread of searches over the last ~30 days: popular hits, a few
+  // unmet-demand zero-result queries, across tabs and (some) categories.
+  const searchers = [demo.id, maya.id, jordan.id, sam.id, priya.id, devon.id, null];
+  const searchSpecs: [string, string, string | null, number, number][] = [
+    // [query, tab, category, resultCount, timesRepeated]
+    ["calculus", "Marketplace", "Textbooks & Course Materials", 3, 14],
+    ["desk", "Marketplace", "Furniture", 5, 11],
+    ["mini fridge", "Marketplace", "Kitchen & Appliances", 2, 9],
+    ["headphones", "Marketplace", "Electronics", 4, 9],
+    ["bike", "Marketplace", "Bikes & Transit", 3, 8],
+    ["monitor", "Marketplace", "Electronics", 2, 7],
+    ["textbook", "Marketplace", "Textbooks & Course Materials", 6, 7],
+    ["futon", "Marketplace", "Furniture", 1, 6],
+    ["lamp", "Marketplace", null, 4, 5],
+    ["tickets", "Marketplace", "Tickets & Events", 2, 5],
+    ["winter coat", "Marketplace", "Clothing & Accessories", 1, 4],
+    ["plant", "Donations", null, 2, 4],
+    // Unmet demand — zero results (the valuable signal):
+    ["airpods pro", "Marketplace", "Electronics", 0, 12],
+    ["graphing calculator ti-nspire", "Marketplace", null, 0, 8],
+    ["standing desk", "Marketplace", "Furniture", 0, 7],
+    ["parking pass", "Marketplace", null, 0, 6],
+    ["mattress topper", "Marketplace", "Dorm & Apartment Essentials", 0, 5],
+    ["nintendo switch", "Marketplace", "Electronics", 0, 5],
+    ["lost airpods", "LostFound", null, 0, 4],
+    ["wanted: roommate futon", "Wanted", "Furniture", 0, 3],
+  ];
+  let searchSeq = 0;
+  const searchRows = searchSpecs.flatMap(([query, tab, category, resultCount, times]) =>
+    Array.from({ length: times }, () => {
+      const n = searchSeq++;
+      return {
+        query,
+        tab,
+        category,
+        resultCount,
+        userId: searchers[n % searchers.length],
+        // Spread across the last 30 days, weighted toward recent.
+        createdAt: daysAgo((n * 7) % 30, n % 24),
+      };
+    })
+  );
+  await db.searchEvent.createMany({ data: searchRows });
+
   const counts = {
     users: await db.user.count(),
     listings: await db.listing.count(),
@@ -922,6 +984,7 @@ async function main() {
     savedSearches: await db.savedSearch.count(),
     notifications: await db.notification.count(),
     reports: await db.report.count(),
+    searchEvents: await db.searchEvent.count(),
   };
   console.log("Seeded:", counts);
 }
