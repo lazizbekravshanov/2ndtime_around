@@ -913,6 +913,21 @@ async function main() {
     ),
   ]);
 
+  // Backfill completedAt for already-completed listings (= their updatedAt),
+  // so time-to-completion analytics have data out of the box.
+  const doneListings = await db.listing.findMany({
+    where: { status: { in: ["SOLD", "RESOLVED"] } },
+    select: { id: true, updatedAt: true },
+  });
+  await Promise.all(
+    doneListings.map((l) =>
+      db.listing.update({
+        where: { id: l.id },
+        data: { completedAt: l.updatedAt },
+      })
+    )
+  );
+
   // ================= Search analytics (powers /funnel) =================
   // A realistic spread of searches over the last ~30 days: popular hits, a few
   // unmet-demand zero-result queries, across tabs and (some) categories.

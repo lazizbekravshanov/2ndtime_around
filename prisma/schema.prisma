@@ -59,6 +59,9 @@ model Listing {
   viewCount    Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  // Set when the listing transitions to SOLD/RESOLVED — powers accurate
+  // time-to-completion analytics (updatedAt changes on any edit).
+  completedAt  DateTime?
   // Move-out mode groups bulk-posted items under one shareable batch id.
   moveoutBatchId String?
   // Last price we notified favoriters about, so a drop fires at most once per new low.
@@ -72,6 +75,7 @@ model Listing {
 
   @@index([type, status, category, createdAt])
   @@index([type, category, status]) // category-demand + funnel aggregates
+  @@index([status, completedAt]) // time-to-completion + completed-in-range
   @@index([ownerId])
   @@index([moveoutBatchId])
 }
@@ -92,6 +96,7 @@ model SearchEvent {
 
   @@index([createdAt])
   @@index([query])
+  @@index([resultCount]) // zero-result lookups
 }
 
 model Conversation {

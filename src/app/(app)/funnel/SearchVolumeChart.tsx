@@ -2,8 +2,10 @@
 
 import {
   Bar,
-  BarChart,
   CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -11,15 +13,14 @@ import {
 } from "recharts";
 import type { VolumePoint } from "@/lib/funnel";
 
-// Minimal, monochrome — UC Red is the only accent. Loaded only via the
-// code-split wrapper so Recharts stays out of the main bundle.
+// Raw daily searches (bars) + a 7-day moving average (line) to cut noise.
+// Minimal, monochrome — UC Red is the only accent. Code-split via the wrapper.
 export default function SearchVolumeChart({ data }: { data: VolumePoint[] }) {
-  // Show ~6 x-axis labels so 30 days stays legible.
-  const tickEvery = Math.ceil(data.length / 6);
+  const tickEvery = Math.max(1, Math.ceil(data.length / 6));
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+        <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
           <CartesianGrid stroke="#E7E5E4" vertical={false} />
           <XAxis
             dataKey="label"
@@ -45,8 +46,18 @@ export default function SearchVolumeChart({ data }: { data: VolumePoint[] }) {
             }}
             labelStyle={{ color: "#1C1817", fontWeight: 600 }}
           />
-          <Bar dataKey="count" fill="#E00122" radius={[2, 2, 0, 0]} name="Searches" />
-        </BarChart>
+          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Bar dataKey="count" name="Searches/day" fill="#D6D3D1" radius={[2, 2, 0, 0]} />
+          <Line
+            type="monotone"
+            dataKey="avg"
+            name="7-day avg"
+            stroke="#E00122"
+            strokeWidth={2}
+            dot={false}
+            connectNulls
+          />
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

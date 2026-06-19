@@ -213,11 +213,17 @@ export async function setListingStatus(input: unknown): Promise<ActionResult> {
   // "no longer available" blast every time the owner re-taps Mark as sold.
   if (listing.status === parsed.data.status) return { ok: true };
 
+  // Stamp completedAt on entering a completed state; clear it if reopened.
+  const enteringDone =
+    parsed.data.status === "SOLD" || parsed.data.status === "RESOLVED";
   // Compare-and-set on the prior status: if a concurrent action already moved
   // it, this matches zero rows and we skip the (now-stale) notification.
   const result = await db.listing.updateMany({
     where: { id: listing.id, status: listing.status },
-    data: { status: parsed.data.status },
+    data: {
+      status: parsed.data.status,
+      completedAt: enteringDone ? new Date() : null,
+    },
   });
   if (result.count === 0) return { ok: true };
 
