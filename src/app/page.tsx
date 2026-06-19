@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { HeroMapBackdrop } from "@/components/HeroMapBackdrop";
 import { LeafIcon, LogoMark } from "@/components/icons";
 import { ListingCard } from "@/components/ListingCard";
-import { LandingHero } from "@/components/LandingHero";
+import { buttonClasses } from "@/components/ui/Button";
 import { db } from "@/lib/db";
 import { formatPrice, photoList } from "@/lib/format";
 import { getImpactStats } from "@/lib/impact";
 import { getSessionUser } from "@/lib/session";
+
+const TRUST = ["UC-verified only", "No fees", "Safe campus meetups"];
 
 export default async function LandingPage() {
   // Signed-in students skip the pitch and land on Browse.
@@ -44,7 +47,49 @@ export default async function LandingPage() {
         </Link>
       </header>
 
-      <LandingHero />
+      <section className="relative isolate w-full overflow-hidden border-b border-line">
+        {/* 3D UC-campus map backdrop — lazy, client-only, code-split. */}
+        <HeroMapBackdrop />
+        {/* Flat near-white wash (no gradient) so text clears 4.5:1 over the map. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-[1] bg-paper/65"
+        />
+        {/* Server-rendered hero content — paints immediately, is the LCP element. */}
+        <div className="relative z-10 mx-auto flex min-h-[68vh] max-w-[1100px] flex-col justify-center px-4 py-16 sm:min-h-[80vh] sm:py-24">
+          <div className="max-w-2xl">
+            <h1 className="text-[2.5rem] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-6xl">
+              Everything students need,
+              <br className="hidden sm:block" /> second time around.
+            </h1>
+            <p className="mt-5 max-w-md text-base leading-relaxed text-faint sm:text-lg">
+              Buy, sell, donate, and recover lost items. UC students only, all
+              in one place.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link href="/signin" className={buttonClasses("primary", "lg")}>
+                Sign in with your UC email
+              </Link>
+              <Link
+                href="/browse"
+                className="text-sm font-medium text-faint underline-offset-4 transition-colors hover:text-ink hover:underline"
+              >
+                Browse the marketplace
+              </Link>
+            </div>
+            <ul className="mt-10 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-faint">
+              {TRUST.map((t, i) => (
+                <li key={t} className="flex items-center gap-3">
+                  {i > 0 && (
+                    <span aria-hidden="true" className="h-3 w-px bg-line" />
+                  )}
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
       <main className="mx-auto w-full max-w-[1100px] flex-1 px-4">
         {/* Live listing strip — real activity from campus. */}
