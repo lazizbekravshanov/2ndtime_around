@@ -492,7 +492,10 @@ function FunnelBars({
       {stages.map((s, i) => {
         const pctOfTop = Math.round((s.count / top) * 100);
         const prev = i > 0 ? stages[i - 1].count : null;
-        const dropoff = prev && prev > 0 ? Math.round(((prev - s.count) / prev) * 100) : null;
+        // Change vs the previous stage. Usually a drop ("−12%"); some later
+        // stages can exceed an earlier one (e.g. completions that never logged
+        // an in-app conversation), shown as a neutral "+N%".
+        const change = prev && prev > 0 ? Math.round(((prev - s.count) / prev) * 100) : null;
         const drillKey = i === 1 ? "viewed" : s.key; // "viewed" stage links to its list
         const href = hrefFor(range, catSort, `funnel:${drillKey}`);
         return (
@@ -503,7 +506,11 @@ function FunnelBars({
               </Link>
               <span className="tabular-nums">
                 {s.count.toLocaleString()}
-                {dropoff !== null && <span className="ml-2 text-xs text-faint">−{dropoff}%</span>}
+                {change !== null && (
+                  <span className="ml-2 text-xs text-faint">
+                    {change >= 0 ? `−${change}%` : `+${-change}%`}
+                  </span>
+                )}
               </span>
             </div>
             <div className="mt-1 h-3 overflow-hidden rounded-md bg-paper">

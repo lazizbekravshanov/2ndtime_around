@@ -108,6 +108,10 @@ ceremony.
 | --- | --- |
 | ![Impact page](docs/screenshots/impact.png) | |
 
+| Moderator analytics — Funnel | Demand index, funnel & marketplace health |
+| --- | --- |
+| ![Funnel dashboard](docs/screenshots/funnel.png) | ![Funnel demand & funnel detail](docs/screenshots/funnel-detail.png) |
+
 ## v1 → v2: what changed
 
 v2 keeps the same calm, one-accent look and adds eleven features across
