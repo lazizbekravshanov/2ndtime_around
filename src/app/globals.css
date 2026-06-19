@@ -110,21 +110,20 @@ body {
 }
 
 /*
- * Landing hero map (Leaflet). The map is a faint background texture, so the
- * container reads as paper before tiles load and the attribution stays small
- * and muted. The single UC-red pin is the only spot of color.
+ * Landing hero map (MapLibre GL + OpenFreeMap). The map is a faint 3D texture,
+ * so the attribution stays small and muted and the single UC-red pin is the
+ * only spot of color.
  */
-.leaflet-container {
-  background: var(--color-paper);
-  font-family: inherit;
+.maplibregl-map {
+  font: inherit;
 }
-.leaflet-control-attribution {
-  background: rgba(250, 250, 249, 0.6) !important;
-  color: var(--color-faint) !important;
-  font-size: 10px !important;
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: rgba(250, 250, 249, 0.7);
 }
-.leaflet-control-attribution a {
-  color: var(--color-faint) !important;
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib a {
+  color: var(--color-faint);
+  font-size: 10px;
 }
 .hero-pin {
   display: block;
