@@ -21,9 +21,13 @@ model User {
   year          String?
   createdAt     DateTime  @default(now())
   isModerator   Boolean   @default(false) // gates the moderation queue
+  // Role is a String (not a native Prisma enum) so the schema still works on
+  // SQLite locally — Prisma enums are Postgres-only. Values: USER | MODERATOR.
+  role          String    @default("USER")
   emailOptOut   Boolean   @default(false) // single opt-out for activity emails
 
   listings        Listing[]
+  searchEvents    SearchEvent[]
   messages        Message[]
   startedThreads  Conversation[] @relation("ConversationStarter")
   ratingsGiven    Rating[]  @relation("RatingsGiven")
@@ -67,8 +71,27 @@ model Listing {
   reports       Report[]
 
   @@index([type, status, category, createdAt])
+  @@index([type, category, status]) // category-demand + funnel aggregates
   @@index([ownerId])
   @@index([moveoutBatchId])
+}
+
+// Lightweight, fire-and-forget analytics row written on each Browse search /
+// category filter. Powers the moderator-only /funnel dashboard. `tab` is one
+// of: Marketplace | Donations | LostFound | Wanted.
+model SearchEvent {
+  id          String   @id @default(cuid())
+  query       String
+  category    String?
+  tab         String
+  resultCount Int
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([query])
 }
 
 model Conversation {

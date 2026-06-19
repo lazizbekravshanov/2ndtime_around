@@ -17,6 +17,7 @@ import {
   PAGE_SIZE,
   type BrowseParams,
 } from "@/lib/search";
+import { logSearchEvent } from "@/lib/searchLog";
 import { BrowseFilters } from "./BrowseFilters";
 import { ActiveFilters } from "./ActiveFilters";
 import { SaveSearchButton } from "./SaveSearchButton";
@@ -58,6 +59,10 @@ async function Results({ params }: { params: BrowseParams }) {
   });
   const hasNext = rows.length > PAGE_SIZE;
   const listings = rows.slice(0, PAGE_SIZE);
+
+  // Log the search once per query (page 1), fire-and-forget. Zero-result
+  // searches are logged too — that's the unmet-demand signal.
+  if (page === 1) logSearchEvent(params, listings.length, user?.id ?? null);
 
   if (listings.length === 0) {
     const hasFilters = Boolean(
