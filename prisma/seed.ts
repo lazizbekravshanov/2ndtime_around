@@ -15,6 +15,7 @@ const daysAgo = (n: number, hourOffset = 0) =>
 
 async function main() {
   // Wipe in dependency order — this is a demo database.
+  await db.searchEvent.deleteMany();
   await db.notification.deleteMany();
   await db.savedSearch.deleteMany();
   await db.favorite.deleteMany();
