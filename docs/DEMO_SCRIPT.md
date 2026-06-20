@@ -6,9 +6,10 @@ the unread messages, the pending meetup proposal, the pending lost & found
 claim, and the open rating prompt. Do this after every practice run.
 
 **Sign in:** https://2ndtime-around.vercel.app/signin → pick **Alex Demo**
-→ password `Bearcats2026!`. (The **Professor** persona is a clean account —
-hand it to your reviewer so they can explore on their own device while you
-present.)
+→ enter the demo password (the `DEMO_PASSWORD` value from the Vercel
+environment variables — intentionally not stored in this repo). (The
+**Professor** persona is a clean account — hand it to your reviewer so they can
+explore on their own device while you present.)
 
 ---
 
