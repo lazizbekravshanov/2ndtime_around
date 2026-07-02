@@ -48,7 +48,7 @@ export function ListingCard({
           <img
             src={photos[0]}
             alt=""
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-faint">
@@ -89,7 +89,9 @@ export function ListingCard({
           <span className="truncate">
             {listing.category} · {timeAgo(listing.createdAt)}
           </span>
-          <span className="truncate">{listing.owner.displayName}</span>
+          <span className="truncate">
+            {listing.owner.displayName ?? "UC student"}
+          </span>
         </p>
       </div>
     </Link>

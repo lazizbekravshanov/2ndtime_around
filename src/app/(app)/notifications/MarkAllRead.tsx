@@ -13,7 +13,11 @@ export function MarkAllRead() {
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
-          await markAllNotificationsRead();
+          const res = await markAllNotificationsRead();
+          if (!res.ok) {
+            toast(res.error, { type: "error" });
+            return;
+          }
           toast("All caught up");
         })
       }

@@ -21,11 +21,13 @@ export function ProfileMenu({
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [blocked, setBlocked] = useState(initialBlocked);
+  const [confirmingBlock, setConfirmingBlock] = useState(false);
   const [pending, startTransition] = useTransition();
   const toast = useToast();
 
   function toggleBlock() {
     const next = !blocked;
+    setConfirmingBlock(false);
     startTransition(async () => {
       const res = next ? await blockUser(userId) : await unblockUser(userId);
       if (!res.ok) {
@@ -57,14 +59,42 @@ export function ProfileMenu({
             <FlagIcon className="h-5 w-5 text-faint" />
             Report {name}
           </button>
-          <Button
-            variant="danger"
-            onClick={toggleBlock}
-            disabled={pending}
-            className="w-full"
-          >
-            {blocked ? `Unblock ${name}` : `Block ${name}`}
-          </Button>
+          {/* Blocking is disruptive, so it takes a two-step confirm —
+              matching ListingMenu. Unblocking is benign and acts at once. */}
+          {!blocked && confirmingBlock ? (
+            <div className="rounded-lg border border-line bg-paper p-3">
+              <p className="text-sm">
+                Block {name}? You won&apos;t see each other&apos;s listings or
+                messages.
+              </p>
+              <div className="mt-3 flex justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setConfirmingBlock(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={toggleBlock}
+                  disabled={pending}
+                >
+                  {pending ? "Blocking…" : "Yes, block"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              variant="danger"
+              onClick={blocked ? toggleBlock : () => setConfirmingBlock(true)}
+              disabled={pending}
+              className="w-full"
+            >
+              {blocked ? `Unblock ${name}` : `Block ${name}`}
+            </Button>
+          )}
         </div>
       </Sheet>
 

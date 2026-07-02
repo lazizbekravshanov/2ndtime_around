@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 import { setListingStatus } from "@/lib/actions/listings";
 import type { ListingType } from "@/lib/constants";
 
@@ -21,6 +22,7 @@ export function OwnerActions({
   status: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -43,9 +45,15 @@ export function OwnerActions({
       return;
     }
     if (newStatus === "DELETED") {
+      toast("Listing deleted");
       router.push("/my-items");
       return;
     }
+    toast(
+      newStatus === "ACTIVE"
+        ? "Relisted as active"
+        : `Marked as ${doneLabel.replace("Mark as ", "")}`
+    );
     router.refresh();
   }
 

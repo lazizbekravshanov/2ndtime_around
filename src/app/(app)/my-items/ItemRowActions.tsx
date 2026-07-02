@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
+import { useToast } from "@/components/ui/Toast";
 import { setListingStatus } from "@/lib/actions/listings";
 import type { ListingType } from "@/lib/constants";
 
@@ -23,6 +24,7 @@ export function ItemRowActions({
   status: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [pending, setPending] = useState(false);
 
@@ -34,9 +36,16 @@ export function ItemRowActions({
 
   async function change(newStatus: string) {
     setPending(true);
-    await setListingStatus({ listingId, status: newStatus });
+    const result = await setListingStatus({ listingId, status: newStatus });
     setPending(false);
+    if (!result.ok) {
+      // Keep the modal open so the user can retry — a silent failure that
+      // closes and refreshes would look like success.
+      toast(result.error, { type: "error" });
+      return;
+    }
     setConfirm(null);
+    toast(newStatus === "DELETED" ? "Listing deleted" : `Marked as ${doneWord}`);
     router.refresh();
   }
 

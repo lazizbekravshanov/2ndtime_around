@@ -47,5 +47,8 @@ export const inputClasses =
 export const textareaClasses =
   "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm placeholder:text-faint transition-colors focus:border-ink";
 
+// appearance-none strips the native arrow, so we draw our own chevron —
+// without it a select is indistinguishable from a text input.
 export const selectClasses =
-  "h-10 w-full appearance-none rounded-lg border border-line bg-surface px-3 text-sm transition-colors focus:border-ink";
+  "h-10 w-full appearance-none rounded-lg border border-line bg-surface pl-3 pr-8 text-sm transition-colors focus:border-ink " +
+  "bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20fill%3D%22none%22%20stroke%3D%22%2357534e%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22m4%206%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[position:right_0.625rem_center] bg-no-repeat";

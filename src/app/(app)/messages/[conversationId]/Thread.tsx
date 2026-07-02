@@ -335,7 +335,15 @@ export function Thread({
   const totalCount = messages.length + pendingSends.length;
   useEffect(() => {
     if (totalCount > countRef.current) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      // Respect reduced motion: an explicit "smooth" arg bypasses the global
+      // CSS neutralizer, so choose the behavior in JS.
+      const reduceMotion = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      bottomRef.current?.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "end",
+      });
     }
     countRef.current = totalCount;
   }, [totalCount]);

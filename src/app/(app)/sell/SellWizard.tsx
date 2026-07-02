@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 import {
   Field,
   inputClasses,
@@ -93,6 +94,7 @@ function ProgressBar({ step }: { step: number }) {
 
 export function SellWizard({ initialType }: { initialType?: ListingType }) {
   const router = useRouter();
+  const toast = useToast();
   const [step, setStep] = useState(initialType ? 1 : 0);
   const [type, setType] = useState<ListingType | null>(initialType ?? null);
   const [photos, setPhotos] = useState<string[]>([]);
@@ -153,6 +155,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
       setServerError(result.error);
       return;
     }
+    toast(asDraft ? "Draft saved" : "Posted — your listing is live");
     router.push(asDraft ? "/my-items?tab=drafts" : `/listing/${result.data.id}`);
   }
 

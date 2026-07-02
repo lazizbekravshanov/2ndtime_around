@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { Button, buttonClasses } from "@/components/ui/Button";
 import { RANGE_OPTIONS, type RangeKey } from "@/lib/funnelRange";
 import { refreshFunnel } from "./actions";
 
@@ -70,17 +71,17 @@ export function Controls({
         <span aria-live="polite">
           Last refreshed{refreshedLabel ? ` ${refreshedLabel}` : ""}
         </span>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={refresh}
           disabled={pending}
-          className="rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-ink transition-colors hover:bg-paper disabled:opacity-60"
         >
           {pending ? "Refreshing…" : "Refresh"}
-        </button>
+        </Button>
         <a
           href={`/funnel/export?range=${range}`}
-          className="rounded-lg border border-line bg-surface px-3 py-1.5 font-medium text-ink transition-colors hover:bg-paper"
+          className={buttonClasses("secondary", "sm")}
         >
           Export CSV
         </a>

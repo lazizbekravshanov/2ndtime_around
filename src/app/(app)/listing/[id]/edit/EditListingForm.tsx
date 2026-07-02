@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 import {
   Field,
   inputClasses,
@@ -44,6 +45,7 @@ type FormData = {
 
 export function EditListingForm({ listing }: { listing: EditableListing }) {
   const router = useRouter();
+  const toast = useToast();
   const [photos, setPhotos] = useState<string[]>(listing.photos);
   const [serverError, setServerError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -134,6 +136,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
         return;
       }
       if (publish || !isDraft) {
+        toast(publish ? "Listing published" : "Changes saved");
         router.push(`/listing/${listing.id}`);
         router.refresh();
       } else {
