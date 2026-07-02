@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { CategoryShortcuts } from "@/components/CategoryShortcuts";
 import { ListingCard, ListingCardSkeleton } from "@/components/ListingCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ButtonLink } from "@/components/ui/Button";
@@ -186,6 +187,13 @@ export default async function BrowsePage({
       <div className="mt-4">
         <BrowseFilters tab={tab} />
       </div>
+
+      {/* Campus staples — shown until a category or search narrows things. */}
+      {tab === "market" && !params.category && !params.q && (
+        <div className="mt-4">
+          <CategoryShortcuts />
+        </div>
+      )}
 
       {chips.length > 0 && (
         <div className="mt-3 flex items-center justify-between gap-3">
