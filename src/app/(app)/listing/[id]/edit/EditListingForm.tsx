@@ -28,6 +28,7 @@ type EditableListing = {
   title: string;
   description: string;
   category: string;
+  courseCode: string | null;
   condition: string | null;
   price: number | null;
   locationNote: string | null;
@@ -38,6 +39,7 @@ type FormData = {
   title: string;
   description: string;
   category: string;
+  courseCode: string;
   condition: string;
   price?: number;
   locationNote: string;
@@ -69,6 +71,13 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
         .min(10, "Add a little more detail (at least 10 characters).")
         .max(2000, "Keep the description under 2000 characters."),
       category: z.string().min(1, "Pick a category."),
+      courseCode: z
+        .string()
+        .trim()
+        .toUpperCase()
+        .regex(/^[A-Z]{2,6} ?\d{3,4}[A-Z]?$/, "Use a course code like MATH 1061.")
+        .optional()
+        .or(z.literal("")),
       condition: z.string().optional(),
       price: z.number().min(0.5, "Price must be between $0.50 and $9,999.").max(9999.99, "Price must be between $0.50 and $9,999.").optional(),
       locationNote: z.string().optional(),
@@ -90,6 +99,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
     register,
     handleSubmit,
     setError,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -97,6 +107,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
       title: listing.title,
       description: listing.description,
       category: listing.category,
+      courseCode: listing.courseCode ?? "",
       condition: listing.condition ?? "",
       price: listing.price ?? undefined,
       locationNote: listing.locationNote ?? "",
@@ -116,6 +127,7 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
           title: data.title,
           description: data.description,
           category: data.category,
+          courseCode: data.courseCode || undefined,
           condition: data.condition || undefined,
           price:
             listing.type === "SELL" && data.price !== undefined && !Number.isNaN(data.price)
@@ -171,6 +183,24 @@ export function EditListingForm({ listing }: { listing: EditableListing }) {
           ))}
         </select>
       </Field>
+
+      {watch("category") === "Textbooks & Course Materials" && (
+        <Field
+          label="Course code"
+          htmlFor="courseCode"
+          optional
+          hint="Classmates search by course — this puts your book in front of them."
+          error={errors.courseCode?.message}
+        >
+          <input
+            id="courseCode"
+            placeholder="e.g. MATH 1061"
+            aria-invalid={errors.courseCode ? true : undefined}
+            className={inputClasses}
+            {...register("courseCode")}
+          />
+        </Field>
+      )}
 
       {!isLostFound && (
         <Field

@@ -36,6 +36,13 @@ export const listingSchema = z
       .min(10, "Add a little more detail (at least 10 characters).")
       .max(2000, "Keep the description under 2000 characters."),
     category: z.enum(CATEGORIES),
+    // Course code for textbooks, e.g. "MATH 1061" — normalized to uppercase.
+    courseCode: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z]{2,6} ?\d{3,4}[A-Z]?$/, "Use a course code like MATH 1061.")
+      .optional(),
     condition: z.enum(CONDITIONS).optional(),
     price: z
       .number()

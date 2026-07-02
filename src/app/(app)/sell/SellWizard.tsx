@@ -46,6 +46,14 @@ function makeDetailsSchema(type: ListingType) {
     title: z.string().trim().min(3, "Title needs at least 3 characters.").max(80, "Keep the title under 80 characters."),
     description: z.string().trim().min(10, "Add a little more detail (at least 10 characters).").max(2000, "Keep the description under 2000 characters."),
     category: z.enum(CATEGORIES, { message: "Pick a category." }),
+    // Only shown (and only meaningful) for textbooks; "" = not provided.
+    courseCode: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z]{2,6} ?\d{3,4}[A-Z]?$/, "Use a course code like MATH 1061.")
+      .optional()
+      .or(z.literal("")),
     condition:
       type === "SELL" || type === "DONATE"
         ? z.enum(CONDITIONS, { message: "Pick a condition." })
@@ -143,6 +151,7 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
         title: details.title,
         description: details.description,
         category: details.category,
+        courseCode: details.courseCode || undefined,
         condition: details.condition,
         price: type === "SELL" ? details.price : undefined,
         locationNote: details.locationNote || undefined,
@@ -296,6 +305,24 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
                 ))}
               </select>
             </Field>
+
+            {watchedCategory === "Textbooks & Course Materials" && (
+              <Field
+                label="Course code"
+                htmlFor="courseCode"
+                optional
+                hint="Classmates search by course — this puts your book in front of them."
+                error={errors.courseCode?.message}
+              >
+                <input
+                  id="courseCode"
+                  placeholder="e.g. MATH 1061"
+                  aria-invalid={errors.courseCode ? true : undefined}
+                  className={inputClasses}
+                  {...register("courseCode")}
+                />
+              </Field>
+            )}
 
             {(type === "SELL" || type === "DONATE") && (
               <Field

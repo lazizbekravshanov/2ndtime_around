@@ -114,6 +114,24 @@ export function BrowseFilters({ tab }: { tab: string }) {
         </div>
       </div>
 
+      {/* Course filter appears once the Textbooks category is chosen —
+          students hunt books by course, not by title. */}
+      {searchParams.get("category") === "Textbooks & Course Materials" && (
+        <div className="flex items-center gap-2">
+          <label htmlFor="course-filter" className="text-sm text-faint">
+            Course
+          </label>
+          <input
+            id="course-filter"
+            type="search"
+            placeholder="e.g. MATH 1061"
+            defaultValue={searchParams.get("course") ?? ""}
+            onChange={(e) => setParamDebounced("course", e.target.value, 300)}
+            className={`${inputClasses} w-44`}
+          />
+        </div>
+      )}
+
       {tab === "market" && (
         <div className="flex items-center gap-2">
           <label htmlFor="min-price" className="text-sm text-faint">

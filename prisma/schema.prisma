@@ -50,6 +50,8 @@ model Listing {
   title        String
   description  String
   category     String
+  // Optional course code for textbook listings, e.g. "MATH 1061".
+  courseCode   String?
   condition    String?
   price        Float?
   status       String   @default("ACTIVE")

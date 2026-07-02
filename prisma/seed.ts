@@ -78,7 +78,8 @@ async function main() {
     type: "SELL", title: "Calculus: Early Transcendentals (8th ed)",
     description:
       "Stewart's calculus, used for MATH 1061/1062. Clean pages, no highlighting, binding solid. Saves you $200 vs the bookstore.",
-    category: "Textbooks & Course Materials", condition: "Like new", price: 45,
+    category: "Textbooks & Course Materials", courseCode: "MATH 1061",
+    condition: "Like new", price: 45,
     photos: ["/seed/calc-textbook.svg"], ownerId: maya.id,
     createdAt: daysAgo(2), viewCount: 38,
   });
@@ -86,7 +87,8 @@ async function main() {
     type: "SELL", title: "Organic Chemistry textbook + model kit",
     description:
       "Klein 4th edition with the molecular model kit thrown in. A few chapters have neat pencil notes (honestly helpful).",
-    category: "Textbooks & Course Materials", condition: "Good", price: 60,
+    category: "Textbooks & Course Materials", courseCode: "CHEM 2040",
+    condition: "Good", price: 60,
     photos: ["/seed/chem-textbook.svg"], ownerId: priya.id,
     createdAt: daysAgo(4), viewCount: 22,
   });
@@ -166,7 +168,8 @@ async function main() {
   const soldPsych = await L({
     type: "SELL", title: "PSYC 1001 textbook bundle",
     description: "Both required books for intro psych, good condition.",
-    category: "Textbooks & Course Materials", condition: "Good", price: 38,
+    category: "Textbooks & Course Materials", courseCode: "PSYC 1001",
+    condition: "Good", price: 38,
     photos: ["/seed/psych-textbook.svg"], ownerId: priya.id,
     status: "SOLD", createdAt: daysAgo(45), updatedAt: daysAgo(42), viewCount: 51,
   });
@@ -630,7 +633,8 @@ async function main() {
     type: "SELL", title: "Physics 2001 textbook",
     description:
       "University Physics vol. 1, used one semester. Light highlighting in two chapters, otherwise clean.",
-    category: "Textbooks & Course Materials", condition: "Good", price: 30,
+    category: "Textbooks & Course Materials", courseCode: "PHYS 2001",
+    condition: "Good", price: 30,
     photos: ["/seed/chem-textbook.svg"], ownerId: priya.id,
     createdAt: daysAgo(3, 9), viewCount: 18,
   });

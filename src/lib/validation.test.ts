@@ -27,6 +27,31 @@ describe("listingSchema", () => {
   it("rejects a too-short title", () => {
     expect(listingSchema.safeParse({ ...baseListing, title: "x" }).success).toBe(false);
   });
+  it("accepts and normalizes a course code", () => {
+    const r = listingSchema.safeParse({
+      ...baseListing,
+      courseCode: "  math 1061 ",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.courseCode).toBe("MATH 1061");
+  });
+  it("accepts the compact course-code form", () => {
+    const r = listingSchema.safeParse({ ...baseListing, courseCode: "CS2028C" });
+    expect(r.success).toBe(true);
+  });
+  it("rejects a malformed course code", () => {
+    expect(
+      listingSchema.safeParse({ ...baseListing, courseCode: "not a course" })
+        .success
+    ).toBe(false);
+    expect(
+      listingSchema.safeParse({ ...baseListing, courseCode: "1061 MATH" })
+        .success
+    ).toBe(false);
+  });
+  it("allows omitting the course code", () => {
+    expect(listingSchema.safeParse(baseListing).success).toBe(true);
+  });
   it("requires a locationNote for LOST", () => {
     expect(
       listingSchema.safeParse({ ...baseListing, type: "LOST", price: undefined }).success

@@ -32,6 +32,8 @@ export type BrowseParams = {
   tab?: string;
   q?: string;
   category?: string;
+  /** Course-code filter — only meaningful with the Textbooks category. */
+  course?: string;
   condition?: string;
   min?: string;
   max?: string;
@@ -87,7 +89,13 @@ export function buildListingWhere(
       where.AND = tokens.map((t) => {
         const match = likeFilter(t);
         return {
-          OR: [{ title: match }, { description: match }, { category: match }],
+          OR: [
+            { title: match },
+            { description: match },
+            { category: match },
+            // "phys 2001" should find the textbook listed for that course.
+            { courseCode: match },
+          ],
         };
       }) as Prisma.ListingWhereInput[];
     }
@@ -105,6 +113,11 @@ export function buildListingWhere(
     (CONDITIONS as readonly string[]).includes(params.condition)
   ) {
     where.condition = params.condition;
+  }
+
+  // Course filter rides along with the Textbooks category (bounded input).
+  if (params.course && params.category === "Textbooks & Course Materials") {
+    where.courseCode = likeFilter(params.course.trim().slice(0, 12));
   }
 
   if (tab === "market") {
@@ -138,6 +151,8 @@ export function activeFilterChips(
   const chips: { key: string; label: string }[] = [];
   if (params.q) chips.push({ key: "q", label: `“${params.q}”` });
   if (params.category) chips.push({ key: "category", label: params.category });
+  if (params.course)
+    chips.push({ key: "course", label: params.course.toUpperCase() });
   if (params.condition) chips.push({ key: "condition", label: params.condition });
   if (params.min) chips.push({ key: "min", label: `min $${params.min}` });
   if (params.max) chips.push({ key: "max", label: `max $${params.max}` });

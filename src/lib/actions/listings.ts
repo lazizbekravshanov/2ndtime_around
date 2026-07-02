@@ -87,6 +87,7 @@ export async function createListing(
       title: d.title,
       description: d.description,
       category: d.category,
+      courseCode: d.courseCode ?? null,
       condition: d.condition ?? null,
       // Price only ever applies to SELL listings; donations are free.
       price: d.type === "SELL" ? (d.price ?? null) : null,
@@ -155,6 +156,7 @@ export async function updateListing(
       title: d.title,
       description: d.description,
       category: d.category,
+      courseCode: d.courseCode ?? null,
       condition: d.condition ?? null,
       price: newPrice,
       locationNote: d.locationNote ?? null,

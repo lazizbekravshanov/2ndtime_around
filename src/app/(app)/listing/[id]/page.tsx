@@ -155,6 +155,9 @@ export default async function ListingPage({
               {TYPE_LABELS[type]}
             </Badge>
             <Badge tone="outline">{listing.category}</Badge>
+            {listing.courseCode && (
+              <Badge tone="neutral">{listing.courseCode}</Badge>
+            )}
             {listing.status === "DRAFT" && <StatusBadge status="DRAFT" />}
             {done && <StatusBadge status={listing.status as ListingStatus} />}
           </div>

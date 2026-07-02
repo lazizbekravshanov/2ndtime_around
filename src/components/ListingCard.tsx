@@ -11,6 +11,7 @@ export type ListingCardData = {
   type: ListingType;
   title: string;
   category: string;
+  courseCode?: string | null;
   price: number | null;
   status: ListingStatus;
   locationNote: string | null;
@@ -89,7 +90,10 @@ export function ListingCard({
 
         <p className="flex items-center justify-between gap-2 text-xs text-faint">
           <span className="truncate">
-            {listing.category} · {timeAgo(listing.createdAt)}
+            {/* A course code identifies a textbook better than the (long,
+                truncated) category name does. */}
+            {listing.courseCode ?? listing.category} ·{" "}
+            {timeAgo(listing.createdAt)}
           </span>
           <span className="truncate">
             {listing.owner.displayName ?? "UC student"}

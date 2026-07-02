@@ -33,6 +33,7 @@ function pageHref(params: BrowseParams, p: number): string {
   if (params.tab && params.tab !== "market") sp.set("tab", params.tab);
   if (params.q) sp.set("q", params.q);
   if (params.category) sp.set("category", params.category);
+  if (params.course) sp.set("course", params.course);
   if (params.condition) sp.set("condition", params.condition);
   if (params.min) sp.set("min", params.min);
   if (params.max) sp.set("max", params.max);

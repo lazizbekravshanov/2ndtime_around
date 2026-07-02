@@ -42,6 +42,7 @@ export default async function EditListingPage({
             title: listing.title,
             description: listing.description,
             category: listing.category,
+            courseCode: listing.courseCode,
             condition: listing.condition,
             price: listing.price,
             locationNote: listing.locationNote,
