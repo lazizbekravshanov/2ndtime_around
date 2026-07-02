@@ -227,6 +227,23 @@ UA — so real-world SEO/sharing is unaffected.
 The earlier heuristic-evaluation pass is still written up in
 [`docs/HCI_UX_REPORT.md`](docs/HCI_UX_REPORT.md).
 
+## v3.1 — campus-native components
+
+Six additions that make it feel like it was built *for* students, not just
+near them (spec: [`docs/superpowers/specs/`](docs/superpowers/specs/)):
+
+- **category shortcut chips** on Browse — Textbooks, Dorm essentials, Bikes,
+  Electronics, Music (CCM), Art & Design (DAAP) — one tap to the staples
+- **move-out countdown banner** (within 45 days of semester end) that feeds
+  the existing bulk move-out flow; dismissible per semester
+- **"Recently sold"** social-proof line on the landing, from real sales
+- **course codes on textbooks** — post with "MATH 1061", searchable by
+  course, filterable once the Textbooks category is picked
+- **major + class year** shown on seller cards and chat headers, so the
+  counterparty reads as a classmate
+- **meetup quick-picks** — walking-time hints on every safe spot + one-tap
+  between-class time chips (no map, zero new JS weight)
+
 ## how it's laid out
 
 ```
