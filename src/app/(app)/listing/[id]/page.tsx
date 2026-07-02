@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
@@ -20,6 +22,51 @@ import { ClaimButton } from "./ClaimButton";
 import { MessageSellerButton } from "./MessageSellerButton";
 import { OwnerActions } from "./OwnerActions";
 
+// cache() dedupes the query between generateMetadata and the page render.
+const getListing = cache((id: string) =>
+  db.listing.findUnique({
+    where: { id },
+    include: {
+      owner: {
+        select: { id: true, displayName: true, createdAt: true },
+      },
+    },
+  })
+);
+
+/** Share-friendly metadata: a listing pasted into a group chat previews with
+ *  its title, price, blurb, and first photo. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const listing = await getListing(id);
+  if (!listing || listing.status !== "ACTIVE") return { title: "Listing" };
+
+  const price =
+    listing.type === "SELL" && listing.price !== null
+      ? ` · ${formatPrice(listing.price)}`
+      : listing.type === "DONATE"
+        ? " · Free"
+        : "";
+  const title = `${listing.title}${price}`;
+  const description = listing.description.slice(0, 160);
+  const photo = photoList(listing.photos)[0];
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      ...(photo ? { images: [{ url: photo }] } : {}),
+    },
+    twitter: { card: photo ? "summary_large_image" : "summary" },
+  };
+}
+
 export default async function ListingPage({
   params,
 }: {
@@ -28,14 +75,7 @@ export default async function ListingPage({
   const { id } = await params;
   const user = await requireUser();
 
-  const listing = await db.listing.findUnique({
-    where: { id },
-    include: {
-      owner: {
-        select: { id: true, displayName: true, createdAt: true },
-      },
-    },
-  });
+  const listing = await getListing(id);
   if (!listing || listing.status === "DELETED") notFound();
 
   const isOwner = listing.ownerId === user.id;
