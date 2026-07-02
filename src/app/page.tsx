@@ -27,6 +27,20 @@ const getRecentListings = unstable_cache(
   { revalidate: 60 }
 );
 
+// Social proof from real completed sales — titles/prices were public while
+// the listings were live, so nothing private surfaces here.
+const getRecentlySold = unstable_cache(
+  async () =>
+    db.listing.findMany({
+      where: { type: "SELL", status: "SOLD", price: { not: null } },
+      select: { id: true, title: true, price: true },
+      orderBy: { updatedAt: "desc" },
+      take: 4,
+    }),
+  ["landing-recently-sold"],
+  { revalidate: 60 }
+);
+
 export default async function LandingPage() {
   // Signed-in students skip the pitch and land on Browse.
   const user = await getSessionUser();
@@ -34,9 +48,10 @@ export default async function LandingPage() {
 
   // Real recent listings + real campus-impact numbers for the sections below
   // the hero.
-  const [cached, impact] = await Promise.all([
+  const [cached, impact, recentlySold] = await Promise.all([
     getRecentListings(),
     getImpactStats(),
+    getRecentlySold(),
   ]);
   const recent = cached.map((l) => ({
     ...l,
@@ -126,6 +141,19 @@ export default async function LandingPage() {
             <p className="mt-3 text-center text-xs text-faint">
               Live from campus, updated all day
             </p>
+
+            {/* Real recently-completed sales — quiet social proof. */}
+            {recentlySold.length > 0 && (
+              <p className="mt-2 text-center text-xs text-faint">
+                <span className="font-medium text-ink">Recently sold:</span>{" "}
+                {recentlySold.map((l, i) => (
+                  <span key={l.id}>
+                    {i > 0 && <span aria-hidden="true"> · </span>}
+                    {l.title} {formatPrice(l.price as number)}
+                  </span>
+                ))}
+              </p>
+            )}
           </section>
         )}
 
