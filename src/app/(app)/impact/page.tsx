@@ -4,21 +4,10 @@ import { LeafIcon } from "@/components/icons";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { getUserStats, computeBadges } from "@/lib/badges";
+import { currentSemester } from "@/lib/semester";
 import { BadgeShelf } from "@/components/BadgeShelf";
 
 export const metadata = { title: "Campus impact" };
-
-// Rough UC semester boundaries — enough for "this semester vs all time".
-function currentSemester(): { name: string; start: Date } {
-  const now = new Date();
-  const year = now.getFullYear();
-  const spring = new Date(year, 0, 1);
-  const summer = new Date(year, 4, 10);
-  const fall = new Date(year, 7, 15);
-  if (now >= fall) return { name: `Fall ${year}`, start: fall };
-  if (now >= summer) return { name: `Summer ${year}`, start: summer };
-  return { name: `Spring ${year}`, start: spring };
-}
 
 const REUSED_WHERE: Prisma.ListingWhereInput = {
   type: { in: ["SELL", "DONATE"] },

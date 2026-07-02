@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { CategoryShortcuts } from "@/components/CategoryShortcuts";
+import { MoveoutBanner } from "@/components/MoveoutBanner";
+import { currentSemester, daysUntilMoveOut } from "@/lib/semester";
 import { ListingCard, ListingCardSkeleton } from "@/components/ListingCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ButtonLink } from "@/components/ui/Button";
@@ -157,9 +159,20 @@ export default async function BrowsePage({
   const tab = parseTab(params.tab);
   const chips = activeFilterChips(params);
 
+  const moveoutDays = daysUntilMoveOut();
+
   return (
     <div>
       <h1 className="sr-only">Browse</h1>
+
+      {moveoutDays !== null && (
+        <div className="mb-4">
+          <MoveoutBanner
+            days={moveoutDays}
+            semesterKey={currentSemester().key}
+          />
+        </div>
+      )}
 
       {/* Tab bar — minimal underline style; active marked with a UC-red
           indicator, inactive labels muted. */}

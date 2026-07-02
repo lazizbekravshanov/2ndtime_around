@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { MoveoutBanner } from "@/components/MoveoutBanner";
 import { StatusBadge } from "@/components/StatusBadge";
+import { currentSemester, daysUntilMoveOut } from "@/lib/semester";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { EyeIcon } from "@/components/icons";
@@ -56,9 +58,20 @@ export default async function MyItemsPage({
     orderBy: { createdAt: "desc" },
   });
 
+  const moveoutDays = daysUntilMoveOut();
+
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-semibold tracking-tight">My items</h1>
+
+      {moveoutDays !== null && (
+        <div className="mt-4">
+          <MoveoutBanner
+            days={moveoutDays}
+            semesterKey={currentSemester().key}
+          />
+        </div>
+      )}
 
       <nav aria-label="Item status" className="mt-4 flex gap-1 border-b border-line">
         {TABS.map((t) => (
