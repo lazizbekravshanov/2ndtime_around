@@ -283,7 +283,9 @@ export function Thread({
       const res = await fetch(`/api/conversations/${conversationId}/messages`);
       if (!res.ok) return;
       const json = (await res.json()) as ThreadPayload;
-      setMessages(json.messages);
+      // Shape-check before trusting the payload — a malformed body must not
+      // crash the thread (the spread over `messages` would throw).
+      if (Array.isArray(json.messages)) setMessages(json.messages);
       if (json.listingStatus) setListingStatus(json.listingStatus);
     } catch {
       // Network hiccup — the next tick will catch up.
@@ -317,7 +319,7 @@ export function Thread({
     es.onmessage = (e) => {
       try {
         const json = JSON.parse(e.data) as ThreadPayload;
-        setMessages(json.messages);
+        if (Array.isArray(json.messages)) setMessages(json.messages);
         if (json.listingStatus) setListingStatus(json.listingStatus);
       } catch {
         // ignore malformed frame

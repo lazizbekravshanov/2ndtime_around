@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 import { LeafIcon } from "@/components/icons";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -24,17 +25,15 @@ const REUSED_WHERE: Prisma.ListingWhereInput = {
   status: { in: ["SOLD", "RESOLVED"] },
 };
 
-export default async function ImpactPage() {
-  const user = await requireUser();
-  const semester = currentSemester();
-  const myStats = await getUserStats(user.id);
-  const myBadges = computeBadges(myStats);
-
-  const [reusedAllTime, reusedThisSemester, returnedCount, byCategory] =
-    await Promise.all([
+// These four aggregates are campus-wide (user-independent) and slow-moving —
+// cache them like lib/impact.ts does, keyed by semester so the boundary flip
+// invalidates naturally. Only getUserStats below stays per-request.
+const getGlobalImpact = unstable_cache(
+  async (semesterStartIso: string) =>
+    Promise.all([
       db.listing.count({ where: REUSED_WHERE }),
       db.listing.count({
-        where: { ...REUSED_WHERE, updatedAt: { gte: semester.start } },
+        where: { ...REUSED_WHERE, updatedAt: { gte: new Date(semesterStartIso) } },
       }),
       db.listing.count({
         where: { type: { in: ["LOST", "FOUND"] }, status: "RESOLVED" },
@@ -45,7 +44,19 @@ export default async function ImpactPage() {
         _count: { _all: true },
         orderBy: { _count: { id: "desc" } },
       }),
-    ]);
+    ]),
+  ["impact-page-globals"],
+  { revalidate: 300 }
+);
+
+export default async function ImpactPage() {
+  const user = await requireUser();
+  const semester = currentSemester();
+  const myStats = await getUserStats(user.id);
+  const myBadges = computeBadges(myStats);
+
+  const [reusedAllTime, reusedThisSemester, returnedCount, byCategory] =
+    await getGlobalImpact(semester.start.toISOString());
 
   const maxCategory = Math.max(1, ...byCategory.map((c) => c._count._all));
 

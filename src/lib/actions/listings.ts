@@ -65,6 +65,22 @@ export async function createListing(
   }
 
   const d = parsed.data;
+
+  // Double-submission guard: a retried/double-clicked submit within a few
+  // seconds would otherwise create two identical listings. The disabled
+  // button is client-side courtesy; this is the authoritative check.
+  const duplicate = await db.listing.findFirst({
+    where: {
+      ownerId: user.id,
+      title: d.title,
+      type: d.type,
+      status: { not: "DELETED" },
+      createdAt: { gte: new Date(Date.now() - 10_000) },
+    },
+    select: { id: true },
+  });
+  if (duplicate) return { ok: true, data: { id: duplicate.id } };
+
   const listing = await db.listing.create({
     data: {
       type: d.type,

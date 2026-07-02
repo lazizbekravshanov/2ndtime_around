@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { HeroMapBackdrop } from "@/components/HeroMapBackdrop";
 import { LeafIcon, LogoMark } from "@/components/icons";
 import { ListingCard } from "@/components/ListingCard";
@@ -11,6 +12,21 @@ import { getSessionUser } from "@/lib/session";
 
 const TRUST = ["UC-verified only", "No fees", "Safe campus meetups"];
 
+// The public landing is the highest-traffic anonymous page; its preview strip
+// is slow-moving, so cache it for a minute instead of querying per request.
+// (Dates round-trip the cache as strings — revived below before render.)
+const getRecentListings = unstable_cache(
+  async () =>
+    db.listing.findMany({
+      where: { status: "ACTIVE" },
+      include: { owner: { select: { displayName: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+    }),
+  ["landing-recent-listings"],
+  { revalidate: 60 }
+);
+
 export default async function LandingPage() {
   // Signed-in students skip the pitch and land on Browse.
   const user = await getSessionUser();
@@ -18,15 +34,14 @@ export default async function LandingPage() {
 
   // Real recent listings + real campus-impact numbers for the sections below
   // the hero.
-  const [recent, impact] = await Promise.all([
-    db.listing.findMany({
-      where: { status: "ACTIVE" },
-      include: { owner: { select: { displayName: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 12,
-    }),
+  const [cached, impact] = await Promise.all([
+    getRecentListings(),
     getImpactStats(),
   ]);
+  const recent = cached.map((l) => ({
+    ...l,
+    createdAt: new Date(l.createdAt),
+  }));
   const withPhotos = recent.filter((l) => photoList(l.photos).length > 0);
   const preview = (withPhotos.length >= 4 ? withPhotos : recent).slice(0, 4);
 

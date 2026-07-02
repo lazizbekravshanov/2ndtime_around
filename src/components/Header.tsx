@@ -38,15 +38,22 @@ function UserMenu({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  // Close on outside click or Escape — standard menu behavior, keyboardable.
+  // Close on outside click or Escape. Escape puts focus back on the trigger
+  // so a keyboard user isn't dropped at <body> (WCAG 2.4.3). This is a
+  // disclosure of plain links — no role="menu", which would promise arrow-key
+  // navigation we don't implement.
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
       if (!ref.current?.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
     };
     document.addEventListener("mousedown", onClick);
     document.addEventListener("keydown", onKey);
@@ -59,8 +66,8 @@ function UserMenu({
   return (
     <div className="relative" ref={ref}>
       <button
+        ref={triggerRef}
         type="button"
-        aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
         onClick={() => setOpen((v) => !v)}
@@ -69,12 +76,8 @@ function UserMenu({
         {displayName.charAt(0)}
       </button>
       {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-11 w-44 rounded-xl border border-line bg-surface py-1 shadow-float"
-        >
+        <div className="absolute right-0 top-11 w-44 rounded-xl border border-line bg-surface py-1 shadow-float">
           <Link
-            role="menuitem"
             href={`/profile/${userId}`}
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm hover:bg-paper"
@@ -82,7 +85,6 @@ function UserMenu({
             My profile
           </Link>
           <Link
-            role="menuitem"
             href="/saved"
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm hover:bg-paper"
@@ -90,7 +92,6 @@ function UserMenu({
             Saved
           </Link>
           <Link
-            role="menuitem"
             href="/notifications"
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm hover:bg-paper"
@@ -98,7 +99,6 @@ function UserMenu({
             Notifications
           </Link>
           <Link
-            role="menuitem"
             href="/impact"
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm hover:bg-paper"
@@ -108,7 +108,6 @@ function UserMenu({
           {isModerator && (
             <>
               <Link
-                role="menuitem"
                 href="/funnel"
                 onClick={() => setOpen(false)}
                 className="block px-4 py-2 text-sm hover:bg-paper"
@@ -116,7 +115,6 @@ function UserMenu({
                 Funnel
               </Link>
               <Link
-                role="menuitem"
                 href="/moderation"
                 onClick={() => setOpen(false)}
                 className="block px-4 py-2 text-sm hover:bg-paper"
@@ -126,7 +124,6 @@ function UserMenu({
             </>
           )}
           <button
-            role="menuitem"
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}
             className="block w-full px-4 py-2 text-left text-sm hover:bg-paper"

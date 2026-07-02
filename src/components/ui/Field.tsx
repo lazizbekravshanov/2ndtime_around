@@ -1,8 +1,12 @@
-import type { ReactNode } from "react";
+import { cloneElement, isValidElement, type ReactNode } from "react";
 
 /**
  * Form field wrapper: label, control, inline error. Errors render next to
  * the field they belong to (inline validation), announced to screen readers.
+ * The hint/error paragraphs get ids derived from `htmlFor`, and the control
+ * is linked to them via aria-describedby (WCAG 1.3.1/3.3.1) — so a screen
+ * reader user focusing an invalid field hears WHY it's invalid, not just
+ * that it is.
  */
 export function Field({
   label,
@@ -19,6 +23,17 @@ export function Field({
   optional?: boolean;
   children: ReactNode;
 }) {
+  const errorId = `${htmlFor}-error`;
+  const hintId = `${htmlFor}-hint`;
+  const describedBy = error ? errorId : hint ? hintId : undefined;
+
+  // Link the single wrapped control to its message without changing any
+  // call site. Non-element children (rare) render untouched.
+  const control =
+    describedBy && isValidElement<{ "aria-describedby"?: string }>(children)
+      ? cloneElement(children, { "aria-describedby": describedBy })
+      : children;
+
   return (
     <div>
       <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium">
@@ -29,10 +44,14 @@ export function Field({
           </span>
         )}
       </label>
-      {children}
-      {hint && !error && <p className="mt-1.5 text-xs text-faint">{hint}</p>}
+      {control}
+      {hint && !error && (
+        <p id={hintId} className="mt-1.5 text-xs text-faint">
+          {hint}
+        </p>
+      )}
       {error && (
-        <p role="alert" className="mt-1.5 text-sm text-accent">
+        <p id={errorId} role="alert" className="mt-1.5 text-sm text-accent">
           {error}
         </p>
       )}

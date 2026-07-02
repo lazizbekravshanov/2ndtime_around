@@ -1,6 +1,8 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { getSessionUser } from "@/lib/session";
+import { CATEGORIES } from "@/lib/constants";
 import { quantiles } from "@/lib/stats";
 
 const MS_180_DAYS = 180 * 24 * 60 * 60 * 1000;
@@ -20,6 +22,14 @@ export type PriceSuggestion = {
 export async function suggestPrice(input: {
   category: string;
 }): Promise<PriceSuggestion> {
+  // Same rules as every other action: signed-in callers only, and the
+  // category must be one of ours — anything else gets an empty suggestion.
+  const user = await getSessionUser();
+  if (!user) return { count: 0 };
+  if (!(CATEGORIES as readonly string[]).includes(input.category)) {
+    return { count: 0 };
+  }
+
   const since = new Date(Date.now() - MS_180_DAYS);
   const listings = await db.listing.findMany({
     where: {

@@ -16,7 +16,9 @@ export function BrowseFilters({ tab }: { tab: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [q, setQ] = useState(searchParams.get("q") ?? "");
-  const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // One timer PER field — a shared timer would let a keystroke in one field
+  // silently cancel another field's pending URL update.
+  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   function setParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -25,9 +27,22 @@ export function BrowseFilters({ tab }: { tab: string }) {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
+  function setParamDebounced(key: string, value: string, ms: number) {
+    clearTimeout(timers.current[key]);
+    timers.current[key] = setTimeout(() => setParam(key, value), ms);
+  }
+
   useEffect(() => {
-    return () => clearTimeout(debounce.current);
+    const t = timers.current;
+    return () => Object.values(t).forEach(clearTimeout);
   }, []);
+
+  // Keep the search box in sync when the URL changes underneath us
+  // (back/forward, chip removal, Clear all) — the newest query always wins.
+  const urlQ = searchParams.get("q") ?? "";
+  useEffect(() => {
+    setQ(urlQ);
+  }, [urlQ]);
 
   const lf = searchParams.get("lf") ?? "";
 
@@ -45,11 +60,7 @@ export function BrowseFilters({ tab }: { tab: string }) {
             value={q}
             onChange={(e) => {
               setQ(e.target.value);
-              clearTimeout(debounce.current);
-              debounce.current = setTimeout(
-                () => setParam("q", e.target.value.trim()),
-                300
-              );
+              setParamDebounced("q", e.target.value.trim(), 300);
             }}
             className={`${inputClasses} pl-9`}
           />
@@ -116,11 +127,7 @@ export function BrowseFilters({ tab }: { tab: string }) {
             placeholder="Min"
             aria-label="Minimum price"
             defaultValue={searchParams.get("min") ?? ""}
-            onChange={(e) => {
-              clearTimeout(debounce.current);
-              const value = e.target.value;
-              debounce.current = setTimeout(() => setParam("min", value), 400);
-            }}
+            onChange={(e) => setParamDebounced("min", e.target.value, 400)}
             className={`${inputClasses} w-24`}
           />
           <span className="text-faint">–</span>
@@ -132,11 +139,7 @@ export function BrowseFilters({ tab }: { tab: string }) {
             placeholder="Max"
             aria-label="Maximum price"
             defaultValue={searchParams.get("max") ?? ""}
-            onChange={(e) => {
-              clearTimeout(debounce.current);
-              const value = e.target.value;
-              debounce.current = setTimeout(() => setParam("max", value), 400);
-            }}
+            onChange={(e) => setParamDebounced("max", e.target.value, 400)}
             className={`${inputClasses} w-24`}
           />
         </div>
@@ -158,7 +161,7 @@ export function BrowseFilters({ tab }: { tab: string }) {
               type="button"
               aria-pressed={lf === opt.value}
               onClick={() => setParam("lf", opt.value)}
-              className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-full border px-3.5 py-2 text-sm font-medium transition-colors ${
                 lf === opt.value
                   ? "border-ink bg-ink text-white"
                   : "border-line bg-surface text-faint hover:text-ink"

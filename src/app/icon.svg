@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Brand mark: the "second time around" circular arrow in UC Red,
+       on paper so it reads at 16px in a browser tab. -->
+  <rect width="24" height="24" rx="5" fill="#fafaf9"/>
+  <g stroke="#e00122" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/>
+    <path d="M17.8 3v4.7h-4.7"/>
+  </g>
+</svg>

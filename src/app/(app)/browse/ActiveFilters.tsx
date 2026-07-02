@@ -35,7 +35,7 @@ export function ActiveFilters({
           key={chip.key}
           type="button"
           onClick={() => remove(chip.key)}
-          className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-medium text-faint transition-colors hover:text-ink"
+          className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1.5 text-xs font-medium text-faint transition-colors hover:text-ink"
           aria-label={`Remove filter ${chip.label}`}
         >
           {chip.label}
@@ -46,7 +46,7 @@ export function ActiveFilters({
         <button
           type="button"
           onClick={clearAll}
-          className="px-1.5 py-1 text-xs font-medium text-faint underline-offset-2 transition-colors hover:text-ink hover:underline"
+          className="px-1.5 py-1.5 text-xs font-medium text-faint underline-offset-2 transition-colors hover:text-ink hover:underline"
         >
           Clear all
         </button>

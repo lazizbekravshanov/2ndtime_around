@@ -53,16 +53,17 @@ export function PhotoCarousel({
           </>
         )}
       </div>
+      {/* Plain dot buttons, not a tablist — there's no tabpanel relationship
+          or arrow-key roving here, so tab roles would over-promise to AT. */}
       {photos.length > 1 && (
-        <div className="mt-1 flex justify-center gap-1" role="tablist">
+        <div className="mt-1 flex justify-center gap-1">
           {photos.map((_, i) => (
             // The visible dot stays small, but the tap target is a full
             // 44px-tall hit area (WCAG 2.5.5) so it's thumb-reachable.
             <button
               key={i}
               type="button"
-              role="tab"
-              aria-selected={i === index}
+              aria-current={i === index}
               aria-label={`Photo ${i + 1}`}
               onClick={() => setIndex(i)}
               className="flex h-11 w-8 items-center justify-center"

@@ -64,7 +64,13 @@ export default async function MessagesPage() {
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-line bg-paper">
                     {cover ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={cover} alt="" className="h-full w-full object-cover" />
+                      <img
+                        src={cover}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       <div className="flex h-full items-center justify-center text-xs text-faint">
                         No photo
