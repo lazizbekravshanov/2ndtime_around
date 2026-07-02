@@ -28,7 +28,13 @@ const getListing = cache((id: string) =>
     where: { id },
     include: {
       owner: {
-        select: { id: true, displayName: true, createdAt: true },
+        select: {
+          id: true,
+          displayName: true,
+          createdAt: true,
+          major: true,
+          year: true,
+        },
       },
     },
   })
@@ -223,6 +229,13 @@ export default async function ListingPage({
                 >
                   {listing.owner.displayName}
                 </Link>
+                {(listing.owner.major || listing.owner.year) && (
+                  <p className="text-xs text-faint">
+                    {[listing.owner.major, listing.owner.year]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                )}
                 <p className="text-xs text-faint">
                   Member since {monthYear(listing.owner.createdAt)} ·{" "}
                   {completedCount} completed{" "}

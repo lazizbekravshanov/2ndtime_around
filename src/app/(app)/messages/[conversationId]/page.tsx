@@ -23,9 +23,27 @@ export default async function ConversationPage({
     where: { id: conversationId },
     include: {
       listing: {
-        include: { owner: { select: { id: true, displayName: true, email: true } } },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              displayName: true,
+              email: true,
+              major: true,
+              year: true,
+            },
+          },
+        },
       },
-      starter: { select: { id: true, displayName: true, email: true } },
+      starter: {
+        select: {
+          id: true,
+          displayName: true,
+          email: true,
+          major: true,
+          year: true,
+        },
+      },
       messages: { orderBy: { createdAt: "asc" } },
     },
   });
@@ -93,6 +111,12 @@ export default async function ConversationPage({
                 ? " · Free"
                 : ""}{" "}
             · with {other.displayName}
+            {(other.major || other.year) && (
+              <span>
+                {" "}
+                ({[other.major, other.year].filter(Boolean).join(", ")})
+              </span>
+            )}
           </p>
         </div>
         {(listing.status === "SOLD" || listing.status === "RESOLVED") && (
