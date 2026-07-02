@@ -192,25 +192,40 @@ report/block overflow menu, and safety blurbs on the suggested meetup spots.
 | --- | --- |
 | ![Move-out batch](docs/screenshots/v2-moveout.png) | ![Moderation](docs/screenshots/v2-moderation.png) |
 
-## v3 — design elevation
+## v3 — refinement & hardening
 
-v3 isn't new features — it's the same product, made to feel like Apple shipped
-it. Depth from light instead of lines, purposeful motion, a frosted material
-header, and a warm optical serif (Fraunces) for display moments — all without a
-second accent color or breaking a single accessibility rule.
+v3 isn't new features — it's the same product, audited section by section
+(tokens → typography → layout → components → states → motion → a11y → perf →
+data → reliability → responsive → SEO) and hardened. Same calm one-accent
+look; fewer ways for it to break.
 
 | area | v2 | v3 |
 | --- | --- | --- |
-| **depth** | flat, 1px borders everywhere | soft layered elevation — cards lift, sheets float, header separates on scroll |
-| **motion** | color transitions only | one expo-out ease, staggered entrance reveals, tactile press states (all off under `prefers-reduced-motion`) |
-| **material** | opaque header | frosted backdrop-blur header, borderless at top |
-| **type** | one sans (Inter) | + Fraunces display serif for the hero, page titles, and big stat numerals |
-| **landing** | live listing preview | + a real **campus-impact band**: items kept out of Cincinnati landfills, dollars traded student-to-student, items given free |
-| **accessibility** | baseline | a full heuristic-evaluation pass — ~20 fixes (44px targets, high-contrast focus ring, skip-to-content, roving-tabindex radios, undo on destructive actions…), written up in [`docs/HCI_UX_REPORT.md`](docs/HCI_UX_REPORT.md) |
-| **correctness & scale** | — | race-free favorites/claims, real browse pagination, block-aware notifications, cached impact counts, SSE poll demoted to a true fallback |
+| **tokens** | good foundation, some drift | zero hardcoded colors left — charts/map/logo read `var(--color-…)` or `src/lib/theme.ts`; one `max-w-page` container; one `StatusBadge` source of truth |
+| **states** | browse had skeletons | every data route has a shape-matched `loading.tsx`; `error.tsx` + `global-error.tsx` (no more white screens); failed delete/mark-sold can no longer masquerade as success |
+| **feedback** | toasts on safety/favorites | toasts on the whole lifecycle: post, publish, sold/given/resolved, relist, delete — with two-step confirms on every destructive action, including block |
+| **a11y** | strong baseline | AA sweep: `aria-describedby` on all form errors, focus-trapped sheets that return focus, honest ARIA (dropped fake `menu`/`tablist` roles), no color-only status anywhere |
+| **performance** | fine, unmeasured | measured (below): lazy images, cached landing/impact queries, per-field debounce, and the hero map now skips phones entirely — its 3.5s of script eval was pure cost on the primary device |
+| **data** | validated + race-safe | plus: double-submit guard on `createListing`, auth + category allow-list on `suggestPrice`, shape-checked SSE payloads, back-button-safe search state |
+| **ops** | — | env validated at startup with clear errors; favicon, OG/Twitter cards (a shared listing previews with photo + price), `robots.txt` |
 
-The whole thing propagates from shared design tokens + primitives, so the
-elevation lands on every screen, not just the landing.
+**Lighthouse (landing, mobile emulation, local prod build)** — before → after
+the v3 perf pass:
+
+| category | before | after |
+| --- | --- | --- |
+| Performance | 59 | **99** (FCP 0.8s · LCP 2.3s · TBT 10ms · CLS 0) |
+| Accessibility | 96 | **100** |
+| Best practices | 100 | **100** |
+| SEO | 92 | **92**¹ |
+
+¹ The one failing audit is `meta-description`: Next 15 streams metadata into
+`<body>` on dynamic pages for browser user-agents. Crawlers and link-preview
+bots (`htmlLimitedBots`) receive it in `<head>` — verified with a Twitterbot
+UA — so real-world SEO/sharing is unaffected.
+
+The earlier heuristic-evaluation pass is still written up in
+[`docs/HCI_UX_REPORT.md`](docs/HCI_UX_REPORT.md).
 
 ## how it's laid out
 

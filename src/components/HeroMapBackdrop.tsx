@@ -17,7 +17,9 @@ const HeroMap = dynamic(() => import("@/components/HeroMap"), {
  */
 export function HeroMapBackdrop() {
   return (
-    <div className="absolute inset-0 z-0" aria-hidden="true">
+    // `inert` (not just aria-hidden) so nothing inside — MapLibre's canvas
+    // gets a tabindex, its attribution has links — can ever take focus.
+    <div className="absolute inset-0 z-0" aria-hidden="true" inert>
       <HeroMap />
     </div>
   );

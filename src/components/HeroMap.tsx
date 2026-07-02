@@ -33,6 +33,11 @@ export default function HeroMap() {
       typeof window !== "undefined" &&
       !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+    // The map is a decorative desktop flourish. On phones — the primary
+    // device — its ~3.5s of script evaluation would block the main thread
+    // for a backdrop that's washed to 65% anyway, so skip it entirely.
+    if (!window.matchMedia("(min-width: 640px)").matches) return;
+
     async function init() {
       if (cancelled || !container) return;
       // Dynamic import keeps the MapLibre GL engine in its own chunk — out of
