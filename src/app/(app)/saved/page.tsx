@@ -96,6 +96,7 @@ export default async function SavedPage({
             />
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              <h2 className="sr-only">Saved items</h2>
               {favorites.map((f) => (
                 <ListingCard
                   key={f.id}

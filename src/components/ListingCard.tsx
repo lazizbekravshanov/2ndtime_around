@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/StatusBadge";
 import { PinIcon } from "@/components/icons";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { formatPrice, photoList, timeAgo } from "@/lib/format";
@@ -61,11 +62,7 @@ export function ListingCard({
           {listing.type === "LOST" && <Badge tone="accent">Lost</Badge>}
           {listing.type === "FOUND" && <Badge tone="neutral">Found</Badge>}
           {isWanted && !done && <Badge tone="outline">Looking for</Badge>}
-          {done && (
-            <Badge tone="success">
-              {listing.status === "SOLD" ? "Sold" : "Resolved"}
-            </Badge>
-          )}
+          {done && <StatusBadge status={listing.status} />}
         </div>
       </div>
 

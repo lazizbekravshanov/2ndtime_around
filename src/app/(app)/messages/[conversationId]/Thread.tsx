@@ -39,7 +39,7 @@ function Timestamp({ iso }: { iso: string }) {
       // Server renders in UTC, client in the viewer's timezone — an expected,
       // benign difference. Suppress the hydration warning rather than mismatch.
       suppressHydrationWarning
-      className="mt-1 block text-[11px] text-faint"
+      className="mt-1 block text-xs text-faint"
     >
       {new Date(iso).toLocaleTimeString("en-US", {
         hour: "numeric",
@@ -494,9 +494,9 @@ export function Thread({
                 >
                   <p
                     role="note"
-                    className="flex max-w-[80%] items-start gap-1.5 rounded-lg border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+                    className="flex max-w-[75%] items-start gap-1.5 rounded-lg border border-line bg-paper px-3 py-2 text-xs text-ink"
                   >
-                    <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <AlertIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
                     <span>
                       This message contains an external link or contact info.
                       Never send payment before meeting in person.
@@ -517,7 +517,7 @@ export function Thread({
                 </div>
               </div>
               {m.id === lastSeenMineId && (
-                <p className="pr-1 text-right text-[11px] text-faint">Seen</p>
+                <p className="pr-1 text-right text-xs text-faint">Seen</p>
               )}
             </div>
           );
@@ -609,7 +609,7 @@ export function Thread({
           </form>
         )}
 
-        <p className="mb-2 text-center text-[11px] text-faint">
+        <p className="mb-2 text-center text-xs text-faint">
           Meet at a busy campus spot in daylight. Never share your dorm or
           financial info.
         </p>

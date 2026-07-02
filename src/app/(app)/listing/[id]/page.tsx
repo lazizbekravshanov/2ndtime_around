@@ -2,9 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { Badge } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/StatusBadge";
 import { StarRating } from "@/components/ui/Stars";
 import { ChevronLeftIcon, EyeIcon, PinIcon } from "@/components/icons";
-import { TYPE_LABELS, MEETUP_SPOTS, type ListingType } from "@/lib/constants";
+import {
+  TYPE_LABELS,
+  MEETUP_SPOTS,
+  type ListingStatus,
+  type ListingType,
+} from "@/lib/constants";
 import { db } from "@/lib/db";
 import { formatPrice, monthYear, photoList, timeAgo } from "@/lib/format";
 import { requireUser } from "@/lib/session";
@@ -38,7 +44,7 @@ export default async function ListingPage({
   // friendly dead end instead of the full page.
   if (!isOwner && listing.status !== "ACTIVE") {
     return (
-      <div className="mx-auto max-w-md px-4 py-20 text-center">
+      <div className="mx-auto max-w-md py-20 text-center">
         <h1 className="text-xl font-semibold tracking-tight">
           This listing is no longer available.
         </h1>
@@ -109,12 +115,8 @@ export default async function ListingPage({
               {TYPE_LABELS[type]}
             </Badge>
             <Badge tone="outline">{listing.category}</Badge>
-            {listing.status === "DRAFT" && <Badge tone="neutral">Draft</Badge>}
-            {done && (
-              <Badge tone="success">
-                {listing.status === "SOLD" ? "Sold" : "Resolved"}
-              </Badge>
-            )}
+            {listing.status === "DRAFT" && <StatusBadge status="DRAFT" />}
+            {done && <StatusBadge status={listing.status as ListingStatus} />}
           </div>
 
           <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight">
@@ -271,7 +273,7 @@ export default async function ListingPage({
                     <PinIcon className="h-3.5 w-3.5 shrink-0 text-accent" />
                     <span>
                       {spot.name}
-                      <span className="text-faint/70"> · {spot.blurb}</span>
+                      <span className="text-faint"> · {spot.blurb}</span>
                     </span>
                   </li>
                 ))}

@@ -7,7 +7,7 @@ export async function Footer() {
   const count = await getImpactCount();
   return (
     <footer className="mt-16 border-t border-line bg-surface pb-20 md:pb-0">
-      <div className="mx-auto flex max-w-[1100px] flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-faint sm:flex-row">
+      <div className="mx-auto flex max-w-page flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-faint sm:flex-row">
         <Link
           href="/impact"
           className="inline-flex items-center gap-2 hover:text-ink"

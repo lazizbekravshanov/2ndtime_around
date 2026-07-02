@@ -50,7 +50,7 @@ export default async function AppLayout({
         />
         <main
           id="main-content"
-          className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-6 pb-24 md:pb-6"
+          className="mx-auto w-full max-w-page flex-1 px-4 py-6 pb-24 md:pb-6"
         >
           {children}
         </main>

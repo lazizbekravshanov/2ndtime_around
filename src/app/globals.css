@@ -11,7 +11,11 @@
   --color-faint: #57534e; /* secondary text — darkened to clear WCAG 1.4.3 (≈7:1 on paper) */
   --color-accent: #e00122; /* UC Red — buttons, active states, badges only */
   --color-line: #e7e5e4; /* borders */
+  --color-line-strong: #d6d3d1; /* stronger hairline: muted chart fills, map massing */
   --color-success: #16a34a; /* confirmations only */
+
+  /* One page width everywhere — header, main, footer all align to it. */
+  --container-page: 68.75rem; /* 1100px → max-w-page */
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 

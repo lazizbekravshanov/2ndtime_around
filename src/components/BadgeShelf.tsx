@@ -45,7 +45,7 @@ export function BadgeShelf({
                   style={{ width: `${Math.round(b.progress * 100)}%` }}
                 />
               </span>
-              <span className="w-28 shrink-0 text-right text-[11px] text-faint">
+              <span className="w-28 shrink-0 text-right text-xs text-faint">
                 {b.progressLabel}
               </span>
             </div>

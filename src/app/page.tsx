@@ -32,7 +32,7 @@ export default async function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="mx-auto flex w-full max-w-[1100px] items-center justify-between px-4 py-5">
+      <header className="mx-auto flex w-full max-w-page items-center justify-between px-4 py-5">
         <div className="flex items-center gap-2">
           <LogoMark className="h-7 w-7" />
           <span className="text-base font-semibold tracking-tight">
@@ -56,9 +56,9 @@ export default async function LandingPage() {
           className="pointer-events-none absolute inset-0 z-[1] bg-paper/65"
         />
         {/* Server-rendered hero content — paints immediately, is the LCP element. */}
-        <div className="relative z-10 mx-auto flex min-h-[68vh] max-w-[1100px] flex-col justify-center px-4 py-16 sm:min-h-[80vh] sm:py-24">
+        <div className="relative z-10 mx-auto flex min-h-[68vh] max-w-page flex-col justify-center px-4 py-16 sm:min-h-[80vh] sm:py-24">
           <div className="max-w-2xl">
-            <h1 className="text-[2.5rem] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-6xl">
+            <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
               Everything students need,
               <br className="hidden sm:block" /> second time around.
             </h1>
@@ -91,10 +91,11 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-[1100px] flex-1 px-4">
+      <main className="mx-auto w-full max-w-page flex-1 px-4">
         {/* Live listing strip — real activity from campus. */}
         {preview.length > 0 && (
           <section className="py-12">
+            <h2 className="sr-only">Recent listings</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
               {preview.map((l) => (
                 <ListingCard
@@ -114,11 +115,11 @@ export default async function LandingPage() {
         )}
 
         {/* Campus impact — real numbers; the city-level "why this matters". */}
-        <section className="mb-14 rounded-2xl border border-line bg-surface px-6 py-10 sm:py-12">
-          <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
+        <section className="mb-12 rounded-2xl border border-line bg-surface px-6 py-10 sm:py-12">
+          <h2 className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
             <LeafIcon className="mr-1.5 inline h-4 w-4 text-success" />
             What Bearcats keep in circulation
-          </p>
+          </h2>
           <dl className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3">
             <div className="flex flex-col-reverse gap-1.5 text-center">
               <dt className="text-sm text-faint">
@@ -147,7 +148,7 @@ export default async function LandingPage() {
       </main>
 
       <footer className="border-t border-line bg-surface">
-        <p className="mx-auto max-w-[1100px] px-4 py-6 text-center text-sm text-faint">
+        <p className="mx-auto max-w-page px-4 py-6 text-center text-sm text-faint">
           Built by Team 4 — IT2021 · University of Cincinnati
         </p>
       </footer>

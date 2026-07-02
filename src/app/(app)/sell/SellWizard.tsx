@@ -163,8 +163,10 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
       {/* Step 1 — what kind of post is this? */}
       {step === 0 && (
         <fieldset className="mt-8">
-          <legend className="text-2xl font-semibold tracking-tight">
-            What would you like to post?
+          <legend>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              What would you like to post?
+            </h1>
           </legend>
           <div className="mt-5 grid gap-3">
             {TYPE_OPTIONS.map((opt) => (

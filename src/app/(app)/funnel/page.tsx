@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/Badge";
-import { TYPE_LABELS, type ListingType } from "@/lib/constants";
+import { StatusBadge } from "@/components/StatusBadge";
+import { TYPE_LABELS, type ListingStatus, type ListingType } from "@/lib/constants";
 import { timeAgo } from "@/lib/format";
 import {
   getDrilldown,
@@ -219,7 +219,7 @@ export default async function FunnelPage({
             )}
           </Card>
         </div>
-        <Card title="Most-viewed active listings" className="mt-4 p-0">
+        <Card title="Most-viewed active listings" className="mt-4 overflow-x-auto p-0">
           {data.health.mostViewed.length === 0 ? (
             <p className="px-4 py-6 text-sm text-faint">No active listings in range.</p>
           ) : (
@@ -301,17 +301,7 @@ export default async function FunnelPage({
                     <span className="shrink-0 text-xs text-faint">
                       {TYPE_LABELS[l.type as ListingType] ?? l.type}
                     </span>
-                    <Badge
-                      tone={
-                        l.status === "ACTIVE"
-                          ? "accent"
-                          : l.status === "DRAFT"
-                            ? "outline"
-                            : "success"
-                      }
-                    >
-                      {l.status[0] + l.status.slice(1).toLowerCase()}
-                    </Badge>
+                    <StatusBadge status={l.status as ListingStatus} />
                   </li>
                 ))}
               </ul>
@@ -513,8 +503,8 @@ function FunnelBars({
                 )}
               </span>
             </div>
-            <div className="mt-1 h-3 overflow-hidden rounded-md bg-paper">
-              <div className="h-full rounded-md bg-accent" style={{ width: `${Math.max(pctOfTop, 2)}%` }} />
+            <div className="mt-1 h-3 overflow-hidden rounded-full bg-paper">
+              <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(pctOfTop, 2)}%` }} />
             </div>
           </li>
         );

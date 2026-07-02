@@ -78,7 +78,7 @@ export default async function ConversationPage({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-[10px] text-faint">
+            <div className="flex h-full items-center justify-center text-xs text-faint">
               No photo
             </div>
           )}

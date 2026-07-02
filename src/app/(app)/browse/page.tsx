@@ -100,6 +100,7 @@ async function Results({ params }: { params: BrowseParams }) {
 
   return (
     <>
+      <h2 className="sr-only">Results</h2>
       <p className="mb-3 text-xs text-faint">
         Items {start}–{end}
         {hasNext ? "+" : ""}

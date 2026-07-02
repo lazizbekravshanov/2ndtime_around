@@ -71,7 +71,7 @@ function UserMenu({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-11 w-44 rounded-xl border border-line bg-surface py-1 shadow-sm"
+          className="absolute right-0 top-11 w-44 rounded-xl border border-line bg-surface py-1 shadow-float"
         >
           <Link
             role="menuitem"
@@ -178,7 +178,7 @@ export function Header({
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-line bg-surface">
-        <div className="mx-auto flex h-14 max-w-[1100px] items-center justify-between gap-4 px-4">
+        <div className="mx-auto flex h-14 max-w-page items-center justify-between gap-4 px-4">
           <Link
             href="/browse"
             className="flex items-center gap-2 text-base font-semibold"
@@ -275,7 +275,7 @@ export function Header({
           <Link
             href="/sell"
             aria-label="Post an item"
-            className="flex flex-col items-center gap-0.5 py-1.5 text-[11px] font-medium text-ink"
+            className="flex flex-col items-center gap-0.5 py-1.5 text-xs font-medium text-ink"
           >
             <span className="flex h-9 w-12 items-center justify-center rounded-full bg-accent text-white">
               <PlusIcon className="h-5 w-5" />
@@ -296,11 +296,11 @@ export function Header({
             aria-haspopup="dialog"
             aria-expanded={accountOpen}
             onClick={() => setAccountOpen(true)}
-            className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${
+            className={`relative flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium ${
               accountOpen ? "text-accent" : "text-faint"
             }`}
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full border border-current text-[10px] font-semibold uppercase">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full border border-current text-xs font-semibold uppercase">
               {displayName.charAt(0)}
             </span>
             Account
@@ -362,7 +362,7 @@ function MobileTab({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${
+      className={`relative flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium ${
         active ? "text-accent" : "text-faint"
       }`}
     >
@@ -370,7 +370,7 @@ function MobileTab({
       {label}
       {count !== undefined && count > 0 && (
         <span
-          className="absolute right-[calc(50%-18px)] top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-white"
+          className="absolute right-[calc(50%-18px)] top-1 inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold leading-none text-white"
           aria-label={`${count} unread`}
         >
           {count > 9 ? "9+" : count}

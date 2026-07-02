@@ -149,7 +149,9 @@ export default async function ProfilePage({
                     {r.fromUser.displayName} · {timeAgo(r.createdAt)}
                   </span>
                 </div>
-                {r.comment && <p className="mt-2 text-sm">{r.comment}</p>}
+                {r.comment && (
+                  <p className="mt-2 max-w-prose text-sm">{r.comment}</p>
+                )}
               </li>
             ))}
           </ul>

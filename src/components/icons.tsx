@@ -231,7 +231,7 @@ export function LogoMark({ className = "h-6 w-6" }: IconProps) {
     <svg
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#E00122"
+      stroke="var(--color-accent)"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"

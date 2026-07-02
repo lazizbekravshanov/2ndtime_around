@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/StatusBadge";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { EyeIcon } from "@/components/icons";
-import { TYPE_LABELS, type ListingType } from "@/lib/constants";
+import { TYPE_LABELS, type ListingStatus, type ListingType } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { formatPrice, photoList, timeAgo } from "@/lib/format";
 import { requireUser } from "@/lib/session";
@@ -105,7 +105,7 @@ export default async function MyItemsPage({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={cover} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-[10px] text-faint">
+                    <div className="flex h-full items-center justify-center text-xs text-faint">
                       No photo
                     </div>
                   )}
@@ -118,23 +118,7 @@ export default async function MyItemsPage({
                     >
                       {l.title}
                     </Link>
-                    <Badge
-                      tone={
-                        l.status === "ACTIVE"
-                          ? "accent"
-                          : l.status === "DRAFT"
-                            ? "outline"
-                            : "success"
-                      }
-                    >
-                      {l.status === "ACTIVE"
-                        ? "Active"
-                        : l.status === "DRAFT"
-                          ? "Draft"
-                          : l.status === "SOLD"
-                            ? "Sold"
-                            : "Resolved"}
-                    </Badge>
+                    <StatusBadge status={l.status as ListingStatus} />
                   </div>
                   <p className="mt-0.5 flex items-center gap-2 text-xs text-faint">
                     <span>

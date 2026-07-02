@@ -46,7 +46,7 @@ export default async function PublicLayout({
   } else {
     header = (
       <header className="sticky top-0 z-40 border-b border-line bg-surface">
-        <div className="mx-auto flex w-full max-w-[1100px] items-center justify-between px-4 py-3.5">
+        <div className="mx-auto flex w-full max-w-page items-center justify-between px-4 py-3.5">
           <Link href="/" className="flex items-center gap-2">
             <LogoMark className="h-6 w-6" />
             <span className="text-sm font-semibold tracking-tight">
@@ -69,7 +69,7 @@ export default async function PublicLayout({
       <div className="flex min-h-screen flex-col">
         {header}
         {/* pb clears the mobile bottom-tab bar for signed-in visitors. */}
-        <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-6 pb-24 md:pb-6">
+        <main className="mx-auto w-full max-w-page flex-1 px-4 py-6 pb-24 md:pb-6">
           {children}
         </main>
         <Footer />

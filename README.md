@@ -22,6 +22,43 @@ in this README is v3.
 - **NextAuth** — magic links, `@uc.edu` only
 - **Zod** — the server trusts nobody
 
+## design tokens
+
+everything visual derives from one `@theme` block in `src/app/globals.css`
+(Tailwind 4). if you're adding UI, use these — never a raw hex or an ad-hoc
+size:
+
+| token | value | use |
+| --- | --- | --- |
+| `paper` | `#FAFAF9` | app background |
+| `surface` | `#FFFFFF` | cards, sheets, inputs |
+| `ink` | `#1C1917` | primary text |
+| `faint` | `#57534E` | secondary text (AA on paper/surface) |
+| `accent` | `#E00122` | UC Red — the ONLY accent: primary buttons, active states, badges |
+| `line` | `#E7E5E4` | hairline borders (the default "shadow") |
+| `line-strong` | `#D6D3D1` | stronger hairline: muted chart fills, map massing |
+| `success` | `#16A34A` | confirmations only |
+
+rules of the house:
+
+- **type scale** — `text-xs` 12 / `text-sm` 14 / `text-base` 16 / `text-lg` 18 /
+  `text-xl` 20 / `text-2xl` 24, display sizes (`4xl`–`6xl`) reserved for the
+  landing hero + stat numerals. aim for ≤3 sizes per screen; nothing below 12px.
+- **radius** — cards `rounded-xl`, inputs/buttons `rounded-lg`, pills/badges
+  `rounded-full`. nested elements may step down one (e.g. `rounded-md` inside a
+  padded `rounded-lg` segmented control) so corners stay optically concentric.
+- **depth** — hairline borders, not shadows. the single exception is
+  `shadow-float` on truly floating surfaces (menus, sheets, toasts).
+- **width** — one page container, `max-w-page` (1100px), shared by header,
+  main, and footer so edges always align. `px-4` gutters everywhere.
+- **rhythm** — Tailwind spacing scale; section gaps use 4/5/6 steps
+  consistently (`mt-5` between blocks, `p-4`/`p-5` card padding).
+- **status colors** — every listing status badge goes through
+  `src/components/StatusBadge.tsx`; charts/maps that can't read Tailwind
+  classes use `var(--color-…)` or, as a last resort, `src/lib/theme.ts`.
+- **motion** — 150–250ms, one expo-out ease, all neutralized under
+  `prefers-reduced-motion`.
+
 ## run it
 
 ```bash

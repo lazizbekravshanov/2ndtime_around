@@ -3,6 +3,7 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
 import type { Map as MlMap } from "maplibre-gl";
+import { tokens } from "@/lib/theme";
 
 // UC main campus — MapLibre wants [lng, lat].
 const CAMPUS: [number, number] = [-84.515, 39.1329];
@@ -73,9 +74,9 @@ export default function HeroMap() {
               ["linear"],
               ["coalesce", ["get", "render_height"], 0],
               0,
-              "#E7E5E4",
+              tokens.line,
               40,
-              "#D6D3D1",
+              tokens.lineStrong,
             ],
             "fill-extrusion-height": ["coalesce", ["get", "render_height"], 3],
             "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
