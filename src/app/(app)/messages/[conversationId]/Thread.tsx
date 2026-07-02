@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { inputClasses } from "@/components/ui/Field";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/icons";
 import { MEETUP_SPOTS, type ListingType } from "@/lib/constants";
 import { meetupTime } from "@/lib/format";
+import { quickMeetupSlots } from "@/lib/meetupSlots";
 import { hasContactOrPaymentRisk } from "@/lib/safetyScan";
 import {
   proposeMeetup,
@@ -254,6 +255,11 @@ export function Thread({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [meetupOpen, setMeetupOpen] = useState(false);
+  // Recomputed each time the composer opens so the suggestions stay current.
+  const quickSlots = useMemo(
+    () => (meetupOpen ? quickMeetupSlots() : []),
+    [meetupOpen]
+  );
   const [meetupSpot, setMeetupSpot] = useState<string>(MEETUP_SPOTS[0].name);
   const [meetupTimeValue, setMeetupTimeValue] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -590,8 +596,30 @@ export function Thread({
                     {s.name}
                   </span>
                   <span className="mt-0.5 block text-xs text-faint">
-                    {s.blurb}
+                    {s.blurb} · {s.walk}
                   </span>
+                </button>
+              ))}
+            </div>
+            {/* Between-class quick picks — one tap fills the time input. */}
+            <div
+              role="group"
+              aria-label="Quick times"
+              className="mt-2 flex flex-wrap gap-1.5"
+            >
+              {quickSlots.map((slot) => (
+                <button
+                  key={slot.value}
+                  type="button"
+                  aria-pressed={meetupTimeValue === slot.value}
+                  onClick={() => setMeetupTimeValue(slot.value)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    meetupTimeValue === slot.value
+                      ? "border-ink bg-ink text-white"
+                      : "border-line bg-surface text-faint hover:text-ink"
+                  }`}
+                >
+                  {slot.label}
                 </button>
               ))}
             </div>

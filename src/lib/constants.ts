@@ -51,30 +51,35 @@ export type Condition = (typeof CONDITIONS)[number];
 export const MEETUP_SPOTS = [
   {
     name: "TUC main entrance",
+    walk: "Center of campus",
     blurb: "Busy, staffed, cameras",
     lat: 39.131,
     lng: -84.5169,
   },
   {
     name: "Langsam Library lobby",
+    walk: "~4 min walk from TUC",
     blurb: "Open late, security desk",
     lat: 39.1318,
     lng: -84.5159,
   },
   {
     name: "CRC front desk",
+    walk: "~5 min walk from TUC",
     blurb: "Staffed, high-traffic",
     lat: 39.1297,
     lng: -84.5142,
   },
   {
     name: "MarketPointe entrance",
+    walk: "~6 min walk from TUC",
     blurb: "Dining hall, always busy",
     lat: 39.1284,
     lng: -84.5151,
   },
   {
     name: "Steger Student Life Center",
+    walk: "~2 min walk from TUC",
     blurb: "Central, well-lit",
     lat: 39.1305,
     lng: -84.5163,
