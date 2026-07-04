@@ -918,6 +918,93 @@ async function main() {
     ),
   ]);
 
+  // ---- Leaderboard depth ----
+  // Extra students who SHARE majors with the core cast, so the sustainability
+  // leaderboard's "By major" board aggregates across people instead of showing
+  // one student per major. Each owns completed sales/donations (= items kept in
+  // circulation). Purely additive — no conversations, ratings, or reports refer
+  // to these rows, so nothing else in the seed is affected.
+  const extraStudents = [
+    { email: "kaurrv@mail.uc.edu", displayName: "Ravi K.", major: "Information Technology", year: "Senior", sold: 4, donated: 2 },
+    { email: "wongch@mail.uc.edu", displayName: "Chloe W.", major: "Information Technology", year: "Sophomore", sold: 3, donated: 1 },
+    { email: "brookst@mail.uc.edu", displayName: "Tyler B.", major: "Marketing", year: "Junior", sold: 3, donated: 1 },
+    { email: "lehmanh@mail.uc.edu", displayName: "Hannah L.", major: "Biology", year: "Senior", sold: 2, donated: 2 },
+    { email: "floreso@mail.uc.edu", displayName: "Omar F.", major: "Mechanical Engineering", year: "Junior", sold: 3, donated: 0 },
+    { email: "grantg@mail.uc.edu", displayName: "Grace M.", major: "Nursing", year: "Sophomore", sold: 2, donated: 1 },
+  ];
+  const sellPool: [string, string, number][] = [
+    ["Lecture notes binder", "Textbooks & Course Materials", 10],
+    ["Desk organizer", "Dorm & Apartment Essentials", 8],
+    ["Table lamp", "Dorm & Apartment Essentials", 12],
+    ["USB-C hub", "Electronics", 18],
+    ["Bluetooth speaker", "Electronics", 22],
+    ["Rain jacket", "Clothing & Accessories", 15],
+    ["Coffee maker", "Dorm & Apartment Essentials", 20],
+    ["Bookshelf (small)", "Furniture", 25],
+  ];
+  const donatePool: [string, string][] = [
+    ["Storage bins", "Dorm & Apartment Essentials"],
+    ["Extra hangers", "Dorm & Apartment Essentials"],
+    ["Study snacks (sealed)", "Other"],
+    ["Poster set", "Art & Design Supplies"],
+  ];
+  let extraSeq = 0;
+  for (const s of extraStudents) {
+    const u = await db.user.create({
+      data: {
+        email: s.email,
+        displayName: s.displayName,
+        major: s.major,
+        year: s.year,
+        createdAt: daysAgo(260),
+        emailVerified: daysAgo(260),
+      },
+    });
+    const rows: ReturnType<typeof L>[] = [];
+    for (let i = 0; i < s.sold; i++) {
+      const [title, category, price] = sellPool[extraSeq % sellPool.length];
+      const day = 20 + (extraSeq % 40);
+      rows.push(
+        L({
+          type: "SELL",
+          title,
+          description: `${title} — sold to a fellow Bearcat.`,
+          category,
+          condition: conditions[extraSeq % conditions.length],
+          price,
+          photos: [],
+          ownerId: u.id,
+          status: "SOLD",
+          createdAt: daysAgo(day + 4),
+          updatedAt: daysAgo(day),
+          viewCount: 12 + (extraSeq % 30),
+        })
+      );
+      extraSeq++;
+    }
+    for (let i = 0; i < s.donated; i++) {
+      const [title, category] = donatePool[extraSeq % donatePool.length];
+      const day = 15 + (extraSeq % 30);
+      rows.push(
+        L({
+          type: "DONATE",
+          title,
+          description: `${title} — given away free to another student.`,
+          category,
+          condition: "Good",
+          photos: [],
+          ownerId: u.id,
+          status: "SOLD",
+          createdAt: daysAgo(day + 3),
+          updatedAt: daysAgo(day),
+          viewCount: 6 + (extraSeq % 20),
+        })
+      );
+      extraSeq++;
+    }
+    await Promise.all(rows);
+  }
+
   // Backfill completedAt for already-completed listings (= their updatedAt),
   // so time-to-completion analytics have data out of the box.
   const doneListings = await db.listing.findMany({

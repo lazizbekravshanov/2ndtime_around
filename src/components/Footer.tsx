@@ -18,7 +18,12 @@ export async function Footer() {
             {count === 1 ? "item" : "items"} kept out of landfills
           </span>
         </Link>
-        <p>Built by Team 4 — IT2021 · University of Cincinnati</p>
+        <div className="flex items-center gap-4">
+          <Link href="/leaderboard" className="hover:text-ink">
+            Leaderboard
+          </Link>
+          <p>Built by Team 4 — IT2021 · University of Cincinnati</p>
+        </div>
       </div>
     </footer>
   );

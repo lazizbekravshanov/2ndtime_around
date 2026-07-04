@@ -187,6 +187,14 @@ export default async function LandingPage() {
               </dd>
             </div>
           </dl>
+          <p className="mt-8 text-center text-sm">
+            <Link
+              href="/leaderboard"
+              className="font-medium text-faint underline-offset-4 transition-colors hover:text-ink hover:underline"
+            >
+              See which Bearcats keep the most in circulation →
+            </Link>
+          </p>
         </section>
       </main>
 

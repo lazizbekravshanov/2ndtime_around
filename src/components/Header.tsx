@@ -105,6 +105,13 @@ function UserMenu({
           >
             Campus impact
           </Link>
+          <Link
+            href="/leaderboard"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm hover:bg-paper"
+          >
+            Leaderboard
+          </Link>
           {isModerator && (
             <>
               <Link
@@ -164,6 +171,7 @@ export function Header({
     { href: "/saved", label: "Saved" },
     { href: "/notifications", label: "Notifications", badge: notifCount },
     { href: "/impact", label: "Campus impact" },
+    { href: "/leaderboard", label: "Leaderboard" },
     ...(isModerator
       ? [
           { href: "/funnel", label: "Funnel" },
