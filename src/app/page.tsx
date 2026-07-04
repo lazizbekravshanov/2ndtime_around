@@ -69,12 +69,20 @@ export default async function LandingPage() {
             2nd Time Around
           </span>
         </div>
-        <Link
-          href="/signin"
-          className="text-sm font-medium text-faint transition-colors hover:text-ink"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link
+            href="/how-it-works"
+            className="text-sm font-medium text-faint transition-colors hover:text-ink"
+          >
+            How it works
+          </Link>
+          <Link
+            href="/signin"
+            className="text-sm font-medium text-faint transition-colors hover:text-ink"
+          >
+            Sign in
+          </Link>
+        </div>
       </header>
 
       <section className="relative isolate w-full overflow-hidden border-b border-line">

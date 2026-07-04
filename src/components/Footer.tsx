@@ -19,6 +19,9 @@ export async function Footer() {
           </span>
         </Link>
         <div className="flex items-center gap-4">
+          <Link href="/how-it-works" className="hover:text-ink">
+            How it works
+          </Link>
           <Link href="/leaderboard" className="hover:text-ink">
             Leaderboard
           </Link>
