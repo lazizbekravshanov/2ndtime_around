@@ -244,6 +244,27 @@ near them (spec: [`docs/superpowers/specs/`](docs/superpowers/specs/)):
 - **meetup quick-picks** — walking-time hints on every safe spot + one-tap
   between-class time chips (no map, zero new JS weight)
 
+## v3.2 — pitch-ready pass
+
+A second UX/UI audit, then four tracks to take it from polished project to
+something you could pitch as a real campus venture (spec:
+[`docs/superpowers/specs/2026-07-04-v3.2-pitch-ready-design.md`](docs/superpowers/specs/2026-07-04-v3.2-pitch-ready-design.md)):
+
+- **demo-flawless polish** — nine audit fixes: Browse price/course fields made
+  controlled (no stale value after chip removal), AA-contrast success badge
+  (new `--color-success-strong`), valid card markup (stretched link, not a
+  button-in-anchor) with a real `alt`, one-click **Publish** on drafts,
+  normalized page titles, SVG pin instead of an emoji, a moderation loading
+  skeleton, and distinct empty-state icons
+- **sustainability leaderboard** (`/leaderboard`) — **Top Bearcats** and **By
+  major** boards ranking students by items kept in circulation, with a
+  personalized "You're #N" for signed-in students. Pure ranking logic (11
+  unit tests) over a cached query; no schema change
+- **public "How it works"** (`/how-it-works`) — the in-product pitch narrative:
+  three steps, the trust story, real impact numbers
+- **founder pitch one-pager** — [`docs/pitch/onepager.html`](docs/pitch/onepager.html),
+  a self-contained, design-grade pitch deriving its numbers from the live product
+
 ## how it's laid out
 
 ```
