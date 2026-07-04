@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { ListingCard } from "@/components/ListingCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BadgeIcon } from "@/components/icons";
 import { StarRating } from "@/components/ui/Stars";
 import { db } from "@/lib/db";
 import { monthYear, timeAgo } from "@/lib/format";
@@ -132,6 +133,7 @@ export default async function ProfilePage({
         {ratings.length === 0 ? (
           <div className="mt-4">
             <EmptyState
+              icon={<BadgeIcon className="h-6 w-6" />}
               title="No ratings yet"
               hint="Ratings appear here after completed exchanges."
             />

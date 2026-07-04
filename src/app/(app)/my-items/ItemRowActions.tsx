@@ -49,9 +49,33 @@ export function ItemRowActions({
     router.refresh();
   }
 
+  // Publishing a draft is constructive and reversible (it can be marked done or
+  // deleted after), so it goes straight through without a confirmation modal.
+  async function publish() {
+    setPending(true);
+    const result = await setListingStatus({ listingId, status: "ACTIVE" });
+    setPending(false);
+    if (!result.ok) {
+      toast(result.error, { type: "error" });
+      return;
+    }
+    toast("Listing published");
+    router.refresh();
+  }
+
   return (
     <>
       <div className="flex shrink-0 items-center gap-1.5">
+        {status === "DRAFT" && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={publish}
+            disabled={pending}
+          >
+            {pending ? "Publishing…" : "Publish"}
+          </Button>
+        )}
         <ButtonLink
           variant="secondary"
           size="sm"

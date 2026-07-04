@@ -45,7 +45,7 @@ export default async function FunnelPage({
   return (
     <div className="mx-auto max-w-5xl">
       <header>
-        <h1 className="text-xl font-semibold tracking-tight">Funnel</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Funnel</h1>
         <p className="mt-1 text-sm text-faint">
           Internal analytics — moderators only. Showing{" "}
           <span className="text-ink">{data.rangeLabel.toLowerCase()}</span>.

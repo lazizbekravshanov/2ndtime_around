@@ -13,6 +13,7 @@
   --color-line: #e7e5e4; /* borders */
   --color-line-strong: #d6d3d1; /* stronger hairline: muted chart fills, map massing */
   --color-success: #16a34a; /* confirmations only */
+  --color-success-strong: #15803d; /* darker green for text on the success tint — clears AA (≈5:1) where #16a34a (≈3:1) fails */
 
   /* One page width everywhere — header, main, footer all align to it. */
   --container-page: 68.75rem; /* 1100px → max-w-page */

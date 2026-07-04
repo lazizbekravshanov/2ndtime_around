@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ListingCard } from "@/components/ListingCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HeartIcon, SearchIcon } from "@/components/icons";
 import { ButtonLink } from "@/components/ui/Button";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -66,7 +67,7 @@ export default async function SavedPage({
 
   return (
     <div>
-      <h1 className="text-lg font-semibold">Saved</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Saved</h1>
 
       <nav aria-label="Saved sections" className="mt-3 flex gap-1 border-b border-line">
         {SEGMENTS.map((s) => (
@@ -90,6 +91,7 @@ export default async function SavedPage({
         {segment === "items" ? (
           favorites.length === 0 ? (
             <EmptyState
+              icon={<HeartIcon className="h-6 w-6" />}
               title="Nothing saved yet"
               hint="Tap the heart on anything to keep an eye on it — we'll tell you about price drops."
               action={<ButtonLink href="/browse">Browse items</ButtonLink>}
@@ -112,6 +114,7 @@ export default async function SavedPage({
           )
         ) : searches.length === 0 ? (
           <EmptyState
+            icon={<SearchIcon className="h-6 w-6" />}
             title="No saved searches"
             hint="Search and filter on Browse, then tap “Save this search” to get notified about new matches."
             action={<ButtonLink href="/browse">Go to Browse</ButtonLink>}

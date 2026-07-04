@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ButtonLink } from "@/components/ui/Button";
 import { db } from "@/lib/db";
 import { photoList, timeAgo } from "@/lib/format";
+import { ChatIcon, PinIcon } from "@/components/icons";
 import { requireUser } from "@/lib/session";
 
 export const metadata = { title: "Messages" };
@@ -42,6 +43,7 @@ export default async function MessagesPage() {
       {conversations.length === 0 ? (
         <div className="mt-6">
           <EmptyState
+            icon={<ChatIcon className="h-6 w-6" />}
             title="No conversations yet"
             hint="Find something you like and message the seller — every exchange starts here."
             action={<ButtonLink href="/browse">Browse listings</ButtonLink>}
@@ -100,13 +102,20 @@ export default async function MessagesPage() {
                         unread > 0 ? "font-medium text-ink" : "text-faint"
                       }`}
                     >
-                      {last
-                        ? last.kind === "MEETUP_PROPOSAL"
-                          ? "📍 Meetup proposed"
-                          : last.kind === "CLAIM"
-                            ? "Ownership claim"
-                            : last.body
-                        : "No messages yet — say hi!"}
+                      {last ? (
+                        last.kind === "MEETUP_PROPOSAL" ? (
+                          <>
+                            <PinIcon className="mr-1 inline-block h-3.5 w-3.5 shrink-0 align-[-2px]" />
+                            Meetup proposed
+                          </>
+                        ) : last.kind === "CLAIM" ? (
+                          "Ownership claim"
+                        ) : (
+                          last.body
+                        )
+                      ) : (
+                        "No messages yet — say hi!"
+                      )}
                     </p>
                   </div>
                   {unread > 0 && (

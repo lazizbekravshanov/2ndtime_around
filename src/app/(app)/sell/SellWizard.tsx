@@ -185,12 +185,15 @@ export function SellWizard({ initialType }: { initialType?: ListingType }) {
               <button
                 key={opt.type}
                 type="button"
+                aria-pressed={type === opt.type}
                 onClick={() => {
                   setType(opt.type);
                   setStep(1);
                 }}
                 className={`rounded-xl border p-4 text-left transition-colors hover:border-faint ${
-                  type === opt.type ? "border-accent" : "border-line bg-surface"
+                  type === opt.type
+                    ? "border-accent bg-accent/5"
+                    : "border-line bg-surface"
                 }`}
               >
                 <span className="block text-sm font-semibold">{opt.title}</span>

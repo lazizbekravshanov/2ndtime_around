@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { CheckIcon } from "@/components/icons";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { timeAgo } from "@/lib/format";
@@ -22,7 +23,7 @@ export default async function ModerationPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="text-lg font-semibold">Moderation</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Moderation</h1>
       <p className="mt-1 text-sm text-faint">
         {reports.length} open {reports.length === 1 ? "report" : "reports"}.
       </p>
@@ -30,6 +31,7 @@ export default async function ModerationPage() {
       <div className="mt-5">
         {reports.length === 0 ? (
           <EmptyState
+            icon={<CheckIcon className="h-6 w-6" />}
             title="Nothing to review"
             hint="Reports from the community will appear here for you to action or dismiss."
           />

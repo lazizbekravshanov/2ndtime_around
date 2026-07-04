@@ -4,7 +4,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { currentSemester, daysUntilMoveOut } from "@/lib/semester";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { EyeIcon } from "@/components/icons";
+import { EyeIcon, TagIcon } from "@/components/icons";
 import { TYPE_LABELS, type ListingStatus, type ListingType } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { formatPrice, photoList, timeAgo } from "@/lib/format";
@@ -94,6 +94,7 @@ export default async function MyItemsPage({
       {listings.length === 0 ? (
         <div className="mt-6">
           <EmptyState
+            icon={<TagIcon className="h-6 w-6" />}
             title={EMPTY_COPY[tab].title}
             hint={EMPTY_COPY[tab].hint}
             action={

@@ -34,10 +34,16 @@ export function ListingCard({
   const done = listing.status === "SOLD" || listing.status === "RESOLVED";
 
   return (
-    <Link
-      href={`/listing/${listing.id}`}
-      className="group relative overflow-hidden rounded-xl border border-line bg-surface transition-colors duration-200 hover:border-faint/40"
-    >
+    // Card is a plain container, not an anchor: a stretched link overlays the
+    // whole card for navigation, while the favorite button is a *sibling* (not a
+    // descendant) so we never nest a <button> inside an <a> (invalid HTML / AT hazard).
+    <article className="group relative overflow-hidden rounded-xl border border-line bg-surface transition-colors duration-200 hover:border-faint/40">
+      <Link
+        href={`/listing/${listing.id}`}
+        className="absolute inset-0 z-10 rounded-xl"
+      >
+        <span className="sr-only">{listing.title}</span>
+      </Link>
       {favorited !== undefined && (
         <FavoriteButton listingId={listing.id} initial={favorited} />
       )}
@@ -48,7 +54,7 @@ export function ListingCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={photos[0]}
-            alt=""
+            alt={listing.title}
             loading="lazy"
             decoding="async"
             className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
@@ -100,7 +106,7 @@ export function ListingCard({
           </span>
         </p>
       </div>
-    </Link>
+    </article>
   );
 }
 

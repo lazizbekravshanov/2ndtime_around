@@ -1,4 +1,5 @@
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BellIcon } from "@/components/icons";
 import { ButtonLink } from "@/components/ui/Button";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -40,13 +41,14 @@ export default async function NotificationsPage() {
   return (
     <div className="mx-auto max-w-xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Notifications</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Notifications</h1>
         {hasUnread && <MarkAllRead />}
       </div>
 
       <div className="mt-5">
         {notifications.length === 0 ? (
           <EmptyState
+            icon={<BellIcon className="h-6 w-6" />}
             title="You're all caught up"
             hint="Messages, claims, meetups, price drops, and saved-search matches will show up here."
             action={<ButtonLink href="/browse">Browse items</ButtonLink>}

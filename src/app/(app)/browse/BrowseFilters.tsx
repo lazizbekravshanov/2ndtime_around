@@ -16,6 +16,12 @@ export function BrowseFilters({ tab }: { tab: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [q, setQ] = useState(searchParams.get("q") ?? "");
+  // Course / min / max are controlled too, so removing a chip (or Clear all)
+  // resets the field instead of leaving a stale value visible while the URL
+  // says otherwise. Each stays in sync with its URL param via the effect below.
+  const [course, setCourse] = useState(searchParams.get("course") ?? "");
+  const [min, setMin] = useState(searchParams.get("min") ?? "");
+  const [max, setMax] = useState(searchParams.get("max") ?? "");
   // One timer PER field — a shared timer would let a keystroke in one field
   // silently cancel another field's pending URL update.
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
@@ -37,12 +43,24 @@ export function BrowseFilters({ tab }: { tab: string }) {
     return () => Object.values(t).forEach(clearTimeout);
   }, []);
 
-  // Keep the search box in sync when the URL changes underneath us
-  // (back/forward, chip removal, Clear all) — the newest query always wins.
+  // Keep every controlled field in sync when the URL changes underneath us
+  // (back/forward, chip removal, Clear all) — the newest URL value always wins.
   const urlQ = searchParams.get("q") ?? "";
+  const urlCourse = searchParams.get("course") ?? "";
+  const urlMin = searchParams.get("min") ?? "";
+  const urlMax = searchParams.get("max") ?? "";
   useEffect(() => {
     setQ(urlQ);
   }, [urlQ]);
+  useEffect(() => {
+    setCourse(urlCourse);
+  }, [urlCourse]);
+  useEffect(() => {
+    setMin(urlMin);
+  }, [urlMin]);
+  useEffect(() => {
+    setMax(urlMax);
+  }, [urlMax]);
 
   const lf = searchParams.get("lf") ?? "";
 
@@ -125,8 +143,11 @@ export function BrowseFilters({ tab }: { tab: string }) {
             id="course-filter"
             type="search"
             placeholder="e.g. MATH 1061"
-            defaultValue={searchParams.get("course") ?? ""}
-            onChange={(e) => setParamDebounced("course", e.target.value, 300)}
+            value={course}
+            onChange={(e) => {
+              setCourse(e.target.value);
+              setParamDebounced("course", e.target.value, 300);
+            }}
             className={`${inputClasses} w-44`}
           />
         </div>
@@ -144,8 +165,11 @@ export function BrowseFilters({ tab }: { tab: string }) {
             min={0}
             placeholder="Min"
             aria-label="Minimum price"
-            defaultValue={searchParams.get("min") ?? ""}
-            onChange={(e) => setParamDebounced("min", e.target.value, 400)}
+            value={min}
+            onChange={(e) => {
+              setMin(e.target.value);
+              setParamDebounced("min", e.target.value, 400);
+            }}
             className={`${inputClasses} w-24`}
           />
           <span className="text-faint">–</span>
@@ -156,8 +180,11 @@ export function BrowseFilters({ tab }: { tab: string }) {
             min={0}
             placeholder="Max"
             aria-label="Maximum price"
-            defaultValue={searchParams.get("max") ?? ""}
-            onChange={(e) => setParamDebounced("max", e.target.value, 400)}
+            value={max}
+            onChange={(e) => {
+              setMax(e.target.value);
+              setParamDebounced("max", e.target.value, 400);
+            }}
             className={`${inputClasses} w-24`}
           />
         </div>
