@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Sheet } from "@/components/ui/Sheet";
 import { Toggle } from "@/components/ui/Toggle";
@@ -25,12 +26,31 @@ function defaultLabel(params: BrowseParams): string {
   return parts.join(" · ") || "My saved search";
 }
 
-export function SaveSearchButton({ params }: { params: BrowseParams }) {
+export function SaveSearchButton({
+  params,
+  signInHref,
+}: {
+  params: BrowseParams;
+  /** When set, the viewer is anonymous: saving a search requires sign-in. */
+  signInHref?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");
   const [notify, setNotify] = useState(true);
   const [pending, startTransition] = useTransition();
   const toast = useToast();
+
+  // Anonymous visitors sign in before saving a search.
+  if (signInHref) {
+    return (
+      <Link
+        href={signInHref}
+        className="shrink-0 whitespace-nowrap text-sm font-medium text-faint transition-colors hover:text-ink"
+      >
+        Save this search
+      </Link>
+    );
+  }
 
   function onOpen() {
     setLabel(defaultLabel(params));

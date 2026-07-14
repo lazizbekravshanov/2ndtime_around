@@ -15,7 +15,8 @@ import {
 } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { formatPrice, monthYear, photoList, timeAgo } from "@/lib/format";
-import { requireUser } from "@/lib/session";
+import { getSessionUser } from "@/lib/session";
+import { viewOutcome } from "@/lib/listingVisibility";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ListingMenu } from "./ListingMenu";
 import { ClaimButton } from "./ClaimButton";
@@ -79,16 +80,29 @@ export default async function ListingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const user = await requireUser();
+  // Public page: anonymous visitors may view active listings. A signed-in user
+  // unlocks owner controls, favorite state, and the participation actions.
+  const user = await getSessionUser();
+  // Anonymous visitors reach every protected control through sign-in, returning
+  // here afterwards.
+  const signInHref = user
+    ? undefined
+    : `/signin?callbackUrl=${encodeURIComponent(`/listing/${id}`)}`;
 
   const listing = await getListing(id);
-  if (!listing || listing.status === "DELETED") notFound();
+  if (!listing) notFound();
 
-  const isOwner = listing.ownerId === user.id;
+  const isOwner = user ? listing.ownerId === user.id : false;
   // Only ACTIVE listings are publicly reachable by URL. The owner can still
   // open their own draft / sold / resolved listings; everyone else hits a
-  // friendly dead end instead of the full page.
-  if (!isOwner && listing.status !== "ACTIVE") {
+  // friendly dead end instead of the full page (which must not reveal the
+  // exact non-active status).
+  const outcome = viewOutcome({
+    status: listing.status as ListingStatus,
+    isOwner,
+  });
+  if (outcome === "notFound") notFound();
+  if (outcome === "unavailable") {
     return (
       <div className="mx-auto max-w-md py-20 text-center">
         <h1 className="text-xl font-semibold tracking-tight">
@@ -133,12 +147,13 @@ export default async function ListingPage({
   const done = listing.status === "SOLD" || listing.status === "RESOLVED";
   const showMeetup = (type === "SELL" || type === "DONATE") && !done;
 
-  const favorited = isOwner
-    ? false
-    : (await db.favorite.findUnique({
-        where: { userId_listingId: { userId: user.id, listingId: id } },
-        select: { id: true },
-      })) !== null;
+  const favorited =
+    user && !isOwner
+      ? (await db.favorite.findUnique({
+          where: { userId_listingId: { userId: user.id, listingId: id } },
+          select: { id: true },
+        })) !== null
+      : false;
 
   return (
     <div>
@@ -272,17 +287,21 @@ export default async function ListingPage({
                     listingId={listing.id}
                     initial={favorited}
                     variant="inline"
+                    signInHref={signInHref}
                   />
                   <ListingMenu
                     listingId={listing.id}
                     ownerId={listing.owner.id}
                     ownerName={listing.owner.displayName ?? "this user"}
+                    signInHref={signInHref}
                   />
                 </div>
               </div>
             ) : (
               <>
-                {type === "FOUND" && <ClaimButton listingId={listing.id} />}
+                {type === "FOUND" && (
+                  <ClaimButton listingId={listing.id} signInHref={signInHref} />
+                )}
                 <MessageSellerButton
                   listingId={listing.id}
                   label={
@@ -295,17 +314,20 @@ export default async function ListingPage({
                           : "Message seller"
                   }
                   secondary={type === "FOUND"}
+                  signInHref={signInHref}
                 />
                 <div className="flex items-center gap-2">
                   <FavoriteButton
                     listingId={listing.id}
                     initial={favorited}
                     variant="inline"
+                    signInHref={signInHref}
                   />
                   <ListingMenu
                     listingId={listing.id}
                     ownerId={listing.owner.id}
                     ownerName={listing.owner.displayName ?? "this user"}
+                    signInHref={signInHref}
                   />
                 </div>
               </>

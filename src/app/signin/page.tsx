@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useRef, useState } from "react";
 import { LogoMark } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 import { Field, inputClasses } from "@/components/ui/Field";
 import { DEMO_ACCOUNTS } from "@/lib/constants";
+import { safeCallbackUrl } from "@/lib/url";
 
 /**
  * Demo-mode sign-in: pick a persona, enter the shared demo password.
@@ -14,8 +15,12 @@ import { DEMO_ACCOUNTS } from "@/lib/constants";
  * shown to teammates and reviewers; the magic-link email flow still exists
  * server-side and returns when real sign-ups open up.
  */
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter();
+  // Anonymous visitors are sent here from public browse/listing pages with a
+  // callbackUrl; validate it (same-origin only) before trusting it.
+  const searchParams = useSearchParams();
+  const callbackUrl = safeCallbackUrl(searchParams.get("callbackUrl"));
   const [email, setEmail] = useState<string>(DEMO_ACCOUNTS[0].email);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +64,7 @@ export default function SignInPage() {
       setError(json?.error ?? "Something went wrong. Try again.");
       return;
     }
-    router.push("/browse");
+    router.push(callbackUrl);
     router.refresh();
   }
 
@@ -149,5 +154,17 @@ export default function SignInPage() {
         permitted.
       </p>
     </main>
+  );
+}
+
+/**
+ * `useSearchParams()` requires a Suspense boundary in the App Router, otherwise
+ * the whole route opts out of static rendering (and the build warns).
+ */
+export default function SignInPage() {
+  return (
+    <Suspense>
+      <SignInForm />
+    </Suspense>
   );
 }

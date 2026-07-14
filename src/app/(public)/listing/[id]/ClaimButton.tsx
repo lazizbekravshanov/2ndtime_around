@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { Field, textareaClasses } from "@/components/ui/Field";
 import { submitClaim } from "@/lib/actions/conversations";
 
@@ -11,12 +11,28 @@ import { submitClaim } from "@/lib/actions/conversations";
  * form asking for a detail only the true owner would know. The claim is
  * sent as a special message the finder can approve or deny in chat.
  */
-export function ClaimButton({ listingId }: { listingId: string }) {
+export function ClaimButton({
+  listingId,
+  signInHref,
+}: {
+  listingId: string;
+  /** When set, the viewer is anonymous: render a sign-in call to action. */
+  signInHref?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  // Anonymous visitors sign in before claiming a found item.
+  if (signInHref) {
+    return (
+      <ButtonLink href={signInHref} className="w-full">
+        Sign in to claim
+      </ButtonLink>
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

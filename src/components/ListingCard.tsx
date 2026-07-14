@@ -23,10 +23,13 @@ export type ListingCardData = {
 export function ListingCard({
   listing,
   favorited,
+  signInHref,
 }: {
   listing: ListingCardData;
   /** undefined hides the heart (e.g. own items); boolean shows its state. */
   favorited?: boolean;
+  /** When set, the viewer is anonymous: the heart becomes a sign-in CTA. */
+  signInHref?: string;
 }) {
   const photos = photoList(listing.photos);
   const isLostFound = listing.type === "LOST" || listing.type === "FOUND";
@@ -44,8 +47,12 @@ export function ListingCard({
       >
         <span className="sr-only">{listing.title}</span>
       </Link>
-      {favorited !== undefined && (
-        <FavoriteButton listingId={listing.id} initial={favorited} />
+      {signInHref ? (
+        <FavoriteButton listingId={listing.id} signInHref={signInHref} />
+      ) : (
+        favorited !== undefined && (
+          <FavoriteButton listingId={listing.id} initial={favorited} />
+        )
       )}
       <div className="relative aspect-[4/3] overflow-hidden bg-paper">
         {photos[0] ? (

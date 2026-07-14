@@ -53,6 +53,10 @@ async function Results({ params }: { params: BrowseParams }) {
 
   const where = buildListingWhere(params, { blockedIds });
   const page = parsePage(params.page);
+  // Anonymous card hearts become sign-in CTAs that return to this browse view.
+  const signInHref = user
+    ? undefined
+    : `/signin?callbackUrl=${encodeURIComponent(pageHref(params, page))}`;
   // Fetch one extra row to know whether a next page exists, without a count().
   const rows = await db.listing.findMany({
     where,
@@ -121,6 +125,7 @@ async function Results({ params }: { params: BrowseParams }) {
             favorited={
               user && l.ownerId !== user.id ? favIds.has(l.id) : undefined
             }
+            signInHref={signInHref}
           />
         ))}
       </div>
@@ -159,6 +164,11 @@ export default async function BrowsePage({
   const params = await searchParams;
   const tab = parseTab(params.tab);
   const chips = activeFilterChips(params);
+  // Anonymous "Save this search" leads to sign-in, returning to this exact view.
+  const user = await getSessionUser();
+  const signInHref = user
+    ? undefined
+    : `/signin?callbackUrl=${encodeURIComponent(pageHref(params, parsePage(params.page)))}`;
 
   const moveoutDays = daysUntilMoveOut();
 
@@ -212,7 +222,7 @@ export default async function BrowsePage({
       {chips.length > 0 && (
         <div className="mt-3 flex items-center justify-between gap-3">
           <ActiveFilters chips={chips} />
-          <SaveSearchButton params={params} />
+          <SaveSearchButton params={params} signInHref={signInHref} />
         </div>
       )}
 

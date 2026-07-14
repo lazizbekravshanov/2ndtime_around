@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
@@ -14,10 +15,13 @@ export function ListingMenu({
   listingId,
   ownerId,
   ownerName,
+  signInHref,
 }: {
   listingId: string;
   ownerId: string;
   ownerName: string;
+  /** When set, the viewer is anonymous: menu items lead to sign-in. */
+  signInHref?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -25,6 +29,40 @@ export function ListingMenu({
   const [confirmingBlock, setConfirmingBlock] = useState(false);
   const [pending, startTransition] = useTransition();
   const toast = useToast();
+
+  // Anonymous visitors get the same overflow affordance, but reporting and
+  // blocking route through sign-in.
+  if (signInHref) {
+    return (
+      <>
+        <IconButton
+          aria-label="More options"
+          title="More options"
+          onClick={() => setMenuOpen(true)}
+        >
+          <DotsIcon className="h-5 w-5" />
+        </IconButton>
+        <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title="Options">
+          <div className="space-y-1">
+            <Link
+              href={signInHref}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm hover:bg-paper"
+            >
+              <FlagIcon className="h-5 w-5 text-faint" />
+              Report this listing
+            </Link>
+            <Link
+              href={signInHref}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm hover:bg-paper"
+            >
+              <BanIcon className="h-5 w-5 text-faint" />
+              Block {ownerName}
+            </Link>
+          </div>
+        </Sheet>
+      </>
+    );
+  }
 
   // Reset the confirm step whenever the sheet is closed.
   function closeMenu() {

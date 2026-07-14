@@ -271,14 +271,18 @@ something you could pitch as a real campus venture (spec:
 src/
   app/
     page.tsx           landing (signed in? → /browse)
-    signin/            persona picker
-    (app)/             everything behind auth
-      browse/          Marketplace · Donations · Lost & Found
-      listing/[id]/    detail, edit, owner actions, "this is mine"
+    signin/            persona picker (honors a same-origin ?callbackUrl)
+    (public)/          browsable without an account
+      browse/          Marketplace · Donations · Lost & Found (anon-friendly)
+      listing/[id]/    active-listing detail (anon-friendly; edit stays in (app))
+      how-it-works/    the pitch narrative
+      leaderboard/     sustainability standings
+      profile/[id]/    ratings live here
+    (app)/             everything that needs auth
+      listing/[id]/edit  owner-only edit
       sell/            4-step wizard, one question per screen
       messages/        threads, 5s polling, meetup proposals, claims
       my-items/        Active / Sold / Drafts
-      profile/[id]/    ratings live here
       impact/          the landfill counter, explained
     api/               auth, uploads, message polling, demo login
   lib/
@@ -301,6 +305,14 @@ some json, rendered as cards you can tap accept/decline on.
   Transit, Music & Instruments (CCM), Art & Design Supplies (DAAP). full
   reasoning in the [design doc](docs/SYSTEM_DESIGN.md). subcategories stay
   search terms — deep menus on a phone are violence.
+- **anyone can browse; only UC students can participate** — `/browse` and
+  active `/listing/[id]` pages are public and crawlable, so the marketplace is
+  discoverable without an account. Every participation action (post, message,
+  claim, favorite, save-search, report) renders a sign-in call to action that
+  returns you to where you were via a validated same-origin `callbackUrl`. Real
+  UC-email registration is a **separate follow-up** — for now anonymous users
+  land in the existing demo sign-in. Non-active listings stay invisible to
+  everyone but their owner.
 - **donations aren't a category, they're a tab** — free stuff gets equal
   billing, not a landfill page at the bottom.
 - **the claim flow is the flex**: describe a detail only the owner would
