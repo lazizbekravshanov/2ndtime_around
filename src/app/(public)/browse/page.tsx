@@ -21,6 +21,7 @@ import {
   type BrowseParams,
 } from "@/lib/search";
 import { logSearchEvent } from "@/lib/searchLog";
+import { signInHref as toSignIn } from "@/lib/url";
 import { BrowseFilters } from "./BrowseFilters";
 import { ActiveFilters } from "./ActiveFilters";
 import { SaveSearchButton } from "./SaveSearchButton";
@@ -54,9 +55,7 @@ async function Results({ params }: { params: BrowseParams }) {
   const where = buildListingWhere(params, { blockedIds });
   const page = parsePage(params.page);
   // Anonymous card hearts become sign-in CTAs that return to this browse view.
-  const signInHref = user
-    ? undefined
-    : `/signin?callbackUrl=${encodeURIComponent(pageHref(params, page))}`;
+  const signInHref = user ? undefined : toSignIn(pageHref(params, page));
   // Fetch one extra row to know whether a next page exists, without a count().
   const rows = await db.listing.findMany({
     where,
@@ -93,9 +92,17 @@ async function Results({ params }: { params: BrowseParams }) {
             <ButtonLink variant="secondary" href={`/browse?tab=${tab}`}>
               Clear filters
             </ButtonLink>
-          ) : (
+          ) : user ? (
             <ButtonLink href={tab === "wanted" ? "/sell?type=WANTED" : "/sell"}>
               {tab === "wanted" ? "Post a want ad" : "Post the first item"}
+            </ButtonLink>
+          ) : (
+            <ButtonLink
+              href={toSignIn(tab === "wanted" ? "/sell?type=WANTED" : "/sell")}
+            >
+              {tab === "wanted"
+                ? "Sign in to post a want ad"
+                : "Sign in to post the first item"}
             </ButtonLink>
           )
         }
@@ -166,9 +173,9 @@ export default async function BrowsePage({
   const chips = activeFilterChips(params);
   // Anonymous "Save this search" leads to sign-in, returning to this exact view.
   const user = await getSessionUser();
-  const signInHref = user
+  const anonSignInHref = user
     ? undefined
-    : `/signin?callbackUrl=${encodeURIComponent(pageHref(params, parsePage(params.page)))}`;
+    : toSignIn(pageHref(params, parsePage(params.page)));
 
   const moveoutDays = daysUntilMoveOut();
 
@@ -181,6 +188,7 @@ export default async function BrowsePage({
           <MoveoutBanner
             days={moveoutDays}
             semesterKey={currentSemester().key}
+            ctaHref={user ? "/sell/moveout" : toSignIn("/sell/moveout")}
           />
         </div>
       )}
@@ -222,7 +230,7 @@ export default async function BrowsePage({
       {chips.length > 0 && (
         <div className="mt-3 flex items-center justify-between gap-3">
           <ActiveFilters chips={chips} />
-          <SaveSearchButton params={params} signInHref={signInHref} />
+          <SaveSearchButton params={params} signInHref={anonSignInHref} />
         </div>
       )}
 

@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { LogoMark } from "@/components/icons";
+import { PublicSignInLink } from "@/components/PublicSignInLink";
 import { ToastProvider } from "@/components/ui/Toast";
 import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
@@ -53,12 +55,18 @@ export default async function PublicLayout({
               2nd Time Around
             </span>
           </Link>
-          <Link
-            href="/signin"
-            className="text-sm font-medium text-faint transition-colors hover:text-ink"
+          <Suspense
+            fallback={
+              <Link
+                href="/signin"
+                className="text-sm font-medium text-faint transition-colors hover:text-ink"
+              >
+                Sign in
+              </Link>
+            }
           >
-            Sign in
-          </Link>
+            <PublicSignInLink className="text-sm font-medium text-faint transition-colors hover:text-ink" />
+          </Suspense>
         </div>
       </header>
     );
@@ -67,9 +75,20 @@ export default async function PublicLayout({
   return (
     <ToastProvider>
       <div className="flex min-h-screen flex-col">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+        >
+          Skip to content
+        </a>
         {header}
-        {/* pb clears the mobile bottom-tab bar for signed-in visitors. */}
-        <main className="mx-auto w-full max-w-page flex-1 px-4 py-6 pb-24 md:pb-6">
+        {/* pb clears the mobile bottom-tab bar for signed-in visitors only. */}
+        <main
+          id="main-content"
+          className={`mx-auto w-full max-w-page flex-1 px-4 py-6 ${
+            user ? "pb-24 md:pb-6" : "pb-6"
+          }`}
+        >
           {children}
         </main>
         <Footer />

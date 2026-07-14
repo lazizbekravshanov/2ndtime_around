@@ -50,7 +50,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const listing = await getListing(id);
-  if (!listing || listing.status !== "ACTIVE") return { title: "Listing" };
+  if (!listing || listing.status !== "ACTIVE") {
+    return { title: "Listing", robots: { index: false, follow: false } };
+  }
 
   const price =
     listing.type === "SELL" && listing.price !== null

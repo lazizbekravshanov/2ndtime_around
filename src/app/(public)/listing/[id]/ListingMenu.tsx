@@ -55,6 +55,13 @@ export function ListingMenu({
               href={signInHref}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm hover:bg-paper"
             >
+              <FlagIcon className="h-5 w-5 text-faint" />
+              Report {ownerName}
+            </Link>
+            <Link
+              href={signInHref}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm hover:bg-paper"
+            >
               <BanIcon className="h-5 w-5 text-faint" />
               Block {ownerName}
             </Link>

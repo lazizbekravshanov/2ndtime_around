@@ -31,3 +31,12 @@ export function isSafeCallbackUrl(value: unknown): value is string {
 export function safeCallbackUrl(value: unknown, fallback = "/browse"): string {
   return isSafeCallbackUrl(value) ? value : fallback;
 }
+
+/**
+ * Build a `/signin` link that returns to `callbackPath` after auth when the
+ * path is safe. Unsafe or missing callbacks yield a bare `/signin`.
+ */
+export function signInHref(callbackPath?: unknown): string {
+  if (!isSafeCallbackUrl(callbackPath)) return "/signin";
+  return `/signin?callbackUrl=${encodeURIComponent(callbackPath)}`;
+}

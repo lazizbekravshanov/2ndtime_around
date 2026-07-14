@@ -47,7 +47,7 @@ export function SaveSearchButton({
         href={signInHref}
         className="shrink-0 whitespace-nowrap text-sm font-medium text-faint transition-colors hover:text-ink"
       >
-        Save this search
+        Sign in to save this search
       </Link>
     );
   }

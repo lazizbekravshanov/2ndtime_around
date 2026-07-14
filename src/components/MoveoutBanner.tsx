@@ -13,9 +13,12 @@ import { XIcon } from "@/components/icons";
 export function MoveoutBanner({
   days,
   semesterKey,
+  ctaHref = "/sell/moveout",
 }: {
   days: number;
   semesterKey: string;
+  /** Override the list-everything CTA (e.g. sign-in for anonymous visitors). */
+  ctaHref?: string;
 }) {
   const storageKey = `moveout-banner-${semesterKey}`;
   const [visible, setVisible] = useState(false);
@@ -47,7 +50,7 @@ export function MoveoutBanner({
         </span>{" "}
         <span className="text-faint">Don&apos;t bin it —</span>{" "}
         <Link
-          href="/sell/moveout"
+          href={ctaHref}
           className="font-medium text-accent underline-offset-2 hover:underline"
         >
           list everything at once →

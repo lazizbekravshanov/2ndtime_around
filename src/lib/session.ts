@@ -1,7 +1,9 @@
 import { getServerSession } from "next-auth";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { safeCallbackUrl, signInHref } from "@/lib/url";
 
 export type SessionUser = {
   id: string;
@@ -22,13 +24,24 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
 /**
  * Auth guard for protected pages: redirects anonymous visitors to /signin
- * and first-time users (no display name yet) to /onboarding.
+ * (preserving a safe return path) and first-time users (no display name yet)
+ * to /onboarding.
  */
 export async function requireUser(opts?: {
   allowUnonboarded?: boolean;
+  /** Relative path to return to after sign-in (validated). */
+  callbackUrl?: string;
 }): Promise<SessionUser> {
   const user = await getSessionUser();
-  if (!user) redirect("/signin");
+  if (!user) {
+    const h = await headers();
+    const fromHeader = h.get("x-pathname");
+    const callback = safeCallbackUrl(
+      opts?.callbackUrl ?? fromHeader,
+      "/browse"
+    );
+    redirect(signInHref(callback));
+  }
   if (!user.displayName && !opts?.allowUnonboarded) redirect("/onboarding");
   return user;
 }

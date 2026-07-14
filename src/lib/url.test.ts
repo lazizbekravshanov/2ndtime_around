@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSafeCallbackUrl, safeCallbackUrl } from "@/lib/url";
+import { isSafeCallbackUrl, safeCallbackUrl, signInHref } from "@/lib/url";
 
 describe("isSafeCallbackUrl", () => {
   it("accepts root-relative paths", () => {
@@ -56,5 +56,21 @@ describe("safeCallbackUrl", () => {
 
   it("honors a custom fallback", () => {
     expect(safeCallbackUrl("//evil.com", "/")).toBe("/");
+  });
+});
+
+describe("signInHref", () => {
+  it("returns bare /signin when callback is missing or unsafe", () => {
+    expect(signInHref()).toBe("/signin");
+    expect(signInHref(null)).toBe("/signin");
+    expect(signInHref("https://evil.com")).toBe("/signin");
+    expect(signInHref("//evil.com")).toBe("/signin");
+  });
+
+  it("returns /signin with encoded safe callback", () => {
+    expect(signInHref("/browse?tab=wanted")).toBe(
+      "/signin?callbackUrl=%2Fbrowse%3Ftab%3Dwanted"
+    );
+    expect(signInHref("/sell")).toBe("/signin?callbackUrl=%2Fsell");
   });
 });

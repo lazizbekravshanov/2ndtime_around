@@ -309,10 +309,11 @@ some json, rendered as cards you can tap accept/decline on.
   active `/listing/[id]` pages are public and crawlable, so the marketplace is
   discoverable without an account. Every participation action (post, message,
   claim, favorite, save-search, report) renders a sign-in call to action that
-  returns you to where you were via a validated same-origin `callbackUrl`. Real
-  UC-email registration is a **separate follow-up** — for now anonymous users
-  land in the existing demo sign-in. Non-active listings stay invisible to
-  everyone but their owner.
+  returns you to where you were via a validated same-origin `callbackUrl`
+  (including public-header Sign in, empty-state Post, move-out CTA, and
+  `requireUser()` deep-link redirects). Real UC-email registration is a
+  **separate follow-up** — for now anonymous users land in the existing demo
+  sign-in. Non-active listings stay invisible to everyone but their owner.
 - **donations aren't a category, they're a tab** — free stuff gets equal
   billing, not a landfill page at the bottom.
 - **the claim flow is the flex**: describe a detail only the owner would
