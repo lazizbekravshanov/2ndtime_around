@@ -48,9 +48,19 @@ function pageHref(params: BrowseParams, p: number): string {
 async function Results({ params }: { params: BrowseParams }) {
   const tab = parseTab(params.tab);
   const user = await getSessionUser();
-  const [blockedIds, favIds] = user
-    ? await Promise.all([blockedUserIds(user.id), favoritedListingIds(user.id)])
-    : [[], new Set<string>()];
+  // Optional signed-in decoration must never take down the public catalog.
+  let blockedIds: string[] = [];
+  let favIds = new Set<string>();
+  if (user) {
+    try {
+      [blockedIds, favIds] = await Promise.all([
+        blockedUserIds(user.id),
+        favoritedListingIds(user.id),
+      ]);
+    } catch {
+      // Soft-fail: show the catalog without personalization.
+    }
+  }
 
   const where = buildListingWhere(params, { blockedIds });
   const page = parsePage(params.page);

@@ -270,7 +270,9 @@ export default async function ListingPage({
             </div>
           </div>
 
-          {/* Primary action */}
+          {/* Primary action — non-owners only reach this page for ACTIVE
+              listings (viewOutcome gates drafts/sold/resolved), so the old
+              "already sold" branch is unreachable and was removed. */}
           <div className="mt-4 space-y-3">
             {isOwner ? (
               <OwnerActions
@@ -278,27 +280,6 @@ export default async function ListingPage({
                 type={type}
                 status={listing.status}
               />
-            ) : done ? (
-              <div className="space-y-3">
-                <p className="rounded-xl border border-line bg-surface p-4 text-sm text-faint">
-                  This {isLostFound ? "item" : "listing"} has been{" "}
-                  {listing.status === "SOLD" ? "sold" : "resolved"}.
-                </p>
-                <div className="flex items-center gap-2">
-                  <FavoriteButton
-                    listingId={listing.id}
-                    initial={favorited}
-                    variant="inline"
-                    signInHref={signInHref}
-                  />
-                  <ListingMenu
-                    listingId={listing.id}
-                    ownerId={listing.owner.id}
-                    ownerName={listing.owner.displayName ?? "this user"}
-                    signInHref={signInHref}
-                  />
-                </div>
-              </div>
             ) : (
               <>
                 {type === "FOUND" && (
