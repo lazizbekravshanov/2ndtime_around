@@ -33,4 +33,13 @@ export async function register() {
         "Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for distributed limiting."
     );
   }
+
+  if (!process.env.EMAIL_SERVER) {
+    // Not fatal — real sign-ups simply stay off (the /signin form hides
+    // itself); demo login remains available if configured.
+    console.warn(
+      "[startup] EMAIL_SERVER not set — real magic-link sign-up is disabled. " +
+        "Set EMAIL_SERVER and EMAIL_FROM to enable it."
+    );
+  }
 }
