@@ -70,6 +70,8 @@ const RULES = {
   messageSend: { limit: 30, windowMs: MIN },
   messagePoll: { limit: 60, windowMs: MIN },
   sse: { limit: 10, windowMs: MIN },
+  magicLinkShort: { limit: 3, windowMs: 10 * MIN },
+  magicLinkHourly: { limit: 10, windowMs: 60 * MIN },
 } satisfies Record<string, LimitRule>;
 
 function createUpstashLimiter(redis: Redis): Limiter {
@@ -192,4 +194,15 @@ export function limitMessagePoll(userId: string): Promise<RateDecision> {
 }
 export function limitSse(userId: string): Promise<RateDecision> {
   return enforce([{ key: `sse:${userId}`, rule: RULES.sse }], "open");
+}
+
+export function limitMagicLink(email: string): Promise<RateDecision> {
+  const key = keyFingerprint(email.trim().toLowerCase());
+  return enforce(
+    [
+      { key: `magicLink:short:${key}`, rule: RULES.magicLinkShort },
+      { key: `magicLink:hourly:${key}`, rule: RULES.magicLinkHourly },
+    ],
+    "closed"
+  );
 }

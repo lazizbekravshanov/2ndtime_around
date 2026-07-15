@@ -5,6 +5,7 @@ import {
   clientIpFrom,
   limitMessageSend,
   limitUpload,
+  limitMagicLink,
   __setLimiterForTests,
   apiRateLimitResponse,
 } from "@/lib/rateLimit";
@@ -116,5 +117,32 @@ describe("apiRateLimitResponse", () => {
     );
     expect(res.headers.get("Retry-After")).toBe("5");
     expect(await res.text()).toBe("Too Many Requests");
+  });
+});
+
+describe("limitMagicLink", () => {
+  afterEach(() => __setLimiterForTests(null));
+
+  it("allows 3 per email per 10 min then denies", async () => {
+    __setLimiterForTests(createInMemoryLimiter(() => 0));
+    const out = [];
+    for (let i = 0; i < 4; i++) out.push(await limitMagicLink("a@uc.edu"));
+    expect(out.map((d) => d.allowed)).toEqual([true, true, true, false]);
+  });
+
+  it("is per-email (normalized)", async () => {
+    __setLimiterForTests(createInMemoryLimiter(() => 0));
+    for (let i = 0; i < 3; i++) await limitMagicLink("a@uc.edu");
+    expect((await limitMagicLink("A@UC.EDU")).allowed).toBe(false); // same key
+    expect((await limitMagicLink("b@uc.edu")).allowed).toBe(true);
+  });
+
+  it("fails CLOSED when the limiter throws", async () => {
+    __setLimiterForTests({
+      check: async () => {
+        throw new Error("down");
+      },
+    });
+    expect((await limitMagicLink("a@uc.edu")).allowed).toBe(false);
   });
 });
