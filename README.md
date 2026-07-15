@@ -299,6 +299,15 @@ messaging is 5-second polling — no websockets, no regrets at this scale.
 meetup proposals and ownership claims are just messages with a `kind` and
 some json, rendered as cards you can tap accept/decline on.
 
+rate limiting guards five boundaries via one policy layer (`src/lib/rateLimit.ts`):
+demo login and uploads fail **closed** (credential/storage abuse outweighs a
+brief outage); listing writes, message send/poll, and SSE connects fail **open**
+(a limiter hiccup must never freeze the marketplace). Demo-login is keyed by a
+one-way hash of IP + email — never the raw values. It's distributed via Upstash
+Redis when `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are set, and
+falls back to per-instance in-memory limiting otherwise (setting the vars later
+upgrades it with no code change).
+
 ## decisions worth knowing
 
 - **13 categories**, built for campus life — Textbooks by college, Bikes &
