@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createInMemoryLimiter } from "@/lib/rateLimit";
+import {
+  createInMemoryLimiter,
+  keyFingerprint,
+  clientIpFrom,
+} from "@/lib/rateLimit";
 
 describe("createInMemoryLimiter", () => {
   const rule = { limit: 3, windowMs: 1000 };
@@ -29,5 +33,31 @@ describe("createInMemoryLimiter", () => {
     const lim = createInMemoryLimiter(() => 0);
     for (let i = 0; i < 3; i++) await lim.check("a", rule);
     expect((await lim.check("b", rule)).allowed).toBe(true);
+  });
+});
+
+describe("keyFingerprint", () => {
+  it("is stable and non-reversible (no raw input present)", () => {
+    const fp = keyFingerprint("1.2.3.4", "a@uc.edu");
+    expect(fp).toMatch(/^[0-9a-f]{32}$/);
+    expect(fp).not.toContain("1.2.3.4");
+    expect(fp).not.toContain("a@uc.edu");
+    expect(keyFingerprint("1.2.3.4", "a@uc.edu")).toBe(fp); // stable
+  });
+  it("differs when any part differs", () => {
+    expect(keyFingerprint("1.2.3.4", "a@uc.edu")).not.toBe(
+      keyFingerprint("1.2.3.4", "b@uc.edu")
+    );
+  });
+});
+
+describe("clientIpFrom", () => {
+  it("takes the first x-forwarded-for hop", () => {
+    const h = new Headers({ "x-forwarded-for": "9.9.9.9, 10.0.0.1" });
+    expect(clientIpFrom(h)).toBe("9.9.9.9");
+  });
+  it("falls back to x-real-ip then a conservative anonymous key", () => {
+    expect(clientIpFrom(new Headers({ "x-real-ip": "8.8.8.8" }))).toBe("8.8.8.8");
+    expect(clientIpFrom(new Headers())).toBe("anonymous");
   });
 });

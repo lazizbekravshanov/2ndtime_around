@@ -1,3 +1,17 @@
+import { createHash } from "crypto";
+
+/** One-way, stable fingerprint of sensitive parts (IP, email) for keys/logs. */
+export function keyFingerprint(...parts: string[]): string {
+  return createHash("sha256").update(parts.join("|")).digest("hex").slice(0, 32);
+}
+
+/** Best-available client IP from request headers; conservative anon fallback. */
+export function clientIpFrom(headers: Headers): string {
+  const xff = headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0]!.trim();
+  return headers.get("x-real-ip")?.trim() || "anonymous";
+}
+
 export type RateDecision = {
   allowed: boolean;
   remaining: number;
