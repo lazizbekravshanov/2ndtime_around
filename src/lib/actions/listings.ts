@@ -8,6 +8,7 @@ import { listingSchema } from "@/lib/validation";
 import { notify } from "@/lib/notify";
 import { matchSavedSearches } from "@/lib/savedSearchMatch";
 import { blockedUserIds } from "@/lib/actions/safety";
+import { limitListingCreate, limitListingMutate } from "@/lib/rateLimit";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAILY_LISTING_LIMIT = 10;
@@ -31,6 +32,14 @@ export async function createListing(
 ): Promise<ActionResult<{ id: string }>> {
   const user = await getSessionUser();
   if (!user) return { ok: false, error: "You need to sign in first." };
+
+  const rl = await limitListingCreate(user.id);
+  if (!rl.allowed) {
+    return {
+      ok: false,
+      error: "You're posting too fast. Try again in a few minutes.",
+    };
+  }
 
   const parsed = listingSchema.safeParse(input);
   if (!parsed.success) {
@@ -110,6 +119,11 @@ export async function updateListing(
 ): Promise<ActionResult<{ id: string }>> {
   const user = await getSessionUser();
   if (!user) return { ok: false, error: "You need to sign in first." };
+
+  const rl = await limitListingMutate(user.id);
+  if (!rl.allowed) {
+    return { ok: false, error: "Too many changes too fast. Try again shortly." };
+  }
 
   // Owners only — verified server-side, never trusted from the client.
   const existing = await db.listing.findUnique({ where: { id: listingId } });
@@ -213,6 +227,11 @@ const statusChangeSchema = z.object({
 export async function setListingStatus(input: unknown): Promise<ActionResult> {
   const user = await getSessionUser();
   if (!user) return { ok: false, error: "You need to sign in first." };
+
+  const rlStatus = await limitListingMutate(user.id);
+  if (!rlStatus.allowed) {
+    return { ok: false, error: "Too many changes too fast. Try again shortly." };
+  }
 
   const parsed = statusChangeSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid request." };
