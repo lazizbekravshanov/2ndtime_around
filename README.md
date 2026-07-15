@@ -299,6 +299,14 @@ messaging is 5-second polling — no websockets, no regrets at this scale.
 meetup proposals and ownership claims are just messages with a `kind` and
 some json, rendered as cards you can tap accept/decline on.
 
+real UC students sign in with an `@uc.edu` / `@mail.uc.edu` **magic link** (the
+primary path on `/signin`); the form self-enables when `EMAIL_SERVER` +
+`EMAIL_FROM` are set and hides itself in production otherwise (in dev the link
+prints to the server console). The demo persona picker stays as a secondary,
+collapsed option gated by `DEMO_PASSWORD`. Magic-link requests are rate-limited
+per email, and the UC-only restriction is enforced server-side in the NextAuth
+`signIn` callback.
+
 rate limiting guards five boundaries via one policy layer (`src/lib/rateLimit.ts`):
 demo login and uploads fail **closed** (credential/storage abuse outweighs a
 brief outage); listing writes, message send/poll, and SSE connects fail **open**
