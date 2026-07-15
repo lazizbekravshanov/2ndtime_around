@@ -25,4 +25,12 @@ export async function register() {
       "DEMO_PASSWORD is not set: /signin persona login is disabled."
     );
   }
+
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    // Not fatal — rate limiting degrades to per-instance in-memory limiting.
+    console.warn(
+      "[startup] Upstash not configured — rate limiting will use the in-memory (per-instance) adapter. " +
+        "Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for distributed limiting."
+    );
+  }
 }

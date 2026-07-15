@@ -6,6 +6,7 @@ import {
   limitMessageSend,
   limitUpload,
   __setLimiterForTests,
+  apiRateLimitResponse,
 } from "@/lib/rateLimit";
 
 describe("createInMemoryLimiter", () => {
@@ -94,5 +95,26 @@ describe("per-boundary limits", () => {
     const d = await limitUpload("u1");
     expect(d.allowed).toBe(false);
     expect(d.retryAfterSeconds).toBeGreaterThan(0);
+  });
+});
+
+describe("apiRateLimitResponse", () => {
+  it("returns 429 with Retry-After and JSON body", async () => {
+    const res = apiRateLimitResponse(
+      { allowed: false, remaining: 0, retryAfterSeconds: 42 },
+      { error: "Slow down." }
+    );
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("42");
+    expect(res.headers.get("Content-Type")).toContain("application/json");
+    expect(await res.json()).toEqual({ error: "Slow down." });
+  });
+  it("supports a plain-text body (SSE convention)", async () => {
+    const res = apiRateLimitResponse(
+      { allowed: false, remaining: 0, retryAfterSeconds: 5 },
+      "Too Many Requests"
+    );
+    expect(res.headers.get("Retry-After")).toBe("5");
+    expect(await res.text()).toBe("Too Many Requests");
   });
 });

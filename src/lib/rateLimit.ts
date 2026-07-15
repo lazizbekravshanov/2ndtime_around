@@ -1,4 +1,6 @@
 import { createHash } from "crypto";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 /** One-way, stable fingerprint of sensitive parts (IP, email) for keys/logs. */
 export function keyFingerprint(...parts: string[]): string {
@@ -70,8 +72,56 @@ const RULES = {
   sse: { limit: 10, windowMs: MIN },
 } satisfies Record<string, LimitRule>;
 
-// Module limiter, chosen once (Task 4 replaces this with env selection).
-let limiter: Limiter = createInMemoryLimiter();
+function createUpstashLimiter(redis: Redis): Limiter {
+  const cache = new Map<string, Ratelimit>();
+  return {
+    async check(key, rule) {
+      const id = `${rule.limit}:${rule.windowMs}`;
+      let rl = cache.get(id);
+      if (!rl) {
+        rl = new Ratelimit({
+          redis,
+          prefix: "rl",
+          limiter: Ratelimit.slidingWindow(rule.limit, `${rule.windowMs} ms`),
+        });
+        cache.set(id, rl);
+      }
+      const res = await rl.limit(key);
+      return {
+        allowed: res.success,
+        remaining: res.remaining,
+        retryAfterSeconds: res.success
+          ? 0
+          : Math.max(0, Math.ceil((res.reset - Date.now()) / 1000)),
+      };
+    },
+  };
+}
+
+function selectLimiter(): Limiter {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) return createUpstashLimiter(new Redis({ url, token }));
+  return createInMemoryLimiter();
+}
+
+/** 429 response helper for API routes. Body is JSON (object) or plain text. */
+export function apiRateLimitResponse(
+  decision: RateDecision,
+  body: string | Record<string, unknown>
+): Response {
+  const isText = typeof body === "string";
+  return new Response(isText ? body : JSON.stringify(body), {
+    status: 429,
+    headers: {
+      "Retry-After": String(decision.retryAfterSeconds),
+      ...(isText ? {} : { "Content-Type": "application/json" }),
+    },
+  });
+}
+
+// Module limiter, chosen once from the environment.
+let limiter: Limiter = selectLimiter();
 /** Test seam: pass a fake limiter, or null to restore the module default. */
 export function __setLimiterForTests(l: Limiter | null): void {
   limiter = l ?? createInMemoryLimiter();
