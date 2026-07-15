@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { DEMO_ACCOUNTS, isUcEmail } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { limitDemoLogin, clientIpFrom, apiRateLimitResponse } from "@/lib/rateLimit";
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -37,6 +38,14 @@ export async function POST(request: Request) {
       { error: "Pick an account and enter the demo password." },
       { status: 400 }
     );
+  }
+  // Throttle brute-force attempts (keyed by a hash of IP + email) before any
+  // UC-domain, persona, or timing-safe password work. Fails closed.
+  const rl = await limitDemoLogin(clientIpFrom(request.headers), parsed.data.email);
+  if (!rl.allowed) {
+    return apiRateLimitResponse(rl, {
+      error: "Too many attempts. Try again shortly.",
+    });
   }
   // UC-only marketplace: reject any non-UC domain up front, the same gate the
   // magic-link flow enforces in the NextAuth signIn callback.
