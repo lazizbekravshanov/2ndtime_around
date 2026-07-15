@@ -3,6 +3,9 @@ import {
   createInMemoryLimiter,
   keyFingerprint,
   clientIpFrom,
+  limitMessageSend,
+  limitUpload,
+  __setLimiterForTests,
 } from "@/lib/rateLimit";
 
 describe("createInMemoryLimiter", () => {
@@ -59,5 +62,37 @@ describe("clientIpFrom", () => {
   it("falls back to x-real-ip then a conservative anonymous key", () => {
     expect(clientIpFrom(new Headers({ "x-real-ip": "8.8.8.8" }))).toBe("8.8.8.8");
     expect(clientIpFrom(new Headers())).toBe("anonymous");
+  });
+});
+
+describe("per-boundary limits", () => {
+  afterEach(() => __setLimiterForTests(null)); // restore default
+
+  it("messageSend allows 30/min then denies", async () => {
+    __setLimiterForTests(createInMemoryLimiter(() => 0));
+    const out = [];
+    for (let i = 0; i < 31; i++) out.push(await limitMessageSend("u1"));
+    expect(out.filter((d) => d.allowed).length).toBe(30);
+    expect(out[30].allowed).toBe(false);
+  });
+
+  it("fail-OPEN: allows when the limiter backend throws", async () => {
+    __setLimiterForTests({
+      check: async () => {
+        throw new Error("redis down");
+      },
+    });
+    expect((await limitMessageSend("u1")).allowed).toBe(true);
+  });
+
+  it("fail-CLOSED: denies when the limiter backend throws (upload)", async () => {
+    __setLimiterForTests({
+      check: async () => {
+        throw new Error("redis down");
+      },
+    });
+    const d = await limitUpload("u1");
+    expect(d.allowed).toBe(false);
+    expect(d.retryAfterSeconds).toBeGreaterThan(0);
   });
 });
