@@ -4,6 +4,7 @@ import type { Adapter } from "next-auth/adapters";
 import EmailProvider from "next-auth/providers/email";
 import { db } from "@/lib/db";
 import { isUcEmail } from "@/lib/constants";
+import { limitMagicLink } from "@/lib/rateLimit";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db) as Adapter,
@@ -12,6 +13,12 @@ export const authOptions: NextAuthOptions = {
       from: process.env.EMAIL_FROM ?? "2nd Time Around <no-reply@localhost>",
       maxAge: 60 * 60, // magic links valid for 1 hour
       async sendVerificationRequest({ identifier, url, provider }) {
+        // Throttle magic-link requests per target email (fail closed) so the
+        // endpoint can't be used to bomb a UC inbox. Throwing aborts the send.
+        const rl = await limitMagicLink(identifier);
+        if (!rl.allowed) {
+          throw new Error("Too many sign-in link requests. Try again later.");
+        }
         // Without an SMTP server configured (local dev), print the magic
         // link to the server console instead of sending real email.
         if (!process.env.EMAIL_SERVER) {
