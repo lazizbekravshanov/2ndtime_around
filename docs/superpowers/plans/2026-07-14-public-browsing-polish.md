@@ -295,8 +295,8 @@ git commit -m "fix: gate anonymous post/save/move-out CTAs through sign-in"
 
 ## Later cycles (loop backlog)
 
-**Cycle 2:** ListingMenu anon Report-user row; `robots: noindex` for non-ACTIVE metadata; remove dead `done` non-owner branch; isolate browse decoration failures.
+**Cycle 2:** ListingMenu anon Report-user row; `robots: noindex` for non-ACTIVE metadata; remove dead `done` non-owner branch; isolate browse decoration failures. ✅
 
-**Cycle 3:** Focused route/smoke tests for anon visibility + CTA hrefs; profile favorite `signInHref`; landing Sign in callback.
+**Cycle 3:** Focused route/smoke tests for anon visibility + CTA hrefs; profile favorite `signInHref`; landing Sign in callback. ✅
 
 **Cycle 4:** Server-validated callback for future UC registration; post-auth action resume (auto-open message).

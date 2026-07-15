@@ -10,6 +10,7 @@ import { isBlockedBetween } from "@/lib/actions/safety";
 import { getUserStats, computeBadges } from "@/lib/badges";
 import { BadgeShelf } from "@/components/BadgeShelf";
 import { ProfileMenu } from "./ProfileMenu";
+import { signInHref } from "@/lib/url";
 
 export const metadata = { title: "Profile" };
 
@@ -39,6 +40,10 @@ export default async function ProfilePage({
   const blocked =
     !viewer || isSelf ? false : await isBlockedBetween(viewer.id, profile.id);
   const badges = computeBadges(await getUserStats(profile.id));
+  // Anonymous hearts on this profile's cards return here after sign-in.
+  const cardSignInHref = viewer
+    ? undefined
+    : signInHref(`/profile/${profile.id}`);
 
   const [listings, ratings, ratingAgg, completedCount] = await Promise.all([
     db.listing.findMany({
@@ -121,6 +126,7 @@ export default async function ProfilePage({
               <ListingCard
                 key={l.id}
                 listing={{ ...l, type: l.type as never, status: l.status as never }}
+                signInHref={cardSignInHref}
               />
             ))}
           </div>

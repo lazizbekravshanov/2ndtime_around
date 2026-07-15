@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { formatPrice, photoList } from "@/lib/format";
 import { getImpactStats } from "@/lib/impact";
 import { getSessionUser } from "@/lib/session";
+import { signInHref } from "@/lib/url";
 
 const TRUST = ["UC-verified only", "No fees", "Safe campus meetups"];
 
@@ -59,6 +60,8 @@ export default async function LandingPage() {
   }));
   const withPhotos = recent.filter((l) => photoList(l.photos).length > 0);
   const preview = (withPhotos.length >= 4 ? withPhotos : recent).slice(0, 4);
+  // After demo/UC sign-in, land on browse (landing itself redirects signed-in users).
+  const browseSignIn = signInHref("/browse");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -77,7 +80,7 @@ export default async function LandingPage() {
             How it works
           </Link>
           <Link
-            href="/signin"
+            href={browseSignIn}
             className="text-sm font-medium text-faint transition-colors hover:text-ink"
           >
             Sign in
@@ -105,7 +108,7 @@ export default async function LandingPage() {
               in one place.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
-              <Link href="/signin" className={buttonClasses("primary", "lg")}>
+              <Link href={browseSignIn} className={buttonClasses("primary", "lg")}>
                 Sign in with your UC email
               </Link>
               <Link
