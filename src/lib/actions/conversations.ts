@@ -12,6 +12,7 @@ import {
 import { notify } from "@/lib/notify";
 import { isBlockedBetween } from "@/lib/actions/safety";
 import type { ActionResult } from "@/lib/actions/listings";
+import { limitMessageSend } from "@/lib/rateLimit";
 
 /** True if the user is one of the two people in this conversation. */
 async function loadConversationFor(userId: string, conversationId: string) {
@@ -76,6 +77,14 @@ export async function startConversation(
 export async function sendMessage(input: unknown): Promise<ActionResult> {
   const user = await getSessionUser();
   if (!user) return { ok: false, error: "You need to sign in first." };
+
+  const rl = await limitMessageSend(user.id);
+  if (!rl.allowed) {
+    return {
+      ok: false,
+      error: "You're sending messages too quickly. Slow down a moment.",
+    };
+  }
 
   const parsed = messageSchema.safeParse(input);
   if (!parsed.success) {

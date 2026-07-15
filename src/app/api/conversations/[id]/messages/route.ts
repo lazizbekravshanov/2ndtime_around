@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
+import { limitMessagePoll, apiRateLimitResponse } from "@/lib/rateLimit";
 
 // Poll target for the open thread (every 5s). Returns the full message
 // list plus listing status, and marks incoming messages as read — if
@@ -13,6 +14,11 @@ export async function GET(
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "Sign in first." }, { status: 401 });
+  }
+
+  const rl = await limitMessagePoll(user.id);
+  if (!rl.allowed) {
+    return apiRateLimitResponse(rl, { error: "Slow down." });
   }
 
   const conversation = await db.conversation.findUnique({

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
+import { limitSse, apiRateLimitResponse } from "@/lib/rateLimit";
 
 // Near-real-time message stream. Authorizes the participant, then pushes the
 // thread state (~1s latency) and closes after ~25s so the platform's bounded
@@ -27,6 +28,12 @@ export async function GET(
   ) {
     return new Response("Not found", { status: 404 });
   }
+
+  // Limit reconnect storms — checked once, at connection establishment.
+  // Fails open so a limiter outage never severs live messaging.
+  const rl = await limitSse(user.id);
+  if (!rl.allowed) return apiRateLimitResponse(rl, "Too Many Requests");
+
   const listingId = conversation.listingId;
 
   // Mark the other person's messages as read once, like the poll route does.
