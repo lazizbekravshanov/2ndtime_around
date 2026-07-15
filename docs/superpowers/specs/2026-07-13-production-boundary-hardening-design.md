@@ -39,9 +39,17 @@ requested email. Missing or invalid IP data maps to a conservative anonymous
 key. Raw IP addresses and email addresses must not appear in logs or Redis
 keys.
 
-Production startup requires `UPSTASH_REDIS_REST_URL` and
-`UPSTASH_REDIS_REST_TOKEN`. Local development and tests do not require network
-access.
+Production uses the Upstash-backed adapter when `UPSTASH_REDIS_REST_URL` and
+`UPSTASH_REDIS_REST_TOKEN` are both set. If either is missing in production,
+startup logs a single warning and the limiter falls back to the in-memory
+adapter (per-instance limiting) rather than failing — so a deploy can never be
+taken down by a missing Upstash variable, and setting the two variables later
+upgrades to distributed limiting with no code change. Local development and
+tests always use the in-memory adapter and never require network access.
+
+(Revised 2026-07-15: the original spec hard-required the Upstash variables in
+production and threw on startup when absent. That was relaxed to the graceful
+fallback above to remove the deploy-time coupling.)
 
 ## Policies
 
@@ -133,6 +141,7 @@ production credentials.
 - SSE reconnects are limited only at connection establishment.
 - Existing tests continue to pass.
 - New tests, TypeScript typecheck, and the production build pass.
-- `.env.example` and project documentation describe required Upstash variables,
-  local fallback behavior, and deployment expectations.
+- `.env.example` and project documentation describe the optional Upstash
+  variables, the in-memory fallback behavior (local, tests, and production when
+  the variables are absent), and deployment expectations.
 
