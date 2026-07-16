@@ -1,6 +1,8 @@
 import type { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { LeafIcon } from "@/components/icons";
+import { StatTile } from "@/components/ui/StatTile";
+import { Meter } from "@/components/ui/Meter";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { getUserStats, computeBadges } from "@/lib/badges";
@@ -59,28 +61,17 @@ export default async function ImpactPage() {
 
       {/* Headline numbers — plain and honest, no chart library */}
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-line bg-surface p-5">
-          <LeafIcon className="h-5 w-5 text-success" />
-          <p className="mt-3 text-4xl font-semibold tracking-tight">
-            {reusedAllTime}
-          </p>
-          <p className="text-sm text-faint">items kept out of landfills</p>
-        </div>
-        <div className="rounded-xl border border-line bg-surface p-5">
-          <p className="text-4xl font-semibold tracking-tight">
-            {reusedThisSemester}
-          </p>
-          <p className="text-sm text-faint">
-            reused in {semester.name}
-            <span className="block text-xs">vs {reusedAllTime} all time</span>
-          </p>
-        </div>
-        <div className="rounded-xl border border-line bg-surface p-5">
-          <p className="text-4xl font-semibold tracking-tight">
-            {returnedCount}
-          </p>
-          <p className="text-sm text-faint">lost items back with owners</p>
-        </div>
+        <StatTile
+          label="items kept out of landfills"
+          value={reusedAllTime}
+          icon={<LeafIcon className="h-4 w-4 text-success" />}
+        />
+        <StatTile
+          label={`reused in ${semester.name}`}
+          value={reusedThisSemester}
+          hint={`vs ${reusedAllTime} all time`}
+        />
+        <StatTile label="lost items back with owners" value={returnedCount} />
       </div>
 
       {/* Your impact + badges */}
@@ -114,16 +105,15 @@ export default async function ImpactPage() {
                   <span>{c.category}</span>
                   <span className="font-medium">{c._count._all}</span>
                 </div>
-                <div
-                  className="mt-1 h-2 rounded-full bg-line"
-                  role="img"
-                  aria-label={`${c.category}: ${c._count._all} of ${reusedAllTime} items`}
-                >
-                  <div
-                    className="h-2 rounded-full bg-success"
-                    style={{ width: `${(c._count._all / maxCategory) * 100}%` }}
-                  />
-                </div>
+                {/* "positive" is this surface's one documented tone exception:
+                    green carries the sustainability story here. */}
+                <Meter
+                  value={c._count._all}
+                  max={maxCategory}
+                  tone="positive"
+                  className="mt-1"
+                  label={`${c.category}: ${c._count._all} of ${reusedAllTime} items`}
+                />
               </li>
             ))}
           </ul>
