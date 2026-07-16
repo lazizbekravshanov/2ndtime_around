@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SearchIcon } from "@/components/icons";
 import { inputClasses, selectClasses } from "@/components/ui/Field";
+import { chipClasses } from "@/components/ui/Chip";
 import { CATEGORIES, CONDITIONS } from "@/lib/constants";
 
 /**
@@ -206,11 +207,7 @@ export function BrowseFilters({ tab }: { tab: string }) {
               type="button"
               aria-pressed={lf === opt.value}
               onClick={() => setParam("lf", opt.value)}
-              className={`rounded-full border px-3.5 py-2 text-sm font-medium transition-colors ${
-                lf === opt.value
-                  ? "border-ink bg-ink text-white"
-                  : "border-line bg-surface text-faint hover:text-ink"
-              }`}
+              className={chipClasses(lf === opt.value ? "active" : "default")}
             >
               {opt.label}
             </button>

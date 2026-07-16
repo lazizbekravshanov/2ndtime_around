@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { XIcon } from "@/components/icons";
+import { chipClasses } from "@/components/ui/Chip";
 
 /** Dismissible pills for each applied filter — tap × to remove just that one. */
 export function ActiveFilters({
@@ -35,7 +36,7 @@ export function ActiveFilters({
           key={chip.key}
           type="button"
           onClick={() => remove(chip.key)}
-          className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1.5 text-xs font-medium text-faint transition-colors hover:text-ink"
+          className={chipClasses()}
           aria-label={`Remove filter ${chip.label}`}
         >
           {chip.label}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { chipClasses } from "@/components/ui/Chip";
 import {
   BikeIcon,
   BookIcon,
@@ -31,9 +32,9 @@ export function CategoryShortcuts() {
           <Link
             key={category}
             href={`/browse?category=${encodeURIComponent(category)}`}
-            className="flex shrink-0 items-center gap-2 rounded-full border border-line bg-surface py-2 pl-3 pr-4 text-sm font-medium transition-colors hover:border-faint/40 hover:bg-paper"
+            className={chipClasses()}
           >
-            <Icon className="h-4 w-4 text-faint" />
+            <Icon className="h-4 w-4" />
             {label}
           </Link>
         ))}

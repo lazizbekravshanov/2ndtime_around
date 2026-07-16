@@ -232,7 +232,7 @@ export default async function BrowsePage({
 
       {/* Campus staples — shown until a category or search narrows things. */}
       {tab === "market" && !params.category && !params.q && (
-        <div className="mt-4">
+        <div className="mt-3">
           <CategoryShortcuts />
         </div>
       )}
@@ -244,7 +244,7 @@ export default async function BrowsePage({
         </div>
       )}
 
-      <div className="mt-5">
+      <div className="mt-4">
         <Suspense
           key={JSON.stringify(params)}
           fallback={
