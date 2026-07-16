@@ -1,4 +1,5 @@
 import { BadgeIcon } from "@/components/icons";
+import { Meter } from "@/components/ui/Meter";
 import type { Badge } from "@/lib/badges";
 
 /**
@@ -39,12 +40,12 @@ export function BadgeShelf({
           {locked.map((b) => (
             <div key={b.key} className="flex items-center gap-3">
               <span className="w-40 shrink-0 text-xs text-faint">{b.label}</span>
-              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-line">
-                <span
-                  className="block h-full rounded-full bg-faint/60"
-                  style={{ width: `${Math.round(b.progress * 100)}%` }}
-                />
-              </span>
+              <Meter
+                value={b.progress}
+                max={1}
+                className="flex-1"
+                label={`${b.label}: ${b.progressLabel}`}
+              />
               <span className="w-28 shrink-0 text-right text-xs text-faint">
                 {b.progressLabel}
               </span>
