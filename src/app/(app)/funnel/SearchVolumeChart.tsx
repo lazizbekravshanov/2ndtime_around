@@ -22,7 +22,9 @@ export default function SearchVolumeChart({ data }: { data: VolumePoint[] }) {
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+        {/* left:0 — a negative left margin pulled the y-axis past the container
+            edge and clipped its tick labels. */}
+        <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="var(--color-line)" vertical={false} />
           <XAxis
             dataKey="label"
@@ -36,7 +38,7 @@ export default function SearchVolumeChart({ data }: { data: VolumePoint[] }) {
             tick={{ fill: "var(--color-faint)", fontSize: 12 }}
             tickLine={false}
             axisLine={false}
-            width={28}
+            width={24}
           />
           <Tooltip
             cursor={{ fill: "var(--color-ink)", fillOpacity: 0.04 }}
