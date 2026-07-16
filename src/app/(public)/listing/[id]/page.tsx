@@ -173,14 +173,13 @@ export default async function ListingPage({
         </div>
 
         <div className="md:col-span-2">
+          {/* Two badges at most: what it is, and (only if notable) its state.
+              Category and course moved to the meta line below — they're
+              reference data, not signals. */}
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone={type === "LOST" || type === "DONATE" ? "accent" : "neutral"}>
               {TYPE_LABELS[type]}
             </Badge>
-            <Badge tone="outline">{listing.category}</Badge>
-            {listing.courseCode && (
-              <Badge tone="neutral">{listing.courseCode}</Badge>
-            )}
             {listing.status === "DRAFT" && <StatusBadge status="DRAFT" />}
             {done && <StatusBadge status={listing.status as ListingStatus} />}
           </div>
@@ -198,20 +197,30 @@ export default async function ListingPage({
             <p className="mt-1 text-xl font-semibold text-success">Free</p>
           )}
 
-          <p className="mt-2 flex items-center gap-3 text-sm text-faint">
-            <span>Posted {timeAgo(listing.createdAt)}</span>
+          {/* One meta line carries category, course, condition, age, and views —
+              previously three separate "Label:" rows plus two pills. */}
+          <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-faint">
+            <span>{listing.category}</span>
+            {listing.courseCode && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{listing.courseCode}</span>
+              </>
+            )}
+            {listing.condition && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{listing.condition}</span>
+              </>
+            )}
+            <span aria-hidden="true">·</span>
+            <span>{timeAgo(listing.createdAt)}</span>
+            <span aria-hidden="true">·</span>
             <span className="inline-flex items-center gap-1">
               <EyeIcon className="h-4 w-4" />
               {listing.viewCount} {listing.viewCount === 1 ? "view" : "views"}
             </span>
           </p>
-
-          {listing.condition && (
-            <p className="mt-4 text-sm">
-              <span className="text-faint">Condition:</span>{" "}
-              <span className="font-medium">{listing.condition}</span>
-            </p>
-          )}
 
           {isLostFound && listing.locationNote && (
             <p className="mt-4 flex items-start gap-1.5 text-sm">
@@ -318,10 +327,14 @@ export default async function ListingPage({
           </div>
 
           {/* Safe meetup spots — selectable later, inside the chat */}
+          {/* Borderless section under a rule — the seller card is the only frame
+              in this column, so two stacked boxes don't compete. */}
           {showMeetup && (
-            <div className="mt-6 rounded-xl border border-line bg-surface p-4">
-              <p className="text-sm font-medium">Suggested safe meetup spots</p>
-              <p className="mt-0.5 text-xs text-faint">
+            <div className="mt-8 border-t border-line pt-5">
+              <p className="text-xs font-medium uppercase tracking-[0.12em] text-faint">
+                Suggested safe meetup spots
+              </p>
+              <p className="mt-2 text-xs text-faint">
                 Well-lit, staffed campus locations. You can propose one with a
                 time inside the chat.
               </p>
@@ -331,7 +344,7 @@ export default async function ListingPage({
                     key={spot.name}
                     className="flex items-center gap-2 text-sm text-faint"
                   >
-                    <PinIcon className="h-3.5 w-3.5 shrink-0 text-accent" />
+                    <PinIcon className="h-3.5 w-3.5 shrink-0" />
                     <span>
                       {spot.name}
                       <span className="text-faint"> · {spot.blurb}</span>
