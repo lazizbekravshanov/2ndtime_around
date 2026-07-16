@@ -14,7 +14,8 @@ import {
 import type { VolumePoint } from "@/lib/funnel";
 
 // Raw daily searches (bars) + a 7-day moving average (line) to cut noise.
-// Minimal, monochrome — UC Red is the only accent. Code-split via the wrapper.
+// Fully monochrome: UC Red is reserved for buttons / active state / status and
+// never appears in data, so the trend line is ink over muted bars.
 // Colors reference the design tokens via CSS vars so charts never drift.
 export default function SearchVolumeChart({ data }: { data: VolumePoint[] }) {
   const tickEvery = Math.max(1, Math.ceil(data.length / 6));
@@ -58,7 +59,7 @@ export default function SearchVolumeChart({ data }: { data: VolumePoint[] }) {
             type="monotone"
             dataKey="avg"
             name="7-day avg"
-            stroke="var(--color-accent)"
+            stroke="var(--color-ink)"
             strokeWidth={2}
             dot={false}
             connectNulls

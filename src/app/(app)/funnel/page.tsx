@@ -1,5 +1,13 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { StatTile } from "@/components/ui/StatTile";
+import { Meter } from "@/components/ui/Meter";
+import {
+  ChevronDownIcon,
+  ChevronUpDownIcon,
+  XIcon,
+} from "@/components/icons";
 import { TYPE_LABELS, type ListingStatus, type ListingType } from "@/lib/constants";
 import { timeAgo } from "@/lib/format";
 import {
@@ -57,77 +65,79 @@ export default async function FunnelPage({
         <Controls range={range.key} catSort={catSort} refreshedAt={data.refreshedAt} />
       </div>
 
+      {/* KPI row with period-over-period deltas — the one place tiles are boxed. */}
+      <section className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {data.kpis.map((k) => {
+          const { delta, hint } = kpiDelta(k);
+          return (
+            <StatTile
+              key={k.key}
+              label={k.label}
+              value={k.value.toLocaleString()}
+              delta={delta}
+              hint={hint}
+            />
+          );
+        })}
+      </section>
+
       {/* Needs attention */}
       {data.exceptions.length > 0 && (
-        <section className="mt-5" aria-label="Needs attention">
-          <div className="rounded-xl border border-line bg-surface p-4">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-faint">
-              Needs attention
-            </h2>
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-              {data.exceptions.map((e, i) => {
-                const href = e.href.startsWith("?drill=")
-                  ? hrefFor(range.key, catSort, e.href.slice("?drill=".length))
-                  : e.href;
-                return (
-                  <li key={i}>
-                    <Link
-                      href={href}
-                      className="flex items-start gap-2 rounded-lg border border-line px-3 py-2 text-sm transition-colors hover:border-faint"
-                    >
-                      <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                      <span>
-                        <span className="font-medium">{e.label}.</span>{" "}
-                        <span className="text-faint">{e.detail}</span>
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </section>
+        <Section eyebrow="Needs attention">
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {data.exceptions.map((e, i) => {
+              const href = e.href.startsWith("?drill=")
+                ? hrefFor(range.key, catSort, e.href.slice("?drill=".length))
+                : e.href;
+              return (
+                <li key={i}>
+                  <Link
+                    href={href}
+                    className="flex items-start gap-2 rounded-lg border border-line px-3 py-2 text-sm transition-colors hover:border-faint"
+                  >
+                    <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />
+                    <span>
+                      <span className="font-medium">{e.label}.</span>{" "}
+                      <span className="text-faint">{e.detail}</span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </Section>
       )}
 
-      {/* KPI row with period-over-period deltas */}
-      <section className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {data.kpis.map((k) => (
-          <KpiCard key={k.key} kpi={k} />
-        ))}
-      </section>
-
       {/* Search insights */}
-      <section id="search-insights" className="mt-8 scroll-mt-20">
-        <h2 className="text-base font-semibold">Search insights</h2>
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <Card title="Most searched terms">
+      <Section id="search-insights" eyebrow="Search insights">
+        <div className="grid gap-8 lg:grid-cols-2">
+          <Block title="Most searched terms">
             <RankedList items={data.topTerms} emptyHint="No searches in this range yet." />
-          </Card>
-          <Card title="Zero-result searches" subtitle="Unmet demand">
+          </Block>
+          <Block title="Zero-result searches" subtitle="Unmet demand">
             <RankedList
               items={data.zeroResultTerms}
-              tone="accent"
               emptyHint="Every search found something."
             />
-          </Card>
+          </Block>
         </div>
-        <Card title="Search volume" subtitle={data.volumeNote} className="mt-4">
+        <Block title="Search volume" subtitle={data.volumeNote} className="mt-8">
           <FunnelCharts volume={data.volume} />
           <p className="mt-2 text-xs text-faint">
-            Bars are raw searches per day; the red line is the 7-day moving
-            average (smoothed trend).
+            Bars are raw searches per day; the line is the 7-day moving average
+            (smoothed trend).
           </p>
-        </Card>
-      </section>
+        </Block>
+      </Section>
 
       {/* Category demand */}
-      <section id="category-demand" className="mt-8 scroll-mt-20">
-        <h2 className="text-base font-semibold">Category demand</h2>
-        <p className="mt-1 text-sm text-faint">
-          Demand index = (wanted listings + searches) ÷ active supply. Higher =
-          more unmet need. Click a category to see its active listings.
-        </p>
-        <Card className="mt-4 overflow-x-auto p-0">
+      <Section
+        id="category-demand"
+        eyebrow="Category demand"
+        description="Demand index = (wanted listings + searches) ÷ active supply. Higher = more unmet need. Click a category to see its active listings."
+      >
+        {/* Tables keep their border — they're the one place a frame earns itself. */}
+        <div className="overflow-x-auto rounded-xl border border-line bg-surface">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-faint">
@@ -143,7 +153,11 @@ export default async function FunnelPage({
                     aria-label="Sort by demand index"
                   >
                     Demand index
-                    <span aria-hidden>{catSort === "demand" ? "▼" : "↕"}</span>
+                    {catSort === "demand" ? (
+                      <ChevronDownIcon className="h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronUpDownIcon className="h-3.5 w-3.5" />
+                    )}
                   </Link>
                 </th>
               </tr>
@@ -154,26 +168,21 @@ export default async function FunnelPage({
               ))}
             </tbody>
           </table>
-        </Card>
-      </section>
+        </div>
+      </Section>
 
       {/* Listing funnel */}
-      <section className="mt-8">
-        <h2 className="text-base font-semibold">Listing funnel</h2>
-        <p className="mt-1 text-sm text-faint">
-          Cohort of listings posted in range: posted → viewed → conversation →
-          completed, with drop-off. Click a stage for the underlying listings.
-        </p>
-        <Card className="mt-4">
-          <FunnelBars stages={data.funnel} range={range.key} catSort={catSort} />
-        </Card>
-      </section>
+      <Section
+        eyebrow="Listing funnel"
+        description="Cohort of listings posted in range: posted → viewed → conversation → completed, with drop-off. Click a stage for the underlying listings."
+      >
+        <FunnelBars stages={data.funnel} range={range.key} catSort={catSort} />
+      </Section>
 
       {/* Marketplace health */}
-      <section className="mt-8">
-        <h2 className="text-base font-semibold">Marketplace health</h2>
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <Card title="Time to completion" subtitle="post → sold/given/resolved">
+      <Section eyebrow="Marketplace health">
+        <div className="grid gap-8 lg:grid-cols-2">
+          <Block title="Time to completion" subtitle="post → sold/given/resolved">
             {data.health.completionDays.sample < 3 ? (
               <p className="text-sm text-faint">
                 Not enough completed listings in this range yet
@@ -184,9 +193,15 @@ export default async function FunnelPage({
               </p>
             ) : (
               <div>
-                <div className="flex items-baseline gap-6">
-                  <Stat label="Median days" value={data.health.completionDays.median!} />
-                  <Stat label="Average days" value={data.health.completionDays.average!} muted />
+                <div className="grid grid-cols-2 gap-3">
+                  <StatTile
+                    label="Median days"
+                    value={data.health.completionDays.median!}
+                  />
+                  <StatTile
+                    label="Average days"
+                    value={data.health.completionDays.average!}
+                  />
                 </div>
                 <p className="mt-3 text-xs text-faint">
                   Median over {data.health.completionDays.sample} completed
@@ -195,8 +210,8 @@ export default async function FunnelPage({
                 </p>
               </div>
             )}
-          </Card>
-          <Card title="Completion rate by category" subtitle="with denominators">
+          </Block>
+          <Block title="Completion rate by category" subtitle="with denominators">
             {data.health.completionByCategory.length === 0 ? (
               <p className="text-sm text-faint">Not enough data yet.</p>
             ) : (
@@ -209,92 +224,93 @@ export default async function FunnelPage({
                       <span className="shrink-0 text-faint">
                         {pct}% of {c.posted}
                       </span>
-                      <div className="h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-paper">
-                        <div className="h-full bg-ink" style={{ width: `${pct}%` }} />
-                      </div>
+                      <Meter
+                        value={c.completed}
+                        max={c.posted}
+                        className="w-20 shrink-0"
+                        label={`${c.category} completion rate`}
+                      />
                     </li>
                   );
                 })}
               </ul>
             )}
-          </Card>
+          </Block>
         </div>
-        <Card title="Most-viewed active listings" className="mt-4 overflow-x-auto p-0">
+        <Block title="Most-viewed active listings" className="mt-8">
           {data.health.mostViewed.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-faint">No active listings in range.</p>
+            <p className="text-sm text-faint">No active listings in range.</p>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-faint">
-                  <th scope="col" className="px-4 py-3 font-medium">Listing</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Category</th>
-                  <th scope="col" className="px-4 py-3 text-right font-medium">Views</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.health.mostViewed.map((l) => (
-                  <tr key={l.id} className="border-b border-line last:border-0">
-                    <th scope="row" className="px-4 py-3 text-left font-normal">
-                      <Link href={`/listing/${l.id}`} className="hover:underline">
-                        {l.title}
-                      </Link>
-                    </th>
-                    <td className="px-4 py-3 text-faint">{l.category}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{l.viewCount}</td>
+            <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-faint">
+                    <th scope="col" className="px-4 py-3 font-medium">Listing</th>
+                    <th scope="col" className="px-4 py-3 font-medium">Category</th>
+                    <th scope="col" className="px-4 py-3 text-right font-medium">Views</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.health.mostViewed.map((l) => (
+                    <tr key={l.id} className="border-b border-line last:border-0">
+                      <th scope="row" className="px-4 py-3 text-left font-normal">
+                        <Link href={`/listing/${l.id}`} className="hover:underline">
+                          {l.title}
+                        </Link>
+                      </th>
+                      <td className="px-4 py-3 text-faint">{l.category}</td>
+                      <td className="px-4 py-3 text-right tabular-nums">{l.viewCount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </Card>
-      </section>
+        </Block>
+      </Section>
 
       {/* Drilldown (only when requested) */}
       {drill && (
-        <section id="drill" className="mt-8 scroll-mt-20">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-semibold">{drill.title}</h2>
-            <Link
-              href={hrefFor(range.key, catSort)}
-              className="text-sm text-faint hover:text-ink"
-            >
-              Close ✕
-            </Link>
-          </div>
-          <p className="mt-1 text-sm text-faint">
+        <Section id="drill" eyebrow={drill.title} action={
+          <Link
+            href={hrefFor(range.key, catSort)}
+            className="inline-flex items-center gap-1 text-sm text-faint hover:text-ink"
+          >
+            <XIcon className="h-4 w-4" />
+            Close
+          </Link>
+        }>
+          <p className="-mt-2 mb-4 text-sm text-faint">
             {drill.description} Showing {drill.rows.length}.
           </p>
-          <Card className="mt-3 p-0">
-            {drill.rows.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-faint">No matching listings.</p>
-            ) : (
-              <ul className="divide-y divide-line">
-                {drill.rows.map((r) => (
-                  <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                    <Link href={`/listing/${r.id}`} className="min-w-0 flex-1 truncate text-sm hover:underline">
-                      {r.title}
-                    </Link>
-                    <span className="shrink-0 text-xs text-faint">{r.category}</span>
-                    <span className="shrink-0 text-xs tabular-nums text-faint">{r.viewCount} views</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        </section>
+          {drill.rows.length === 0 ? (
+            <p className="text-sm text-faint">No matching listings.</p>
+          ) : (
+            <ul className="divide-y divide-line border-y border-line">
+              {drill.rows.map((r) => (
+                <li key={r.id} className="flex items-center justify-between gap-3 py-3">
+                  <Link href={`/listing/${r.id}`} className="min-w-0 flex-1 truncate text-sm hover:underline">
+                    {r.title}
+                  </Link>
+                  <span className="shrink-0 text-xs text-faint">{r.category}</span>
+                  <span className="shrink-0 text-xs tabular-nums text-faint">{r.viewCount} views</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
       )}
 
       {/* Recent activity */}
-      <section className="mt-8 mb-4">
-        <h2 className="text-base font-semibold">Recent activity</h2>
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <Card title="Latest listings" className="p-0">
+      <Section eyebrow="Recent activity" className="mb-4">
+        <div className="grid gap-8 lg:grid-cols-2">
+          <Block title="Latest listings">
             {data.recentListings.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-faint">Nothing in range.</p>
+              <p className="text-sm text-faint">Nothing in range.</p>
             ) : (
-              <ul className="divide-y divide-line">
+              <ul className="divide-y divide-line border-y border-line">
                 {data.recentListings.map((l) => (
-                  <li key={l.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <li key={l.id} className="flex items-center justify-between gap-3 py-3">
                     <Link href={`/listing/${l.id}`} className="min-w-0 flex-1 truncate text-sm hover:underline">
                       {l.title}
                     </Link>
@@ -306,18 +322,18 @@ export default async function FunnelPage({
                 ))}
               </ul>
             )}
-          </Card>
-          <Card title="Latest searches" className="p-0">
+          </Block>
+          <Block title="Latest searches">
             {data.recentSearches.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-faint">Nothing in range.</p>
+              <p className="text-sm text-faint">Nothing in range.</p>
             ) : (
-              <ul className="divide-y divide-line">
+              <ul className="divide-y divide-line border-y border-line">
                 {data.recentSearches.map((s, i) => (
-                  <li key={i} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <li key={i} className="flex items-center justify-between gap-3 py-3">
                     <span className="min-w-0 flex-1 truncate text-sm">{s.query}</span>
                     <span className="shrink-0 text-xs text-faint">
                       {s.resultCount === 0 ? (
-                        <span className="text-accent">0 results</span>
+                        <span className="font-medium text-ink">0 results</span>
                       ) : (
                         `${s.resultCount} results`
                       )}{" "}
@@ -327,58 +343,57 @@ export default async function FunnelPage({
                 ))}
               </ul>
             )}
-          </Card>
+          </Block>
         </div>
-      </section>
+      </Section>
     </div>
   );
 }
 
-function KpiCard({ kpi }: { kpi: Kpi }) {
-  let deltaNode: React.ReactNode = null;
-  if (kpi.prev !== null) {
-    const diff = kpi.value - kpi.prev;
-    if (kpi.prev === 0 && kpi.value === 0) {
-      deltaNode = <span className="text-faint">no change vs prior</span>;
-    } else if (kpi.prev === 0) {
-      deltaNode = <span className="text-faint">▲ new vs prior</span>;
-    } else {
-      const pct = Math.round((diff / kpi.prev) * 100);
-      // Down is at-risk for all four KPIs → UC Red. Up/flat → neutral gray.
-      const cls = diff < 0 ? "text-accent" : "text-faint";
-      const arrow = diff > 0 ? "▲" : diff < 0 ? "▼" : "■";
-      deltaNode = (
-        <span className={cls}>
-          {arrow} {Math.abs(pct)}% vs prior
-        </span>
-      );
-    }
-  } else {
-    deltaNode = <span className="text-faint">all time</span>;
-  }
+/** KPI delta vs. the prior period. Returns no color — StatTile shows direction. */
+function kpiDelta(kpi: Kpi): { delta?: number; hint: string } {
+  if (kpi.prev === null) return { hint: "all time" };
+  if (kpi.prev === 0 && kpi.value === 0) return { hint: "no change vs prior" };
+  if (kpi.prev === 0) return { hint: "new vs prior" };
+  return { delta: ((kpi.value - kpi.prev) / kpi.prev) * 100, hint: "vs prior" };
+}
+
+/**
+ * A dashboard section: a small uppercase eyebrow over a hairline rule, then the
+ * content. Borders are earned — only tiles and tables get a frame, so the page
+ * reads as content rather than a stack of boxes.
+ */
+function Section({
+  eyebrow,
+  description,
+  action,
+  id,
+  className = "",
+  children,
+}: {
+  eyebrow: string;
+  description?: string;
+  action?: ReactNode;
+  id?: string;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="rounded-xl border border-line bg-surface p-5">
-      <div className="text-3xl font-semibold tracking-tight tabular-nums">
-        {kpi.value.toLocaleString()}
+    <section id={id} className={`mt-12 scroll-mt-20 ${className}`}>
+      <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
+        <h2 className="text-xs font-medium uppercase tracking-[0.12em] text-faint">
+          {eyebrow}
+        </h2>
+        {action}
       </div>
-      <div className="mt-1 text-sm text-faint">{kpi.label}</div>
-      <div className="mt-2 text-xs">{deltaNode}</div>
-    </div>
+      {description && <p className="mt-3 text-sm text-faint">{description}</p>}
+      <div className="mt-5">{children}</div>
+    </section>
   );
 }
 
-function Stat({ label, value, muted }: { label: string; value: number; muted?: boolean }) {
-  return (
-    <div>
-      <div className={`text-2xl font-semibold tabular-nums ${muted ? "text-faint" : ""}`}>
-        {value}
-      </div>
-      <div className="text-xs text-faint">{label}</div>
-    </div>
-  );
-}
-
-function Card({
+/** A borderless block inside a Section. */
+function Block({
   title,
   subtitle,
   className = "",
@@ -387,10 +402,10 @@ function Card({
   title?: string;
   subtitle?: string;
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <div className={`rounded-xl border border-line bg-surface p-5 ${className}`}>
+    <div className={className}>
       {title && (
         <div className="mb-3 flex items-baseline justify-between gap-2">
           <h3 className="text-sm font-semibold">{title}</h3>
@@ -404,15 +419,7 @@ function Card({
   );
 }
 
-function RankedList({
-  items,
-  tone = "ink",
-  emptyHint,
-}: {
-  items: TermCount[];
-  tone?: "ink" | "accent";
-  emptyHint: string;
-}) {
+function RankedList({ items, emptyHint }: { items: TermCount[]; emptyHint: string }) {
   if (items.length === 0) return <p className="text-sm text-faint">{emptyHint}</p>;
   const max = Math.max(...items.map((i) => i.count), 1);
   return (
@@ -425,12 +432,7 @@ function RankedList({
               <span className="truncate text-sm">{item.query}</span>
               <span className="shrink-0 text-xs tabular-nums text-faint">{item.count}</span>
             </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-paper">
-              <div
-                className={tone === "accent" ? "h-full bg-accent" : "h-full bg-ink"}
-                style={{ width: `${Math.round((item.count / max) * 100)}%` }}
-              />
-            </div>
+            <Meter value={item.count} max={max} className="mt-1" label={item.query} />
           </div>
         </li>
       ))}
@@ -448,7 +450,8 @@ function CategoryRow({ c, href }: { c: CategoryDemand; href: string }) {
       </th>
       <td className="px-4 py-3 text-right tabular-nums">{c.sell}</td>
       <td className="px-4 py-3 text-right tabular-nums">
-        {c.wanted > 0 ? <span className="font-medium text-accent">{c.wanted}</span> : 0}
+        {/* Emphasis via weight, not color — accent is not a data signal. */}
+        {c.wanted > 0 ? <span className="font-medium text-ink">{c.wanted}</span> : 0}
       </td>
       <td className="px-4 py-3 text-right tabular-nums">{c.searches}</td>
       <td className="px-4 py-3 text-right tabular-nums">{c.supply}</td>
@@ -458,7 +461,7 @@ function CategoryRow({ c, href }: { c: CategoryDemand; href: string }) {
             —
           </span>
         ) : (
-          <span className={c.demandIndex > 1 ? "font-medium text-accent" : ""}>
+          <span className={c.demandIndex > 1 ? "font-medium text-ink" : ""}>
             {c.demandIndex.toFixed(2)}
           </span>
         )}
@@ -480,7 +483,6 @@ function FunnelBars({
   return (
     <ol className="space-y-3">
       {stages.map((s, i) => {
-        const pctOfTop = Math.round((s.count / top) * 100);
         const prev = i > 0 ? stages[i - 1].count : null;
         // Change vs the previous stage. Usually a drop ("−12%"); some later
         // stages can exceed an earlier one (e.g. completions that never logged
@@ -503,9 +505,7 @@ function FunnelBars({
                 )}
               </span>
             </div>
-            <div className="mt-1 h-3 overflow-hidden rounded-full bg-paper">
-              <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(pctOfTop, 2)}%` }} />
-            </div>
+            <Meter value={s.count} max={top} className="mt-1" label={s.label} />
           </li>
         );
       })}
