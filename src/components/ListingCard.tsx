@@ -101,16 +101,12 @@ export function ListingCard({
           </p>
         ) : null}
 
-        <p className="flex items-center justify-between gap-2 text-xs text-faint">
-          <span className="truncate">
-            {/* A course code identifies a textbook better than the (long,
-                truncated) category name does. */}
-            {listing.courseCode ?? listing.category} ·{" "}
-            {timeAgo(listing.createdAt)}
-          </span>
-          <span className="truncate">
-            {listing.owner.displayName ?? "UC student"}
-          </span>
+        {/* One calm line. This row used to crowd category, time, and seller into
+            two competing truncating spans; the seller is on the detail page. */}
+        <p className="truncate text-xs text-faint">
+          {/* A course code identifies a textbook better than the (long,
+              truncated) category name does. */}
+          {listing.courseCode ?? listing.category} · {timeAgo(listing.createdAt)}
         </p>
       </div>
     </article>
