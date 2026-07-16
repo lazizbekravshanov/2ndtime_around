@@ -100,6 +100,32 @@ export function ChevronRightIcon(p: IconProps) {
   );
 }
 
+export function ChevronUpIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M6 15l6-6 6 6" />
+    </Svg>
+  );
+}
+
+export function ChevronDownIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M6 9l6 6 6-6" />
+    </Svg>
+  );
+}
+
+/** Both-directions chevron — the sortable-column affordance. */
+export function ChevronUpDownIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M8 9l4-4 4 4" />
+      <path d="M16 15l-4 4-4-4" />
+    </Svg>
+  );
+}
+
 export function EyeIcon(p: IconProps) {
   return (
     <Svg {...p}>
