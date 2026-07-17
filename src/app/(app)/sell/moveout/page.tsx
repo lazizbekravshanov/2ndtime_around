@@ -14,7 +14,7 @@ export default function MoveoutPage() {
         <ChevronLeftIcon className="h-4 w-4" />
         Back to posting
       </Link>
-      <h1 className="mt-3 text-2xl font-semibold">Move-out mode</h1>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight">Move-out mode</h1>
       <p className="mt-1 text-sm text-faint">
         Clearing out your place? List everything at once. Mark anything you're
         giving away as free — it'll post to the campus donations pile.
