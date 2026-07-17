@@ -84,7 +84,7 @@ function ProgressBar({ step }: { step: number }) {
       {STEPS.map((label, i) => (
         <li key={label} className="flex flex-1 flex-col gap-1.5">
           <span
-            className={`h-1 rounded-full ${i <= step ? "bg-accent" : "bg-line"}`}
+            className={`h-1 rounded-full ${i <= step ? "bg-ink" : "bg-line"}`}
           />
           <span
             className={`text-xs ${
