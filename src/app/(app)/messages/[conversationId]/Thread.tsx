@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { chipClasses } from "@/components/ui/Chip";
 import { inputClasses } from "@/components/ui/Field";
 import {
   AlertIcon,
@@ -84,7 +85,7 @@ function MeetupCard({
   return (
     <div className="mx-auto w-full max-w-sm rounded-xl border border-line bg-surface p-4">
       <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-faint">
-        <PinIcon className="h-3.5 w-3.5 text-accent" />
+        <PinIcon className="h-3.5 w-3.5 text-faint" />
         Meetup proposal
       </p>
       <p className="mt-2 text-sm font-medium">{spot}</p>
@@ -592,7 +593,7 @@ export function Thread({
                   }`}
                 >
                   <span className="flex items-center gap-1.5 text-sm font-medium">
-                    <PinIcon className="h-3.5 w-3.5 shrink-0 text-accent" />
+                    <PinIcon className="h-3.5 w-3.5 shrink-0 text-faint" />
                     {s.name}
                   </span>
                   <span className="mt-0.5 block text-xs text-faint">
@@ -613,11 +614,9 @@ export function Thread({
                   type="button"
                   aria-pressed={meetupTimeValue === slot.value}
                   onClick={() => setMeetupTimeValue(slot.value)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                    meetupTimeValue === slot.value
-                      ? "border-ink bg-ink text-white"
-                      : "border-line bg-surface text-faint hover:text-ink"
-                  }`}
+                  className={chipClasses(
+                    meetupTimeValue === slot.value ? "active" : "default"
+                  )}
                 >
                   {slot.label}
                 </button>
