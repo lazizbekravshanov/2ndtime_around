@@ -63,7 +63,7 @@ export function NotificationRow({ n }: { n: NotificationRowData }) {
         <span className="flex items-center gap-2">
           <span className="truncate text-sm font-medium">{n.title}</span>
           {!n.read && (
-            <span className="h-2 w-2 shrink-0 rounded-full bg-accent">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-ink">
               <span className="sr-only">Unread</span>
             </span>
           )}
