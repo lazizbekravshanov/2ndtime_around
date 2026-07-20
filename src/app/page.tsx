@@ -111,7 +111,7 @@ export default async function LandingPage() {
   const browseSignIn = signInHref("/browse");
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       <header className="mx-auto flex w-full max-w-page items-center justify-between px-4 py-5">
         <div className="flex items-center gap-2">
           <LogoMark className="h-7 w-7" />

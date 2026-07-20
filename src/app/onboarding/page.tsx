@@ -12,7 +12,7 @@ export default async function OnboardingPage() {
   if (user.displayName) redirect("/browse");
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 py-16">
+    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4 py-16">
       <LogoMark className="h-7 w-7" />
       <h1 className="mt-6 text-2xl font-semibold tracking-tight">
         Welcome, Bearcat

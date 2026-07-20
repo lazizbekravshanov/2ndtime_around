@@ -60,14 +60,19 @@ export function Field({
 }
 
 // Placeholders use full --color-faint (no /70 opacity) so they clear WCAG 1.4.3.
+//
+// Controls render at 16px on mobile (text-base) and drop to the compact 14px
+// (md:text-sm) from tablet up. The 16px floor is load-bearing: iOS Safari
+// auto-zooms into any focused input under 16px, which yanks the whole layout
+// off-screen and won't cleanly zoom back. Keep it ≥16px below md.
 export const inputClasses =
-  "h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm placeholder:text-faint transition-colors focus:border-ink";
+  "h-10 w-full rounded-lg border border-line bg-surface px-3 text-base md:text-sm placeholder:text-faint transition-colors focus:border-ink";
 
 export const textareaClasses =
-  "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm placeholder:text-faint transition-colors focus:border-ink";
+  "w-full rounded-lg border border-line bg-surface px-3 py-2 text-base md:text-sm placeholder:text-faint transition-colors focus:border-ink";
 
 // appearance-none strips the native arrow, so we draw our own chevron —
 // without it a select is indistinguishable from a text input.
 export const selectClasses =
-  "h-10 w-full appearance-none rounded-lg border border-line bg-surface pl-3 pr-8 text-sm transition-colors focus:border-ink " +
+  "h-10 w-full appearance-none rounded-lg border border-line bg-surface pl-3 pr-8 text-base md:text-sm transition-colors focus:border-ink " +
   "bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20fill%3D%22none%22%20stroke%3D%22%2357534e%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22m4%206%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[position:right_0.625rem_center] bg-no-repeat";

@@ -98,7 +98,7 @@ export function SignInClient({
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16">
+    <main className="flex min-h-dvh flex-col items-center justify-center px-4 py-16">
       <Link href="/" className="flex items-center gap-2.5">
         <LogoMark className="h-7 w-7" />
         <span className="text-xl font-semibold tracking-tight">

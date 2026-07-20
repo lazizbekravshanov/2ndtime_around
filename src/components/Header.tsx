@@ -186,10 +186,10 @@ export function Header({
         <div className="mx-auto flex h-14 max-w-page items-center justify-between gap-4 px-4">
           <Link
             href="/browse"
-            className="flex items-center gap-2 text-base font-semibold"
+            className="flex min-w-0 items-center gap-2 text-base font-semibold"
           >
             <LogoMark />
-            <span>2nd Time Around</span>
+            <span className="truncate whitespace-nowrap">2nd Time Around</span>
           </Link>
 
           <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
@@ -239,13 +239,19 @@ export function Header({
                 />
               )}
             </Link>
-            <Link
-              href="/sell"
-              className={`${buttonClasses("primary", "sm")} ml-1`}
-            >
-              <PlusIcon className="h-4 w-4" />
-              Post item
-            </Link>
+            {/* Redundant on phones — the bottom tab bar carries the Post CTA —
+                so it's hidden below sm, which also frees the wordmark from
+                wrapping on narrow screens. `contents` keeps the link as the
+                direct flex child from sm up. */}
+            <span className="hidden sm:contents">
+              <Link
+                href="/sell"
+                className={`${buttonClasses("primary", "sm")} ml-1`}
+              >
+                <PlusIcon className="h-4 w-4" />
+                Post item
+              </Link>
+            </span>
             <UserMenu
               userId={userId}
               displayName={displayName}

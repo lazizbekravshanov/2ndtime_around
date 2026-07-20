@@ -32,7 +32,7 @@ export default async function AppLayout({
 
   return (
     <ToastProvider>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-dvh flex-col">
         {/* Keyboard users can jump past the nav straight to content
             (WCAG 2.4.1 Bypass Blocks). Hidden until focused. */}
         <a

@@ -12,7 +12,7 @@ export default async function MagicLinkSentPage({
   const devMode = !process.env.EMAIL_SERVER;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16 text-center">
+    <main className="flex min-h-dvh flex-col items-center justify-center px-4 py-16 text-center">
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
         <CheckIcon className="h-6 w-6 text-success" />
       </span>
