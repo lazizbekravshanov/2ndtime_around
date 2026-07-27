@@ -232,7 +232,19 @@ export function SignInClient({
         </div>
       )}
 
-      <p className="mt-8 max-w-sm text-center text-xs text-faint">
+      {/* The catalog is public, so signing in is not the only way forward.
+          Without this the page is a cul-de-sac for anyone who arrived from a
+          shared listing and isn't ready to hand over an email. */}
+      <p className="mt-8 text-center text-sm">
+        <Link
+          href="/browse"
+          className="font-medium text-faint underline-offset-4 transition-colors hover:text-ink hover:underline"
+        >
+          Browse without signing in →
+        </Link>
+      </p>
+
+      <p className="mt-6 max-w-sm text-center text-xs text-faint">
         UC students only. Only UC email addresses (@uc.edu or @mail.uc.edu) are
         permitted.
       </p>
