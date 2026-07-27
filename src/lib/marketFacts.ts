@@ -33,12 +33,31 @@ export const MARKET_FACTS: MarketFact[] = [
     href: "https://www.nacs.org/student-watch-report-course-materials-spending-stable",
   },
   {
-    value: "113 tons",
-    label: "diverted from landfill at a single peer campus in one move-out",
-    source: "Boston University, 2024",
-    href: "https://www.bu.edu/articles/2026/donate-unwanted-goods-move-out/",
+    // The sharpest figure we have, because it is UC's own public scorecard and
+    // can be opened live in the room. Framed as a gap, never as a criticism:
+    // UC is Gold-rated and #8 greenest in the country, and STARS still scores
+    // minimisation separately from diversion — which is exactly the space this
+    // product occupies.
+    value: "2.31 / 8",
+    label:
+      "points UC earns for waste minimization in its own sustainability report — while rated Gold overall",
+    source: "AASHE STARS, 2023",
+    href: "https://reports.aashe.org/institutions/university-of-cincinnati-oh/report/2023-03-03/",
   },
 ];
+
+/**
+ * UC's sustainability standing. This exists so the STARS gap above reads as an
+ * opportunity rather than an attack: the university is demonstrably good at
+ * this, which is the whole reason the remaining gap is worth funding.
+ */
+export const UC_STANDING = {
+  greenRank: "#8",
+  greenRankBody:
+    "greenest college in the United States, and #1 in Ohio (Princeton Review, 2026)",
+  greenRankHref:
+    "https://www.uc.edu/news/articles/2025/10/the-princeton-review-ranks-uc-among-the-top-greenest-college-campuses.html",
+};
 
 /**
  * UC's own move-out program — the wedge. The university and eight partners
@@ -49,5 +68,9 @@ export const UC_DIVERSION = {
   window: "July 24 – August 2, 2026",
   location: "121 E McMillan Street",
   partners: 8,
+  // Why the window is where it is: UC and Keep Cincinnati Beautiful both
+  // describe Uptown leases ending around July 31, which empties the
+  // neighbourhood in a single week. Refresh `window` each year.
+  leaseEnd: "July 31",
   href: "https://www.uc.edu/about/admin-finance/planning-design-construction/sustainability/get-involved/events-&-programming/uptown-waste-diversion.html",
 };
