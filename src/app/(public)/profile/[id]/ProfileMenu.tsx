@@ -86,8 +86,10 @@ export function ProfileMenu({
               </div>
             </div>
           ) : (
+            // Neutral either way: this opens the block confirm, and unblocking
+            // is restorative rather than destructive.
             <Button
-              variant="danger"
+              variant="secondary"
               onClick={blocked ? toggleBlock : () => setConfirmingBlock(true)}
               disabled={pending}
               className="w-full"

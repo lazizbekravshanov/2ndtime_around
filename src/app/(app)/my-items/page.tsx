@@ -56,6 +56,10 @@ export default async function MyItemsPage({
   const listings = await db.listing.findMany({
     where: { ownerId: user.id, status: { in: STATUS_BY_TAB[tab] } },
     orderBy: { createdAt: "desc" },
+    // Views alone don't tell a seller whether to hold or drop the price.
+    // Saves and inquiries are the demand signal, and _count rides along on
+    // this query rather than costing another round trip.
+    include: { _count: { select: { favorites: true, conversations: true } } },
   });
 
   const moveoutDays = daysUntilMoveOut();
@@ -152,6 +156,14 @@ export default async function MyItemsPage({
                       · <EyeIcon className="h-3.5 w-3.5" />
                       {l.viewCount}
                     </span>
+                    {/* Zeros are omitted rather than shown — a quiet listing
+                        should read as quiet, not as a row of failures. */}
+                    {l._count.favorites > 0 && (
+                      <span>· {l._count.favorites} saved</span>
+                    )}
+                    {l._count.conversations > 0 && (
+                      <span>· {l._count.conversations} asked</span>
+                    )}
                   </p>
                 </div>
                 <ItemRowActions

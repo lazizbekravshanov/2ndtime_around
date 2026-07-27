@@ -76,6 +76,9 @@ async function Results({ params }: { params: BrowseParams }) {
   });
   const hasNext = rows.length > PAGE_SIZE;
   const listings = rows.slice(0, PAGE_SIZE);
+  // Cards carry this view forward so a listing's back-link returns to these
+  // exact results rather than an unfiltered grid.
+  const backTo = pageHref(params, page);
 
   // Log the search once per query (page 1), fire-and-forget. Zero-result
   // searches are logged too — that's the unmet-demand signal.
@@ -143,6 +146,7 @@ async function Results({ params }: { params: BrowseParams }) {
               user && l.ownerId !== user.id ? favIds.has(l.id) : undefined
             }
             signInHref={signInHref}
+            backTo={backTo}
           />
         ))}
       </div>
