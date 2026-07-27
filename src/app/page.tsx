@@ -15,7 +15,7 @@ import { ListingCard } from "@/components/ListingCard";
 import { buttonClasses } from "@/components/ui/Button";
 import { db } from "@/lib/db";
 import { photoList } from "@/lib/format";
-import { MARKET_FACTS, UC_DIVERSION } from "@/lib/marketFacts";
+import { MARKET_FACTS, UC_DIVERSION, UC_STANDING } from "@/lib/marketFacts";
 import { getSessionUser } from "@/lib/session";
 import { signInHref } from "@/lib/url";
 
@@ -230,8 +230,10 @@ export default async function LandingPage() {
             <h2 className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
               The opportunity
             </h2>
+            {/* "every move-out", not "every May": dorms empty in May, but the
+                Uptown leases that drive the real pile-up end in July. */}
             <p className="mx-auto mt-4 max-w-3xl text-center text-3xl font-semibold tracking-tight sm:text-5xl">
-              One campus throws away a small fortune every May.
+              One campus throws away a small fortune every move-out.
             </p>
             <dl className="mx-auto mt-16 grid max-w-4xl grid-cols-1 gap-12 sm:grid-cols-3">
               {MARKET_FACTS.map((f) => (
@@ -253,6 +255,21 @@ export default async function LandingPage() {
                 </div>
               ))}
             </dl>
+            {/* Context, so the STARS number reads as an opening rather than an
+                attack on a university that is demonstrably good at this. */}
+            <p className="mx-auto mt-14 max-w-2xl text-center text-sm leading-relaxed text-faint">
+              That last number is not neglect. UC is the{" "}
+              <a
+                href={UC_STANDING.greenRankHref}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
+              >
+                {UC_STANDING.greenRank} {UC_STANDING.greenRankBody}
+              </a>
+              . Minimization is scored separately from diversion — and nothing
+              upstream of the dumpster is being measured yet.
+            </p>
           </div>
         </section>
 
@@ -264,15 +281,17 @@ export default async function LandingPage() {
               Why now
             </h2>
             <p className="mx-auto mt-4 max-w-3xl text-center text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              UC is already solving this{" "}
-              <span className="text-accent">with dumpsters.</span>
+              Every Uptown lease ends{" "}
+              <span className="text-accent">{UC_DIVERSION.leaseEnd}.</span>
             </p>
             <p className="mx-auto mt-6 max-w-2xl text-center text-base leading-relaxed text-faint sm:text-lg">
-              Right now — {UC_DIVERSION.window} — the university and{" "}
-              {UC_DIVERSION.partners} partners are running Uptown Waste
-              Diversion at {UC_DIVERSION.location}: extra dumpsters, e-waste
-              bins, and a donation drop-off. It works, and it is entirely
-              downstream. Everything it handles has already become garbage.
+              The neighborhood empties in a single week, and it has always meant
+              the same thing: furniture on the sidewalk and dumpsters running
+              over. Right now — {UC_DIVERSION.window} — the university and{" "}
+              {UC_DIVERSION.partners} partners are answering it at{" "}
+              {UC_DIVERSION.location} with extra dumpsters, e-waste bins, and a
+              donation drop-off. It works, and it is entirely downstream.
+              Everything it handles has already become garbage.
             </p>
             <div className="mx-auto mt-14 grid max-w-3xl gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2">
               <div className="bg-surface p-8">
