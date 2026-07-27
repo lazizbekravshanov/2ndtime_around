@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isSafeCallbackUrl, safeCallbackUrl, signInHref } from "@/lib/url";
+import {
+  isSafeCallbackUrl,
+  safeBrowseReturn,
+  safeCallbackUrl,
+  signInHref,
+} from "@/lib/url";
 
 describe("isSafeCallbackUrl", () => {
   it("accepts root-relative paths", () => {
@@ -72,5 +77,44 @@ describe("signInHref", () => {
       "/signin?callbackUrl=%2Fbrowse%3Ftab%3Dwanted"
     );
     expect(signInHref("/sell")).toBe("/signin?callbackUrl=%2Fsell");
+  });
+});
+
+describe("safeBrowseReturn", () => {
+  it("accepts browse paths, with or without a query", () => {
+    expect(safeBrowseReturn("/browse")).toBe("/browse");
+    expect(safeBrowseReturn("/browse?tab=wanted")).toBe("/browse?tab=wanted");
+    expect(safeBrowseReturn("/browse?q=desk+chair&category=Furniture&page=2")).toBe(
+      "/browse?q=desk+chair&category=Furniture&page=2"
+    );
+    expect(safeBrowseReturn("/browse#results")).toBe("/browse#results");
+  });
+
+  it("rejects in-app paths that are not browse", () => {
+    // Without this, ?from= would be a general-purpose in-app redirect.
+    expect(safeBrowseReturn("/sell")).toBe(null);
+    expect(safeBrowseReturn("/messages")).toBe(null);
+    expect(safeBrowseReturn("/signin?callbackUrl=%2Fsell")).toBe(null);
+  });
+
+  it("rejects prefixes that merely start with the browse string", () => {
+    expect(safeBrowseReturn("/browsers")).toBe(null);
+    expect(safeBrowseReturn("/browse-all")).toBe(null);
+    expect(safeBrowseReturn("/browsefoo?q=1")).toBe(null);
+  });
+
+  it("rejects off-origin and smuggled values", () => {
+    expect(safeBrowseReturn("https://evil.com/browse")).toBe(null);
+    expect(safeBrowseReturn("//evil.com/browse")).toBe(null);
+    expect(safeBrowseReturn("/\\evil.com/browse")).toBe(null);
+    expect(safeBrowseReturn("/browse\\@evil.com")).toBe(null);
+    expect(safeBrowseReturn("/browse\n?q=x")).toBe(null);
+  });
+
+  it("rejects missing or non-string values", () => {
+    expect(safeBrowseReturn(undefined)).toBe(null);
+    expect(safeBrowseReturn(null)).toBe(null);
+    expect(safeBrowseReturn("")).toBe(null);
+    expect(safeBrowseReturn(42)).toBe(null);
   });
 });

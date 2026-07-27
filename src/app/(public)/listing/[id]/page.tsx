@@ -1,4 +1,4 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -16,12 +16,17 @@ import {
 import { db } from "@/lib/db";
 import { formatPrice, monthYear, photoList, timeAgo } from "@/lib/format";
 import { getSessionUser } from "@/lib/session";
+import { safeBrowseReturn } from "@/lib/url";
 import { viewOutcome } from "@/lib/listingVisibility";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ListingMenu } from "./ListingMenu";
 import { ClaimButton } from "./ClaimButton";
 import { MessageSellerButton } from "./MessageSellerButton";
 import { OwnerActions } from "./OwnerActions";
+import {
+  RelatedListings,
+  RelatedListingsSkeleton,
+} from "./RelatedListings";
 
 // cache() dedupes the query between generateMetadata and the page render.
 const getListing = cache((id: string) =>
@@ -78,10 +83,17 @@ export async function generateMetadata({
 
 export default async function ListingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { id } = await params;
+  // `from` carries the browse view this listing was opened from. It is
+  // attacker-controllable and lands in an href, so it is validated down to a
+  // same-origin /browse path before use; anything else falls back to /browse.
+  const { from } = await searchParams;
+  const backTo = safeBrowseReturn(from);
   // Public page: anonymous visitors may view active listings. A signed-in user
   // unlocks owner controls, favorite state, and the participation actions.
   const user = await getSessionUser();
@@ -114,10 +126,11 @@ export default async function ListingPage({
           It may have been sold, claimed, or taken down.
         </p>
         <Link
-          href="/browse"
+          href={backTo ?? "/browse"}
           className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
         >
-          <ChevronLeftIcon className="h-4 w-4" /> Back to browse
+          <ChevronLeftIcon className="h-4 w-4" />{" "}
+          {backTo ? "Back to results" : "Back to browse"}
         </Link>
       </div>
     );
@@ -160,11 +173,11 @@ export default async function ListingPage({
   return (
     <div>
       <Link
-        href="/browse"
+        href={backTo ?? "/browse"}
         className="inline-flex items-center gap-1 text-sm text-faint hover:text-ink"
       >
         <ChevronLeftIcon className="h-4 w-4" />
-        Back to browse
+        {backTo ? "Back to results" : "Back to browse"}
       </Link>
 
       <div className="mt-4 grid gap-8 md:grid-cols-5">
@@ -356,6 +369,17 @@ export default async function ListingPage({
           )}
         </div>
       </div>
+
+      {/* Somewhere to go next. Suspended so two extra queries can never delay
+          the listing itself. */}
+      <Suspense fallback={<RelatedListingsSkeleton />}>
+        <RelatedListings
+          listingId={listing.id}
+          ownerId={listing.owner.id}
+          ownerName={listing.owner.displayName ?? "this seller"}
+          category={listing.category}
+        />
+      </Suspense>
     </div>
   );
 }

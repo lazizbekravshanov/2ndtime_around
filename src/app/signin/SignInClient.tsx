@@ -217,7 +217,14 @@ export function SignInClient({
                   />
                 </Field>
               </div>
-              <Button type="submit" disabled={demoPending} className="mt-4 w-full">
+              {/* Secondary: the magic link is the real door, and two red
+                  buttons on one screen means neither reads as the primary. */}
+              <Button
+                type="submit"
+                variant="secondary"
+                disabled={demoPending}
+                className="mt-4 w-full"
+              >
                 {demoPending ? "Signing in…" : "Sign in as demo user"}
               </Button>
             </form>

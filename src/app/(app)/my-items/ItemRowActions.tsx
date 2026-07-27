@@ -93,7 +93,9 @@ export function ItemRowActions({
             {doneLabel}
           </Button>
         )}
-        <Button variant="danger" size="sm" onClick={() => setConfirm("delete")}>
+        {/* Neutral: this only opens the confirm. Red belongs on the button in
+            the dialog that actually destroys, not on the one that asks. */}
+        <Button variant="secondary" size="sm" onClick={() => setConfirm("delete")}>
           Delete
         </Button>
       </div>

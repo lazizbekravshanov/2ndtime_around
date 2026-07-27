@@ -108,8 +108,9 @@ export function OwnerActions({
             </Button>
           </span>
         ) : (
+          // Neutral until confirmed — the red lives on "Yes, delete" above.
           <Button
-            variant="danger"
+            variant="secondary"
             size="sm"
             onClick={() => setConfirmingDelete(true)}
           >

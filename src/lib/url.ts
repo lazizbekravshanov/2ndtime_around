@@ -33,6 +33,30 @@ export function safeCallbackUrl(value: unknown, fallback = "/browse"): string {
 }
 
 /**
+ * Validate a `?from=` browse-return path.
+ *
+ * A listing page reaches this value straight from the query string and renders
+ * it into an `href`, so it is attacker-controllable. On top of the same-origin
+ * checks above, the path must actually be a browse view: without the prefix
+ * check, `?from=` would be a general-purpose in-app redirect, letting a crafted
+ * link plant a "Back to results" button that points anywhere in the app.
+ *
+ * The prefix is matched against `/browse` followed by end-of-string, `?`, or
+ * `#` — so `/browsers` and `/browse-all` are rejected rather than passing on a
+ * bare `startsWith`.
+ *
+ * Returns the path when safe, otherwise `null` so callers can fall back to
+ * their own default label and href.
+ */
+export function safeBrowseReturn(value: unknown): string | null {
+  if (!isSafeCallbackUrl(value)) return null;
+  if (!value.startsWith("/browse")) return null;
+  const next = value[7]; // char right after "/browse"
+  if (next !== undefined && next !== "?" && next !== "#") return null;
+  return value;
+}
+
+/**
  * Build a `/signin` link that returns to `callbackPath` after auth when the
  * path is safe. Unsafe or missing callbacks yield a bare `/signin`.
  */
