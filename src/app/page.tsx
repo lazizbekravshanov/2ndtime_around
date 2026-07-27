@@ -14,8 +14,8 @@ import {
 import { ListingCard } from "@/components/ListingCard";
 import { buttonClasses } from "@/components/ui/Button";
 import { db } from "@/lib/db";
-import { formatPrice, photoList } from "@/lib/format";
-import { getImpactStats } from "@/lib/impact";
+import { photoList } from "@/lib/format";
+import { MARKET_FACTS, UC_DIVERSION } from "@/lib/marketFacts";
 import { getSessionUser } from "@/lib/session";
 import { signInHref } from "@/lib/url";
 
@@ -34,26 +34,19 @@ const getRecentListings = unstable_cache(
   { revalidate: 60 }
 );
 
+// Four, not eight. This section is read from the back of a room during a
+// pitch, so it carries the pillars that differentiate us — the long tail
+// (want ads, lost & found, impact tracking) is on /how-it-works.
 const FEATURES = [
   {
     icon: TagIcon,
-    title: "Buy and sell",
-    body: "Textbooks, dorm gear, bikes, tickets. Set a price, meet on campus, done. No shipping, no fees.",
+    title: "Buy, sell, and give away",
+    body: "Textbooks, dorm gear, bikes, tickets. Set a price or give it away free. No shipping, no fees, no middleman.",
   },
   {
-    icon: LeafIcon,
-    title: "Donations",
-    body: "Free stuff gets its own tab, not a footnote. Give away what you can't carry home at move-out.",
-  },
-  {
-    icon: PinIcon,
-    title: "Lost & found",
-    body: "Report what you lost or found. Claims are verified by a detail only the real owner would know.",
-  },
-  {
-    icon: SearchIcon,
-    title: "Want ads",
-    body: "Can't find it? Post what you're looking for and let the person who has it come to you.",
+    icon: BadgeIcon,
+    title: "UC students only",
+    body: "Every account is verified by a @uc.edu address. You're trading with classmates, not strangers off the internet.",
   },
   {
     icon: ChatIcon,
@@ -61,19 +54,9 @@ const FEATURES = [
     body: "Propose a time and a well-lit, staffed spot — TUC, Langsam, the CRC — right inside the chat.",
   },
   {
-    icon: BadgeIcon,
-    title: "UC students only",
-    body: "Every account is verified by a @uc.edu address. You're trading with classmates, not strangers.",
-  },
-  {
     icon: BoxIcon,
     title: "Move-out mode",
-    body: "List your whole room in one pass when the semester ends, instead of one item at a time.",
-  },
-  {
-    icon: LeafIcon,
-    title: "Impact you can see",
-    body: "Every completed swap is counted — what you kept out of a Cincinnati landfill, tracked per semester.",
+    body: "List your whole room in one pass at the end of the semester, instead of one item at a time.",
   },
 ];
 
@@ -101,10 +84,9 @@ export default async function LandingPage() {
   const user = await getSessionUser();
   if (user) redirect("/browse");
 
-  const [cached, impact] = await Promise.all([
-    getRecentListings(),
-    getImpactStats(),
-  ]);
+  // The opportunity figures are external constants now, so the landing page
+  // no longer queries our own impact stats.
+  const cached = await getRecentListings();
   const recent = cached.map((l) => ({ ...l, createdAt: new Date(l.createdAt) }));
   const withPhotos = recent.filter((l) => photoList(l.photos).length > 0);
   const preview = (withPhotos.length >= 4 ? withPhotos : recent).slice(0, 4);
@@ -197,18 +179,13 @@ export default async function LandingPage() {
             </button>
           </form>
 
-          {/* Real numbers only — these are the pilot's actual completed swaps. */}
-          {impact.itemsKept > 0 && (
-            <p className="mt-6 text-sm text-faint">
-              <LeafIcon className="mr-1.5 inline h-4 w-4 text-success" />
-              <span className="font-medium text-ink">{impact.itemsKept}</span>{" "}
-              items kept in circulation ·{" "}
-              <span className="font-medium text-ink">
-                {formatPrice(impact.soldValue)}
-              </span>{" "}
-              traded between students
-            </p>
-          )}
+          {/* No activity counters here: ours are pilot data, and a seeded
+              number under the hero reads as traction. The opportunity section
+              below carries sourced, external figures instead. */}
+          <p className="mt-6 text-sm text-faint">
+            <LeafIcon className="mr-1.5 inline h-4 w-4 text-success" />
+            Free to use · UC students only · Nothing shipped, nothing wasted
+          </p>
         </div>
       </section>
 
@@ -243,6 +220,98 @@ export default async function LandingPage() {
             </div>
           </section>
         )}
+
+        {/* The opportunity — external, citable figures only.
+            This section used to show our own seeded pilot counts, which read
+            as traction. Every number here belongs to someone else and links to
+            its source, so it holds up when someone checks. */}
+        <section className="border-t border-line">
+          <div className="mx-auto max-w-page px-4 py-20 sm:py-28">
+            <h2 className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
+              The opportunity
+            </h2>
+            <p className="mx-auto mt-4 max-w-3xl text-center text-3xl font-semibold tracking-tight sm:text-5xl">
+              One campus throws away a small fortune every May.
+            </p>
+            <dl className="mx-auto mt-16 grid max-w-4xl grid-cols-1 gap-12 sm:grid-cols-3">
+              {MARKET_FACTS.map((f) => (
+                <div key={f.value} className="text-center">
+                  <dd className="text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl">
+                    {f.value}
+                  </dd>
+                  <dt className="mx-auto mt-3 max-w-56 text-sm leading-relaxed text-faint">
+                    {f.label}
+                  </dt>
+                  <a
+                    href={f.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-block text-xs text-faint underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
+                  >
+                    {f.source}
+                  </a>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        {/* Why now — the wedge. UC already funds a downstream answer to this
+            problem; the interesting move is upstream. */}
+        <section className="border-t border-line bg-surface/60">
+          <div className="mx-auto max-w-page px-4 py-20 sm:py-28">
+            <h2 className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
+              Why now
+            </h2>
+            <p className="mx-auto mt-4 max-w-3xl text-center text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
+              UC is already solving this{" "}
+              <span className="text-accent">with dumpsters.</span>
+            </p>
+            <p className="mx-auto mt-6 max-w-2xl text-center text-base leading-relaxed text-faint sm:text-lg">
+              Right now — {UC_DIVERSION.window} — the university and{" "}
+              {UC_DIVERSION.partners} partners are running Uptown Waste
+              Diversion at {UC_DIVERSION.location}: extra dumpsters, e-waste
+              bins, and a donation drop-off. It works, and it is entirely
+              downstream. Everything it handles has already become garbage.
+            </p>
+            <div className="mx-auto mt-14 grid max-w-3xl gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2">
+              <div className="bg-surface p-8">
+                <p className="text-xs font-medium uppercase tracking-[0.12em] text-faint">
+                  Today
+                </p>
+                <p className="mt-3 text-xl font-semibold tracking-tight">
+                  Haul it to a dumpster on McMillan.
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-faint">
+                  Ten days a year, one location, and the couch is already waste
+                  by the time anyone sees it.
+                </p>
+              </div>
+              <div className="bg-surface p-8">
+                <p className="text-xs font-medium uppercase tracking-[0.12em] text-faint">
+                  With 2nd Time Around
+                </p>
+                <p className="mt-3 text-xl font-semibold tracking-tight">
+                  A sophomore two blocks away takes it.
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-faint">
+                  All year, every dorm, and it never becomes waste at all —
+                  because someone who needed it got there first.
+                </p>
+              </div>
+            </div>
+            <p className="mt-8 text-center text-sm">
+              <a
+                href={UC_DIVERSION.href}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-faint underline-offset-4 transition-colors hover:text-ink hover:underline"
+              >
+                UC Uptown Waste Diversion →
+              </a>
+            </p>
+          </div>
+        </section>
 
         {/* Features — borderless grid, monochrome icons. */}
         <section className="border-t border-line">
@@ -305,50 +374,9 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* Impact — the real campus numbers, borderless. */}
+        {/* Final CTA — plain paper so it alternates against "How it works"
+            above it, now that the section order puts the wedge up front. */}
         <section className="border-t border-line">
-          <div className="mx-auto max-w-page px-4 py-20 sm:py-28">
-            <h2 className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
-              <LeafIcon className="mr-1.5 inline h-4 w-4 text-success" />
-              What Bearcats keep in circulation
-            </h2>
-            <dl className="mx-auto mt-14 grid max-w-3xl grid-cols-1 gap-12 sm:grid-cols-3">
-              <div className="flex flex-col-reverse gap-2 text-center">
-                <dt className="text-sm text-faint">
-                  items kept out of Cincinnati landfills
-                </dt>
-                <dd className="text-5xl font-semibold tracking-tight tabular-nums">
-                  {impact.itemsKept}
-                </dd>
-              </div>
-              <div className="flex flex-col-reverse gap-2 text-center">
-                <dt className="text-sm text-faint">
-                  traded between students, not big retail
-                </dt>
-                <dd className="text-5xl font-semibold tracking-tight tabular-nums">
-                  {formatPrice(impact.soldValue)}
-                </dd>
-              </div>
-              <div className="flex flex-col-reverse gap-2 text-center">
-                <dt className="text-sm text-faint">items given away free</dt>
-                <dd className="text-5xl font-semibold tracking-tight tabular-nums">
-                  {impact.donated}
-                </dd>
-              </div>
-            </dl>
-            <p className="mt-12 text-center text-sm">
-              <Link
-                href="/leaderboard"
-                className="font-medium text-faint underline-offset-4 transition-colors hover:text-ink hover:underline"
-              >
-                See which Bearcats keep the most in circulation →
-              </Link>
-            </p>
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="border-t border-line bg-surface/60">
           <div className="mx-auto max-w-page px-4 py-20 text-center sm:py-28">
             <h2 className="mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
               Your next textbook is already on campus.

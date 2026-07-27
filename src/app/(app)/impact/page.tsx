@@ -58,6 +58,13 @@ export default async function ImpactPage() {
         Every completed sale or donation is one less thing in a dumpster at
         move-out.
       </p>
+      {/* Said plainly and up front: these totals come from the seeded pilot
+          cohort, not from open enrollment. Anyone we demo to will ask, and the
+          answer should already be on the page. */}
+      <p className="mt-3 rounded-lg border border-line bg-surface px-3 py-2 text-xs text-faint">
+        These totals cover the pilot cohort, not the full campus — real numbers
+        from a seeded group of students, not a projection.
+      </p>
 
       {/* Headline numbers — plain and honest, no chart library */}
       <div className="mt-6 grid gap-4 sm:grid-cols-3">

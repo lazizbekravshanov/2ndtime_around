@@ -13,9 +13,13 @@ export async function Footer() {
           className="inline-flex items-center gap-2 hover:text-ink"
         >
           <LeafIcon className="h-4 w-4 text-success" />
+          {/* "pilot" is not decoration: this counter runs on our seeded pilot
+              cohort, and an unqualified number here reads as traction to
+              anyone we're showing the product to. */}
           <span>
             <strong className="font-semibold text-ink">{count}</strong>{" "}
             {count === 1 ? "item" : "items"} kept out of landfills
+            <span className="text-faint"> · pilot</span>
           </span>
         </Link>
         <div className="flex items-center gap-4">
