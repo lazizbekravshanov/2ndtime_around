@@ -262,9 +262,13 @@ export default async function ListingPage({
             </p>
             <div className="mt-2 flex items-center justify-between gap-3">
               <div>
+                {/* A resting underline, not just a hover one: this is the only
+                    interactive text in the seller card, and with hover-only
+                    styling it read as a plain label — so the profile behind it
+                    was effectively undiscoverable. */}
                 <Link
                   href={`/profile/${listing.owner.id}`}
-                  className="font-medium hover:underline"
+                  className="font-medium underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
                 >
                   {listing.owner.displayName}
                 </Link>
