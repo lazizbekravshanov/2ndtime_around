@@ -65,12 +65,33 @@ export const UC_STANDING = {
  * drop-off on McMillan). We are the upstream half.
  */
 export const UC_DIVERSION = {
-  window: "July 24 – August 2, 2026",
+  /** Inclusive window, as published by UC. Update both when UC announces. */
+  start: "2026-07-24",
+  end: "2026-08-02",
+  /** Dateless label, so the copy stays true after the window closes. */
+  windowLabel: "July 24 – August 2",
   location: "121 E McMillan Street",
   partners: 8,
   // Why the window is where it is: UC and Keep Cincinnati Beautiful both
   // describe Uptown leases ending around July 31, which empties the
-  // neighbourhood in a single week. Refresh `window` each year.
+  // neighbourhood in a single week.
   leaseEnd: "July 31",
   href: "https://www.uc.edu/about/admin-finance/planning-design-construction/sustainability/get-involved/events-&-programming/uptown-waste-diversion.html",
 };
+
+/**
+ * Is UC's diversion window open today?
+ *
+ * The landing copy claimed "Right now — July 24 – August 2, 2026". That is a
+ * dated factual claim on a public page, and it goes false the moment the
+ * window closes — days after it shipped, and embarrassingly so a year later.
+ * The page now asks this and picks its wording, so the claim can never outlive
+ * the fact.
+ *
+ * Compared on calendar dates (UTC midnight boundaries) — the window is a
+ * published range of days, not an instant, so timezone precision is noise.
+ */
+export function isDiversionWindowOpen(now: Date): boolean {
+  const day = now.toISOString().slice(0, 10);
+  return day >= UC_DIVERSION.start && day <= UC_DIVERSION.end;
+}

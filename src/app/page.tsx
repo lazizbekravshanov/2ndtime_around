@@ -15,7 +15,12 @@ import { ListingCard } from "@/components/ListingCard";
 import { buttonClasses } from "@/components/ui/Button";
 import { db } from "@/lib/db";
 import { photoList } from "@/lib/format";
-import { MARKET_FACTS, UC_DIVERSION, UC_STANDING } from "@/lib/marketFacts";
+import {
+  isDiversionWindowOpen,
+  MARKET_FACTS,
+  UC_DIVERSION,
+  UC_STANDING,
+} from "@/lib/marketFacts";
 import { getSessionUser } from "@/lib/session";
 import { signInHref } from "@/lib/url";
 
@@ -86,6 +91,9 @@ export default async function LandingPage() {
 
   // The opportunity figures are external constants now, so the landing page
   // no longer queries our own impact stats.
+  // Evaluated per request, so the wedge copy stops claiming "right now"
+  // the day UC's window closes.
+  const diversionOpen = isDiversionWindowOpen(new Date());
   const cached = await getRecentListings();
   const recent = cached.map((l) => ({ ...l, createdAt: new Date(l.createdAt) }));
   const withPhotos = recent.filter((l) => photoList(l.photos).length > 0);
@@ -287,8 +295,21 @@ export default async function LandingPage() {
             <p className="mx-auto mt-6 max-w-2xl text-center text-base leading-relaxed text-faint sm:text-lg">
               The neighborhood empties in a single week, and it has always meant
               the same thing: furniture on the sidewalk and dumpsters running
-              over. Right now — {UC_DIVERSION.window} — the university and{" "}
-              {UC_DIVERSION.partners} partners are answering it at{" "}
+              over.{" "}
+              {/* "Right now" is only true inside the window. Outside it the
+                  sentence states the annual fact instead, so a dated claim
+                  can't outlive the date. */}
+              {diversionOpen ? (
+                <>
+                  Right now — {UC_DIVERSION.windowLabel} — the university and{" "}
+                </>
+              ) : (
+                <>
+                  Every summer — {UC_DIVERSION.windowLabel} — the university
+                  and{" "}
+                </>
+              )}
+              {UC_DIVERSION.partners} partners answer it at{" "}
               {UC_DIVERSION.location} with extra dumpsters, e-waste bins, and a
               donation drop-off. It works, and it is entirely downstream.
               Everything it handles has already become garbage.
