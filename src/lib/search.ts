@@ -39,8 +39,13 @@ export type BrowseParams = {
   max?: string;
   sort?: string;
   lf?: string;
+  /** Recency filter. Only "week" is recognised; anything else is ignored. */
+  since?: string;
   page?: string;
 };
+
+/** How far back `?since=week` looks. */
+export const SINCE_WEEK_DAYS = 7;
 
 /** Listings shown per browse page. */
 export const PAGE_SIZE = 48;
@@ -61,7 +66,7 @@ export const PRICED_TABS: TabKey[] = ["market"];
  */
 export function buildListingWhere(
   params: BrowseParams,
-  opts: { blockedIds?: string[] } = {}
+  opts: { blockedIds?: string[]; now?: Date } = {}
 ): Prisma.ListingWhereInput {
   const tab = parseTab(params.tab);
   const where: Prisma.ListingWhereInput = { status: "ACTIVE" };
@@ -129,6 +134,16 @@ export function buildListingWhere(
     if (price.gte !== undefined || price.lte !== undefined) where.price = price;
   }
 
+  // "New this week" — most browsing is really "what's new", which until now
+  // meant trusting the default sort rather than filtering. `now` is injectable
+  // so the boundary is testable without freezing the clock.
+  if (params.since === "week") {
+    const from = new Date(
+      (opts.now ?? new Date()).getTime() - SINCE_WEEK_DAYS * 24 * 60 * 60 * 1000
+    );
+    where.createdAt = { gte: from };
+  }
+
   if (opts.blockedIds && opts.blockedIds.length > 0) {
     where.ownerId = { notIn: opts.blockedIds };
   }
@@ -141,6 +156,10 @@ export function buildOrderBy(
 ): Prisma.ListingOrderByWithRelationInput | Prisma.ListingOrderByWithRelationInput[] {
   if (sort === "price-asc") return [{ price: "asc" }, { createdAt: "desc" }];
   if (sort === "price-desc") return [{ price: "desc" }, { createdAt: "desc" }];
+  // Popularity — the third dimension the sort was missing. Ties fall back to
+  // newest so the order stays stable among the many listings with zero saves.
+  if (sort === "saved")
+    return [{ favorites: { _count: "desc" } }, { createdAt: "desc" }];
   return { createdAt: "desc" };
 }
 
@@ -156,5 +175,7 @@ export function activeFilterChips(
   if (params.condition) chips.push({ key: "condition", label: params.condition });
   if (params.min) chips.push({ key: "min", label: `min $${params.min}` });
   if (params.max) chips.push({ key: "max", label: `max $${params.max}` });
+  if (params.since === "week")
+    chips.push({ key: "since", label: "New this week" });
   return chips;
 }

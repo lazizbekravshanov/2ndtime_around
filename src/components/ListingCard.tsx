@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { CategoryGlyph } from "@/components/CategoryGlyph";
-import { PinIcon } from "@/components/icons";
+import { HeartIcon, PinIcon } from "@/components/icons";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { formatPrice, photoList, timeAgo } from "@/lib/format";
 import type { ListingStatus, ListingType } from "@/lib/constants";
@@ -13,12 +13,16 @@ export type ListingCardData = {
   title: string;
   category: string;
   courseCode?: string | null;
+  /** Shown for sale/donation items — the deciding attribute for used goods. */
+  condition?: string | null;
   price: number | null;
   status: ListingStatus;
   locationNote: string | null;
   photos: unknown;
   createdAt: Date;
   owner: { displayName: string | null };
+  /** Favourites on this listing. Optional: only browse opts into the count. */
+  savedCount?: number;
 };
 
 export function ListingCard({
@@ -43,6 +47,12 @@ export function ListingCard({
   const isLostFound = listing.type === "LOST" || listing.type === "FOUND";
   const isWanted = listing.type === "WANTED";
   const done = listing.status === "SOLD" || listing.status === "RESOLVED";
+  const hasPhoto = Boolean(photos[0]);
+  // Condition is only meaningful for things being handed over. A lost phone
+  // or a want-ad has no condition worth stating.
+  const showCondition =
+    Boolean(listing.condition) &&
+    (listing.type === "SELL" || listing.type === "DONATE");
   const href = backTo
     ? `/listing/${listing.id}?from=${encodeURIComponent(backTo)}`
     : `/listing/${listing.id}`;
@@ -63,7 +73,7 @@ export function ListingCard({
         )
       )}
       <div className="relative aspect-[4/3] overflow-hidden bg-paper">
-        {photos[0] ? (
+        {hasPhoto ? (
           // Plain <img>: uploads land in /public at runtime, which
           // next/image's optimizer can't see in dev.
           // eslint-disable-next-line @next/next/no-img-element
@@ -120,13 +130,28 @@ export function ListingCard({
           </p>
         ) : null}
 
-        {/* One calm line. This row used to crowd category, time, and seller into
-            two competing truncating spans; the seller is on the detail page. */}
+        {/* One calm line. Condition leads because it is what decides a used
+            item; the seller stays on the detail page.
+
+            When the card has no photo the glyph cell already names the
+            category, so it is dropped here rather than printed twice. */}
         <p className="truncate text-xs text-faint">
-          {/* A course code identifies a textbook better than the (long,
-              truncated) category name does. */}
-          {listing.courseCode ?? listing.category} · {timeAgo(listing.createdAt)}
+          {[
+            showCondition ? listing.condition : null,
+            hasPhoto ? (listing.courseCode ?? listing.category) : null,
+            timeAgo(listing.createdAt),
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
+
+        {/* Interest, only when there is some. A zero would advertise silence. */}
+        {(listing.savedCount ?? 0) > 0 && (
+          <p className="flex items-center gap-1 text-xs text-faint">
+            <HeartIcon className="h-3.5 w-3.5 shrink-0" />
+            {listing.savedCount} saved
+          </p>
+        )}
       </div>
     </article>
   );
