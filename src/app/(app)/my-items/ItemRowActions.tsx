@@ -76,8 +76,12 @@ export function ItemRowActions({
             {pending ? "Publishing…" : "Publish"}
           </Button>
         )}
+        {/* Hierarchy without adding red: the completion action keeps the
+            bordered treatment and everything around it recedes to ghost.
+            Making "Sold" primary would put UC red on every row of the list,
+            which is exactly the accent-as-decoration problem we removed. */}
         <ButtonLink
-          variant="secondary"
+          variant="ghost"
           size="sm"
           href={`/listing/${listingId}/edit`}
         >
@@ -93,9 +97,9 @@ export function ItemRowActions({
             {doneLabel}
           </Button>
         )}
-        {/* Neutral: this only opens the confirm. Red belongs on the button in
-            the dialog that actually destroys, not on the one that asks. */}
-        <Button variant="secondary" size="sm" onClick={() => setConfirm("delete")}>
+        {/* Quiet, and neutral: this only opens the confirm. Red belongs on
+            the button in the dialog that actually destroys. */}
+        <Button variant="ghost" size="sm" onClick={() => setConfirm("delete")}>
           Delete
         </Button>
       </div>

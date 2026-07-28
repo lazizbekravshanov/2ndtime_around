@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MoveoutBanner } from "@/components/MoveoutBanner";
 import { StatusBadge } from "@/components/StatusBadge";
+import { CategoryGlyph } from "@/components/CategoryGlyph";
 import { currentSemester, daysUntilMoveOut } from "@/lib/semester";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -62,6 +63,22 @@ export default async function MyItemsPage({
     include: { _count: { select: { favorites: true, conversations: true } } },
   });
 
+  // Counts per tab, so a forgotten draft is visible without clicking into it.
+  // One grouped query over this user's own listings.
+  const grouped = await db.listing.groupBy({
+    by: ["status"],
+    where: { ownerId: user.id, status: { in: ["ACTIVE", "SOLD", "RESOLVED", "DRAFT"] } },
+    _count: { _all: true },
+  });
+  const byStatus = Object.fromEntries(
+    grouped.map((g) => [g.status, g._count._all])
+  ) as Record<string, number>;
+  const tabCounts: Record<TabKey, number> = {
+    active: byStatus.ACTIVE ?? 0,
+    done: (byStatus.SOLD ?? 0) + (byStatus.RESOLVED ?? 0),
+    drafts: byStatus.DRAFT ?? 0,
+  };
+
   const moveoutDays = daysUntilMoveOut();
 
   return (
@@ -88,6 +105,11 @@ export default async function MyItemsPage({
             }`}
           >
             {t.label}
+            {tabCounts[t.key] > 0 && (
+              <span className="ml-1.5 text-xs tabular-nums text-faint">
+                {tabCounts[t.key]}
+              </span>
+            )}
             {tab === t.key && (
               <span className="absolute inset-x-3 bottom-0 h-0.5 bg-accent" />
             )}
@@ -129,8 +151,11 @@ export default async function MyItemsPage({
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-xs text-faint">
-                      No photo
+                    // Matches the browse card's photoless treatment — this row
+                    // was still showing an empty grey box after the cards
+                    // gained a glyph.
+                    <div className="flex h-full items-center justify-center text-faint">
+                      <CategoryGlyph category={l.category} className="h-5 w-5" />
                     </div>
                   )}
                 </Link>
@@ -142,7 +167,11 @@ export default async function MyItemsPage({
                     >
                       {l.title}
                     </Link>
-                    <StatusBadge status={l.status as ListingStatus} />
+                    {/* On the Active tab every row is active, so the badge
+                        says nothing. It stays where it distinguishes. */}
+                    {tab !== "active" && (
+                      <StatusBadge status={l.status as ListingStatus} />
+                    )}
                   </div>
                   <p className="mt-0.5 flex items-center gap-2 text-xs text-faint">
                     <span>

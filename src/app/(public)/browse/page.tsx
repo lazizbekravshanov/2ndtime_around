@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { Suspense } from "react";
 import { CategoryShortcuts } from "@/components/CategoryShortcuts";
 import { MoveoutBanner } from "@/components/MoveoutBanner";
@@ -40,10 +41,39 @@ function pageHref(params: BrowseParams, p: number): string {
   if (params.max) sp.set("max", params.max);
   if (params.sort) sp.set("sort", params.sort);
   if (params.lf) sp.set("lf", params.lf);
+  if (params.since) sp.set("since", params.since);
   if (p > 1) sp.set("page", String(p));
   const qs = sp.toString();
   return qs ? `/browse?${qs}` : "/browse";
 }
+
+/**
+ * How many active listings sit behind each tab.
+ *
+ * Deliberately NOT filtered by the current search: these label the sections,
+ * so a number that shifted as you typed would describe your query rather than
+ * the marketplace. One grouped query, cached like the landing strip.
+ */
+const getTabCounts = unstable_cache(
+  async (): Promise<Record<string, number>> => {
+    const rows = await db.listing.groupBy({
+      by: ["type"],
+      where: { status: "ACTIVE" },
+      _count: { _all: true },
+    });
+    const byType = Object.fromEntries(
+      rows.map((r) => [r.type, r._count._all])
+    ) as Record<string, number>;
+    return {
+      market: byType.SELL ?? 0,
+      donations: byType.DONATE ?? 0,
+      lostfound: (byType.LOST ?? 0) + (byType.FOUND ?? 0),
+      wanted: byType.WANTED ?? 0,
+    };
+  },
+  ["browse-tab-counts"],
+  { revalidate: 60 }
+);
 
 async function Results({ params }: { params: BrowseParams }) {
   const tab = parseTab(params.tab);
@@ -69,7 +99,12 @@ async function Results({ params }: { params: BrowseParams }) {
   // Fetch one extra row to know whether a next page exists, without a count().
   const rows = await db.listing.findMany({
     where,
-    include: { owner: { select: { displayName: true } } },
+    include: {
+      owner: { select: { displayName: true } },
+      // Interest count rides along on the query we're already making — the
+      // card renders it only when non-zero.
+      _count: { select: { favorites: true } },
+    },
     orderBy: buildOrderBy(params.sort),
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE + 1,
@@ -123,15 +158,16 @@ async function Results({ params }: { params: BrowseParams }) {
     );
   }
 
-  const start = (page - 1) * PAGE_SIZE + 1;
-  const end = (page - 1) * PAGE_SIZE + listings.length;
+  // A count, not a window. "Items 1–22" described pagination internals and
+  // read like a bug; people want to know how many things there are.
+  const shown = (page - 1) * PAGE_SIZE + listings.length;
 
   return (
     <>
       <h2 className="sr-only">Results</h2>
       <p className="mb-3 text-xs text-faint">
-        Items {start}–{end}
-        {hasNext ? "+" : ""}
+        {shown}
+        {hasNext ? "+" : ""} {shown === 1 && !hasNext ? "item" : "items"}
       </p>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {listings.map((l) => (
@@ -141,6 +177,7 @@ async function Results({ params }: { params: BrowseParams }) {
               ...l,
               type: l.type as never,
               status: l.status as never,
+              savedCount: l._count.favorites,
             }}
             favorited={
               user && l.ownerId !== user.id ? favIds.has(l.id) : undefined
@@ -192,6 +229,7 @@ export default async function BrowsePage({
     : toSignIn(pageHref(params, parsePage(params.page)));
 
   const moveoutDays = daysUntilMoveOut();
+  const tabCounts = await getTabCounts();
 
   return (
     <div>
@@ -223,6 +261,12 @@ export default async function BrowsePage({
             }`}
           >
             {t.label}
+            {/* Section size, so you can see what's in a tab before opening it. */}
+            {tabCounts[t.key] > 0 && (
+              <span className="ml-1.5 text-xs tabular-nums text-faint">
+                {tabCounts[t.key]}
+              </span>
+            )}
             {tab === t.key && (
               <span className="absolute inset-x-3 -bottom-px h-0.5 bg-accent" />
             )}

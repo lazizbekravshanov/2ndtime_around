@@ -120,3 +120,56 @@ describe("activeFilterChips", () => {
     expect(chips.map((c) => c.key)).toEqual(["q", "category", "min", "max"]);
   });
 });
+
+describe("buildOrderBy — most saved", () => {
+  it("orders by favourite count, tie-broken by newest", () => {
+    expect(buildOrderBy("saved")).toEqual([
+      { favorites: { _count: "desc" } },
+      { createdAt: "desc" },
+    ]);
+  });
+
+  it("still falls back to newest for an unknown sort", () => {
+    expect(buildOrderBy("bogus")).toEqual({ createdAt: "desc" });
+  });
+});
+
+describe("buildListingWhere — since=week", () => {
+  // Fixed clock so the boundary is exact rather than time-of-run dependent.
+  const now = new Date("2026-07-28T12:00:00.000Z");
+
+  it("filters to the last seven days", () => {
+    const where = buildListingWhere({ since: "week" }, { now });
+    expect(where.createdAt).toEqual({
+      gte: new Date("2026-07-21T12:00:00.000Z"),
+    });
+  });
+
+  it("omits the date filter when since is absent or unrecognised", () => {
+    expect(buildListingWhere({}, { now }).createdAt).toBeUndefined();
+    expect(buildListingWhere({ since: "month" }, { now }).createdAt).toBeUndefined();
+    expect(buildListingWhere({ since: "" }, { now }).createdAt).toBeUndefined();
+  });
+
+  it("combines with other filters rather than replacing them", () => {
+    const where = buildListingWhere(
+      { since: "week", category: "Furniture" },
+      { now }
+    );
+    expect(where.category).toBe("Furniture");
+    expect(where.createdAt).toBeDefined();
+    expect(where.status).toBe("ACTIVE");
+  });
+});
+
+describe("activeFilterChips — since", () => {
+  it("shows a dismissible chip for the recency filter", () => {
+    expect(activeFilterChips({ since: "week" })).toEqual([
+      { key: "since", label: "New this week" },
+    ]);
+  });
+
+  it("ignores an unrecognised since value", () => {
+    expect(activeFilterChips({ since: "month" })).toEqual([]);
+  });
+});

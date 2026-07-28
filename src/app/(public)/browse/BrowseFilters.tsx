@@ -64,9 +64,12 @@ export function BrowseFilters({ tab }: { tab: string }) {
   }, [urlMax]);
 
   const lf = searchParams.get("lf") ?? "";
+  const sinceWeek = searchParams.get("since") === "week";
 
   return (
-    <div className="space-y-3">
+    // One bordered panel instead of three rows floating loose on the page —
+    // the controls read as a single object rather than scattered chrome.
+    <div className="space-y-3 rounded-xl border border-line bg-surface p-3">
       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint" />
@@ -126,10 +129,25 @@ export function BrowseFilters({ tab }: { tab: string }) {
               className={`${selectClasses} sm:w-auto`}
             >
               <option value="">Newest</option>
+              <option value="saved">Most saved</option>
               <option value="price-asc">Price: low → high</option>
               <option value="price-desc">Price: high → low</option>
             </select>
           )}
+
+          {/* Recency as a toggle rather than another dropdown: "what's new" is
+              the most common intent on a marketplace, and it deserves one tap
+              instead of a hidden select option. */}
+          <button
+            type="button"
+            aria-pressed={sinceWeek}
+            onClick={() => setParam("since", sinceWeek ? "" : "week")}
+            className={`${chipClasses()} justify-center sm:w-auto ${
+              sinceWeek ? "border-ink text-ink" : ""
+            }`}
+          >
+            New this week
+          </button>
         </div>
       </div>
 
@@ -140,17 +158,19 @@ export function BrowseFilters({ tab }: { tab: string }) {
           <label htmlFor="course-filter" className="text-sm text-faint">
             Course
           </label>
-          <input
-            id="course-filter"
-            type="search"
-            placeholder="e.g. MATH 1061"
-            value={course}
-            onChange={(e) => {
-              setCourse(e.target.value);
-              setParamDebounced("course", e.target.value, 300);
-            }}
-            className={`${inputClasses} w-44`}
-          />
+          <div className="w-44">
+            <input
+              id="course-filter"
+              type="search"
+              placeholder="e.g. MATH 1061"
+              value={course}
+              onChange={(e) => {
+                setCourse(e.target.value);
+                setParamDebounced("course", e.target.value, 300);
+              }}
+              className={inputClasses}
+            />
+          </div>
         </div>
       )}
 
@@ -159,35 +179,41 @@ export function BrowseFilters({ tab }: { tab: string }) {
           <label htmlFor="min-price" className="text-sm text-faint">
             Price
           </label>
-          <input
-            id="min-price"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            placeholder="Min"
-            aria-label="Minimum price"
-            value={min}
-            onChange={(e) => {
-              setMin(e.target.value);
-              setParamDebounced("min", e.target.value, 400);
-            }}
-            className={`${inputClasses} w-24`}
-          />
+          {/* Sized by a wrapper: inputClasses carries w-full, so an appended
+              w-24 loses the cascade and the field spans the row. */}
+          <div className="w-24">
+            <input
+              id="min-price"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              placeholder="Min"
+              aria-label="Minimum price"
+              value={min}
+              onChange={(e) => {
+                setMin(e.target.value);
+                setParamDebounced("min", e.target.value, 400);
+              }}
+              className={inputClasses}
+            />
+          </div>
           <span className="text-faint">–</span>
-          <input
-            id="max-price"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            placeholder="Max"
-            aria-label="Maximum price"
-            value={max}
-            onChange={(e) => {
-              setMax(e.target.value);
-              setParamDebounced("max", e.target.value, 400);
-            }}
-            className={`${inputClasses} w-24`}
-          />
+          <div className="w-24">
+            <input
+              id="max-price"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              placeholder="Max"
+              aria-label="Maximum price"
+              value={max}
+              onChange={(e) => {
+                setMax(e.target.value);
+                setParamDebounced("max", e.target.value, 400);
+              }}
+              className={inputClasses}
+            />
+          </div>
         </div>
       )}
 
