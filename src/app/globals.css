@@ -47,6 +47,20 @@ body {
   border-radius: 6px;
 }
 
+/*
+ * Touch targets (WCAG 2.5.5). The compact 32px controls read well with a
+ * mouse but are below the 44px the header already commits to, and a phone is
+ * the primary device here. `pointer: coarse` raises them for touch only, so
+ * desktop density is untouched — applied via the shared Button and Chip
+ * classes rather than a blanket element selector, which would stretch inline
+ * text links.
+ */
+@media (pointer: coarse) {
+  .tap-target {
+    min-height: 44px;
+  }
+}
+
 /* Skeleton loading shimmer — we use skeletons, never spinners. */
 @keyframes pulse-soft {
   0%,

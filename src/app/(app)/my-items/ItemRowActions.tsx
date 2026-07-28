@@ -65,7 +65,9 @@ export function ItemRowActions({
 
   return (
     <>
-      <div className="flex shrink-0 items-center gap-1.5">
+      {/* Full width on phones so the three buttons share the actions band
+          evenly instead of crowding; natural width from sm up. */}
+      <div className="flex shrink-0 items-center gap-1.5 [&>*]:flex-1 sm:[&>*]:flex-none">
         {status === "DRAFT" && (
           <Button
             variant="primary"

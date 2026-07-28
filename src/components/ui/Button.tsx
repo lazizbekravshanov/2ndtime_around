@@ -6,7 +6,7 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 // One accent color, used sparingly: primary actions only. Everything else
 // stays neutral so the red always means "the main thing to do here".
 const base =
-  "inline-flex items-center justify-center gap-2 text-sm font-medium transition-[transform,background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 whitespace-nowrap";
+  "tap-target inline-flex items-center justify-center gap-2 text-sm font-medium transition-[transform,background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 whitespace-nowrap";
 
 // Default radius everywhere; "pill" is the landing page's CTA treatment.
 type Shape = "rounded" | "pill";
