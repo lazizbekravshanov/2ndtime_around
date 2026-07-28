@@ -247,9 +247,13 @@ export default async function BrowsePage({
 
       {/* Tab bar — minimal underline style; active marked with a UC-red
           indicator, inactive labels muted. */}
+      {/* Bleeds to the screen edge on phones so a partially-visible tab
+          signals that the row scrolls — the counts widened each tab enough to
+          push "Wanted" off a 375px screen, where a flush clip just looked
+          broken. Same trick the category chips already use. */}
       <nav
         aria-label="Sections"
-        className="flex gap-1 overflow-x-auto border-b border-line"
+        className="-mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 sm:mx-0 sm:px-0"
       >
         {BROWSE_TABS.map((t) => (
           <Link

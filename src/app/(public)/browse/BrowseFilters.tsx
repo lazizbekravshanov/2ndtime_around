@@ -142,9 +142,9 @@ export function BrowseFilters({ tab }: { tab: string }) {
             type="button"
             aria-pressed={sinceWeek}
             onClick={() => setParam("since", sinceWeek ? "" : "week")}
-            className={`${chipClasses()} justify-center sm:w-auto ${
-              sinceWeek ? "border-ink text-ink" : ""
-            }`}
+            // h-10 to sit level with the selects beside it — as a default
+            // 32px chip it read as misaligned in a row of 40px controls.
+            className={`${chipClasses(sinceWeek ? "active" : "default")} h-10 justify-center sm:w-auto`}
           >
             New this week
           </button>

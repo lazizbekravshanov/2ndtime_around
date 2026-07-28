@@ -136,7 +136,16 @@ export default async function MyItemsPage({
             const cover = photoList(l.photos)[0];
             const type = l.type as ListingType;
             return (
-              <li key={l.id} className="flex items-center gap-3 p-3">
+              // On a phone the thumbnail, title, metadata and three buttons
+              // cannot share one line — the title was truncating to "Ai..."
+              // and the meta text collided with the actions. Below sm the row
+              // stacks into a content band and an actions band; from sm up it
+              // is the original single line.
+              <li
+                key={l.id}
+                className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                 <Link
                   href={`/listing/${l.id}`}
                   className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-line bg-paper"
@@ -194,6 +203,7 @@ export default async function MyItemsPage({
                       <span>· {l._count.conversations} asked</span>
                     )}
                   </p>
+                </div>
                 </div>
                 <ItemRowActions
                   listingId={l.id}

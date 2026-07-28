@@ -59,13 +59,13 @@ export default async function PublicLayout({
             fallback={
               <Link
                 href="/signin"
-                className="text-sm font-medium text-faint transition-colors hover:text-ink"
+                className="tap-target -mr-2 inline-flex items-center px-2 text-sm font-medium text-faint transition-colors hover:text-ink"
               >
                 Sign in
               </Link>
             }
           >
-            <PublicSignInLink className="text-sm font-medium text-faint transition-colors hover:text-ink" />
+            <PublicSignInLink className="tap-target -mr-2 inline-flex items-center px-2 text-sm font-medium text-faint transition-colors hover:text-ink" />
           </Suspense>
         </div>
       </header>
