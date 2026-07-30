@@ -13,6 +13,8 @@ import {
 } from "@/components/icons";
 import { ListingCard } from "@/components/ListingCard";
 import { buttonClasses } from "@/components/ui/Button";
+import { chipClasses } from "@/components/ui/Chip";
+import { CATEGORIES, MEETUP_SPOTS } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { photoList } from "@/lib/format";
 import {
@@ -21,6 +23,7 @@ import {
   UC_DIVERSION,
   UC_STANDING,
 } from "@/lib/marketFacts";
+import { campusMoment, type CampusPhase } from "@/lib/semester";
 import { getSessionUser } from "@/lib/session";
 import { signInHref } from "@/lib/url";
 
@@ -65,6 +68,43 @@ const FEATURES = [
   },
 ];
 
+/**
+ * The three ways onto the marketplace, built from the category constants so a
+ * rename breaks the build rather than silently rotting the link.
+ *
+ * Ordered by where campus is: someone arriving in move-out week should be
+ * offered the bulk lister first, not dorm shopping.
+ */
+// `satisfies` makes TypeScript check each string really is a category, so
+// renaming one fails the build here instead of quietly producing a filter that
+// matches nothing. Referencing by value rather than index also survives a
+// reorder of CATEGORIES.
+const LINKED_CATEGORIES = {
+  textbooks: "Textbooks & Course Materials",
+  dorm: "Dorm & Apartment Essentials",
+} satisfies Record<string, (typeof CATEGORIES)[number]>;
+
+const ENTRY_POINTS = {
+  movein: {
+    label: "Furnishing a room",
+    href: `/browse?category=${encodeURIComponent(LINKED_CATEGORIES.dorm)}`,
+  },
+  textbooks: {
+    label: "Need your textbooks",
+    href: `/browse?category=${encodeURIComponent(LINKED_CATEGORIES.textbooks)}`,
+  },
+  moveout: { label: "Clearing a room out", href: "/sell/moveout" },
+} as const;
+
+function entryPointsFor(
+  phase: CampusPhase
+): { label: string; href: string }[] {
+  const { movein, textbooks, moveout } = ENTRY_POINTS;
+  if (phase === "moveout") return [moveout, movein, textbooks];
+  if (phase === "movein") return [movein, textbooks, moveout];
+  return [textbooks, movein, moveout];
+}
+
 const STEPS = [
   {
     title: "Sign in with your UC email",
@@ -93,7 +133,10 @@ export default async function LandingPage() {
   // no longer queries our own impact stats.
   // Evaluated per request, so the wedge copy stops claiming "right now"
   // the day UC's window closes.
-  const diversionOpen = isDiversionWindowOpen(new Date());
+  const now = new Date();
+  const diversionOpen = isDiversionWindowOpen(now);
+  const moment = campusMoment(now);
+  const entryPoints = entryPointsFor(moment.phase);
   const cached = await getRecentListings();
   const recent = cached.map((l) => ({ ...l, createdAt: new Date(l.createdAt) }));
   const withPhotos = recent.filter((l) => photoList(l.photos).length > 0);
@@ -140,13 +183,20 @@ export default async function LandingPage() {
           className="pointer-events-none absolute inset-0 -z-10 [background-image:radial-gradient(var(--color-line-strong)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,black,transparent)]"
         />
         <div className="mx-auto max-w-page px-4 pb-20 pt-16 text-center sm:pb-28 sm:pt-24">
+          {/* The page knows what week of the academic year it is. A stranger
+              landing in August sees move-in; in December, move-out. It runs on
+              the same clock as the in-app banner, so it can't claim a moment
+              that isn't happening. */}
+          <p className="mb-5 text-xs font-medium uppercase tracking-[0.14em] text-faint">
+            {moment.label}
+          </p>
+
           <h1 className="mx-auto max-w-4xl text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
             Everything students need,{" "}
             <span className="text-accent">second time around.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-faint sm:text-lg">
-            The UC-only marketplace for buying, selling, donating, and recovering
-            what campus life runs on.
+            {moment.lede}
           </p>
 
           {/* Plain GET form — /browse already reads ?q=, so search works with no
@@ -190,7 +240,17 @@ export default async function LandingPage() {
           {/* No activity counters here: ours are pilot data, and a seeded
               number under the hero reads as traction. The opportunity section
               below carries sourced, external figures instead. */}
-          <p className="mt-6 text-sm text-faint">
+          {/* Three ways in, ordered by where campus actually is right now.
+              Every one is a working filter, not a decorative tile. */}
+          <div className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-2">
+            {entryPoints.map((e) => (
+              <Link key={e.href} href={e.href} className={chipClasses()}>
+                {e.label}
+              </Link>
+            ))}
+          </div>
+
+          <p className="mt-8 text-sm text-faint">
             <LeafIcon className="mr-1.5 inline h-4 w-4 text-success" />
             Free to use · UC students only · Nothing shipped, nothing wasted
           </p>
@@ -350,6 +410,31 @@ export default async function LandingPage() {
                 UC Uptown Waste Diversion →
               </a>
             </p>
+          </div>
+        </section>
+
+        {/* Real places, named. These constants already drive the meetup
+            picker inside chats; on the landing page the specificity — "open
+            late, security desk" — is what signals a student built this. */}
+        <section className="border-t border-line bg-surface/60">
+          <div className="mx-auto max-w-page px-4 py-20 sm:py-28">
+            <h2 className="text-center text-xs font-medium uppercase tracking-[0.12em] text-faint">
+              Where trades happen
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-3xl font-semibold tracking-tight sm:text-4xl">
+              On campus, in daylight, somewhere staffed.
+            </p>
+            <ul className="mx-auto mt-14 grid max-w-3xl gap-x-10 gap-y-6 sm:grid-cols-2">
+              {MEETUP_SPOTS.map((spot) => (
+                <li key={spot.name} className="flex items-start gap-2.5">
+                  <PinIcon className="mt-0.5 h-4 w-4 shrink-0 text-faint" />
+                  <span className="text-sm">
+                    <span className="font-medium">{spot.name}</span>
+                    <span className="text-faint"> — {spot.blurb}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
