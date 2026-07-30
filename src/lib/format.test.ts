@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { formatPrice, meetupTime, monthYear, photoList, timeAgo } from "@/lib/format";
+import {
+  formatPrice,
+  meetupTime,
+  monthYear,
+  photoList,
+  priceSlot,
+  timeAgo,
+} from "@/lib/format";
 
 describe("formatPrice", () => {
   it("formats whole dollars", () => expect(formatPrice(25)).toBe("$25"));
@@ -46,5 +53,37 @@ describe("monthYear", () => {
 describe("meetupTime", () => {
   it("renders a weekday-and-time string", () => {
     expect(meetupTime("2026-06-20T15:30:00")).toContain("at");
+  });
+});
+
+describe("priceSlot", () => {
+  it("shows the price for a sale", () => {
+    expect(priceSlot("SELL", 35)).toEqual({ text: "$35", muted: false });
+    expect(priceSlot("SELL", 12.5)).toEqual({ text: "$12.50", muted: false });
+  });
+
+  it("shows Free for a donation, at full weight", () => {
+    expect(priceSlot("DONATE", null)).toEqual({ text: "Free", muted: false });
+    // A donation with a stray price is still free.
+    expect(priceSlot("DONATE", 20)).toEqual({ text: "Free", muted: false });
+  });
+
+  it("shows the type for listings that have no price, muted", () => {
+    expect(priceSlot("LOST", null)).toEqual({ text: "Lost", muted: true });
+    expect(priceSlot("FOUND", null)).toEqual({ text: "Found", muted: true });
+    expect(priceSlot("WANTED", null)).toEqual({
+      text: "Looking for",
+      muted: true,
+    });
+  });
+
+  it("never returns an empty slot, so the grid rhythm holds", () => {
+    for (const t of ["SELL", "DONATE", "LOST", "FOUND", "WANTED", "ODD"]) {
+      expect(priceSlot(t, null).text.trim()).not.toBe("");
+    }
+  });
+
+  it("falls back rather than rendering blank for a priceless sale", () => {
+    expect(priceSlot("SELL", null)).toEqual({ text: "—", muted: true });
   });
 });
