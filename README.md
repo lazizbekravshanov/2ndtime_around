@@ -3,8 +3,7 @@
 your stuff deserves a second chance. the UC-only marketplace for buying,
 selling, donating, and finding lost things.
 
-**live:** https://2ndtime-around.vercel.app · built by Team 4 — IT2021,
-University of Cincinnati
+**live:** https://2ndtime-around.vercel.app · University of Cincinnati
 
 no randoms from across town. no sketchy meetups. no "is this still
 available?" into the void. every account is a UC student, every meetup spot

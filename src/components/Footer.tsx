@@ -29,7 +29,7 @@ export async function Footer() {
           <Link href="/leaderboard" className="hover:text-ink">
             Leaderboard
           </Link>
-          <p>Built by Team 4 — IT2021 · University of Cincinnati</p>
+          <p>University of Cincinnati</p>
         </div>
       </div>
     </footer>

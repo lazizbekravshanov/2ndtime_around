@@ -530,7 +530,7 @@ export default async function LandingPage() {
 
       <footer className="border-t border-line">
         <p className="mx-auto max-w-page px-4 py-8 text-center text-sm text-faint">
-          Built by Team 4 — IT2021 · University of Cincinnati
+          University of Cincinnati
         </p>
       </footer>
     </div>
