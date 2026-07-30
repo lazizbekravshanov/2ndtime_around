@@ -34,7 +34,8 @@ export function FavoriteButton({
   // Anonymous visitors sign in before saving; keep the same heart affordance so
   // the layout is identical to the authenticated card/detail.
   if (signInHref) {
-    const base = variant === "overlay" ? overlayBase : inlineBase;
+    const base =
+      variant === "overlay" ? `${overlayBase} card-fav` : inlineBase;
     return (
       <Link
         href={signInHref}
@@ -73,7 +74,12 @@ export function FavoriteButton({
     doToggle();
   }
 
-  const base = variant === "overlay" ? overlayBase : inlineBase;
+  const base =
+    variant === "overlay"
+      ? // Fade only while unsaved. Hiding a *filled* heart would erase the
+        // only signal that the viewer already saved this listing.
+        `${overlayBase} ${favorited ? "" : "card-fav"}`
+      : inlineBase;
 
   return (
     <button

@@ -169,7 +169,7 @@ async function Results({ params }: { params: BrowseParams }) {
         {shown}
         {hasNext ? "+" : ""} {shown === 1 && !hasNext ? "item" : "items"}
       </p>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
         {listings.map((l) => (
           <ListingCard
             key={l.id}
@@ -300,7 +300,7 @@ export default async function BrowsePage({
         <Suspense
           key={JSON.stringify(params)}
           fallback={
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <ListingCardSkeleton key={i} />
               ))}

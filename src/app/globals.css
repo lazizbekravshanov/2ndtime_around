@@ -61,6 +61,27 @@ body {
   }
 }
 
+/*
+ * Card favourite button. Permanently visible it was the loudest mark on every
+ * tile — a secondary action outranking the price. On mice it now fades in with
+ * the card; on touch, where there is no hover, it stays put.
+ *
+ * The :focus-visible and :focus-within rules are not polish: without them a
+ * keyboard user would tab to an invisible control.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .card-fav {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .group:hover .card-fav,
+  .card-fav:hover,
+  .card-fav:focus-visible,
+  .card-fav:focus-within {
+    opacity: 1;
+  }
+}
+
 /* Skeleton loading shimmer — we use skeletons, never spinners. */
 @keyframes pulse-soft {
   0%,

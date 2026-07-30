@@ -4,7 +4,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { CategoryGlyph } from "@/components/CategoryGlyph";
 import { HeartIcon, PinIcon } from "@/components/icons";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { formatPrice, photoList, timeAgo } from "@/lib/format";
+import { photoList, priceSlot, timeAgo } from "@/lib/format";
 import type { ListingStatus, ListingType } from "@/lib/constants";
 
 export type ListingCardData = {
@@ -53,6 +53,7 @@ export function ListingCard({
   const showCondition =
     Boolean(listing.condition) &&
     (listing.type === "SELL" || listing.type === "DONATE");
+  const slot = priceSlot(listing.type, listing.price);
   const href = backTo
     ? `/listing/${listing.id}?from=${encodeURIComponent(backTo)}`
     : `/listing/${listing.id}`;
@@ -88,70 +89,73 @@ export function ListingCard({
           // No photo: a monochrome category glyph reads as "we know what this
           // is, there's just no picture" — the old bare "No photo" label left
           // the largest area of the card saying nothing at all.
-          <div className="flex h-full flex-col items-center justify-center gap-2 px-3 text-center text-faint">
-            <CategoryGlyph category={listing.category} className="h-7 w-7" />
+          <div className="flex h-full flex-col items-center justify-center gap-2.5 bg-line/25 px-3 text-center text-faint">
+            <CategoryGlyph category={listing.category} className="h-9 w-9" />
             <span className="line-clamp-2 text-xs">
               {isWanted ? "Looking for this" : listing.category}
             </span>
           </div>
         )}
+        {/* Only badges the body doesn't already carry. Lost / Found /
+            Looking-for moved into the price slot, so keeping them here too was
+            saying the same thing twice and crowding the picture. "Free" stays
+            because it's the strongest draw on a donation. */}
         <div className="absolute left-2 top-2 flex gap-1.5">
           {listing.type === "DONATE" && !done && (
             <Badge tone="accent">Free</Badge>
           )}
-          {listing.type === "LOST" && <Badge tone="accent">Lost</Badge>}
-          {listing.type === "FOUND" && <Badge tone="neutral">Found</Badge>}
-          {isWanted && !done && <Badge tone="outline">Looking for</Badge>}
           {done && <StatusBadge status={listing.status} />}
         </div>
+
+        {/* Social proof sits on the image, which is both where marketplaces
+            put it and what keeps the body to exactly three rows. */}
+        {(listing.savedCount ?? 0) > 0 && (
+          <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-surface/90 px-2 py-0.5 text-xs text-faint">
+            <HeartIcon className="h-3 w-3 shrink-0" />
+            {listing.savedCount}
+          </span>
+        )}
       </div>
 
-      <div className="space-y-1 p-3">
-        {/* Two lines for the title, with the height reserved either way so
-            cards stay a uniform height across the grid. Single-line truncation
-            was cutting most real titles ("Sony noise-cancelling hea…") because
-            the price was competing for the same row; the price now aligns to
-            the first line instead of stealing width from it. */}
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-2 min-h-10 min-w-0 flex-1 text-sm font-medium leading-5">
-            {listing.title}
-          </h3>
-          {listing.type === "SELL" && listing.price !== null && (
-            <span className="shrink-0 whitespace-nowrap text-sm font-semibold leading-5">
-              {formatPrice(listing.price)}
-            </span>
-          )}
-        </div>
+      {/* Exactly three rows on every card — price, title, meta — so a grid row
+          shares one rhythm no matter which fields a listing happens to have. */}
+      <div className="space-y-1 p-4">
+        {/* Price leads. People scan a marketplace grid for price, and it used
+            to share a row with the title at the same size, so neither won. */}
+        <p
+          className={`text-base font-semibold leading-6 ${
+            slot.muted ? "text-faint" : "text-ink"
+          }`}
+        >
+          {slot.text}
+        </p>
 
-        {isLostFound && listing.locationNote ? (
-          <p className="flex items-center gap-1 text-xs text-faint">
-            <PinIcon className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{listing.locationNote}</span>
-          </p>
-        ) : null}
+        <h3 className="line-clamp-2 min-h-10 text-sm leading-5 text-ink">
+          {listing.title}
+        </h3>
 
         {/* One calm line. Condition leads because it is what decides a used
-            item; the seller stays on the detail page.
+            item; the seller stays on the detail page. For lost and found the
+            location matters more than either, so it takes the slot.
 
             When the card has no photo the glyph cell already names the
             category, so it is dropped here rather than printed twice. */}
-        <p className="truncate text-xs text-faint">
-          {[
-            showCondition ? listing.condition : null,
-            hasPhoto ? (listing.courseCode ?? listing.category) : null,
-            timeAgo(listing.createdAt),
-          ]
-            .filter(Boolean)
-            .join(" · ")}
+        <p className="flex items-center gap-1 truncate text-xs text-faint">
+          {isLostFound && listing.locationNote ? (
+            <>
+              <PinIcon className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{listing.locationNote}</span>
+            </>
+          ) : (
+            [
+              showCondition ? listing.condition : null,
+              hasPhoto ? (listing.courseCode ?? listing.category) : null,
+              timeAgo(listing.createdAt),
+            ]
+              .filter(Boolean)
+              .join(" · ")
+          )}
         </p>
-
-        {/* Interest, only when there is some. A zero would advertise silence. */}
-        {(listing.savedCount ?? 0) > 0 && (
-          <p className="flex items-center gap-1 text-xs text-faint">
-            <HeartIcon className="h-3.5 w-3.5 shrink-0" />
-            {listing.savedCount} saved
-          </p>
-        )}
       </div>
     </article>
   );
@@ -162,9 +166,10 @@ export function ListingCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-surface">
       <div className="skeleton aspect-[4/3] rounded-none" />
-      {/* Mirrors the card's reserved two-line title block, so swapping the
-          skeleton for real content shifts nothing. */}
-      <div className="space-y-1 p-3">
+      {/* Mirrors the card's three-row body - price, two-line title, meta -
+          so swapping the skeleton for real content shifts nothing. */}
+      <div className="space-y-1 p-4">
+        <div className="skeleton h-6 w-16" />
         <div className="min-h-10 space-y-1.5">
           <div className="skeleton h-4 w-3/4" />
           <div className="skeleton h-4 w-1/2" />
