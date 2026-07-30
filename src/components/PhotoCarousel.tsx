@@ -2,21 +2,31 @@
 
 import { useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
+import { CategoryGlyph } from "@/components/CategoryGlyph";
 
 /** Simple, keyboard-friendly photo carousel: arrows + dot indicators. */
 export function PhotoCarousel({
   photos,
   title,
+  category,
 }: {
   photos: string[];
   title: string;
+  /** Names the empty state, so a photoless listing still says something. */
+  category: string;
 }) {
   const [index, setIndex] = useState(0);
 
   if (photos.length === 0) {
     return (
-      <div className="flex aspect-[4/3] items-center justify-center rounded-xl border border-line bg-surface text-sm text-faint">
-        No photos for this listing
+      // Matches the photoless treatment on cards and my-items rows. A full 4:3
+      // box saying "No photos" cost an entire phone screen before the price —
+      // this states the same fact in a fraction of the height, and names the
+      // category so the space says something.
+      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-line bg-line/25 px-4 py-14 text-center text-faint sm:aspect-[4/3] sm:py-0">
+        <CategoryGlyph category={category} className="h-10 w-10" />
+        <span className="text-sm">{category}</span>
+        <span className="text-xs">No photos yet</span>
       </div>
     );
   }

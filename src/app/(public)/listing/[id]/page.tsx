@@ -6,7 +6,13 @@ import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { Badge } from "@/components/ui/Badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { StarRating } from "@/components/ui/Stars";
-import { ChevronLeftIcon, EyeIcon, PinIcon } from "@/components/icons";
+import {
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EyeIcon,
+  PinIcon,
+} from "@/components/icons";
 import {
   TYPE_LABELS,
   MEETUP_SPOTS,
@@ -42,6 +48,9 @@ const getListing = cache((id: string) =>
           year: true,
         },
       },
+      // Social proof at the decision point. The cards show this; the page
+      // where it would actually create urgency did not.
+      _count: { select: { favorites: true } },
     },
   })
 );
@@ -182,7 +191,11 @@ export default async function ListingPage({
 
       <div className="mt-4 grid gap-8 md:grid-cols-5">
         <div className="md:col-span-3">
-          <PhotoCarousel photos={photos} title={listing.title} />
+          <PhotoCarousel
+            photos={photos}
+            title={listing.title}
+            category={listing.category}
+          />
         </div>
 
         <div className="md:col-span-2">
@@ -197,18 +210,23 @@ export default async function ListingPage({
             {done && <StatusBadge status={listing.status as ListingStatus} />}
           </div>
 
-          <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight">
-            {listing.title}
-          </h1>
-
+          {/* Price leads, as it does on the cards. It previously sat under the
+              title at barely more than body weight, which is the wrong order
+              for the page where someone decides whether to buy. */}
           {type === "SELL" && listing.price !== null && (
-            <p className="mt-1 text-xl font-semibold">
+            <p className="mt-3 text-4xl font-semibold tracking-tight tabular-nums">
               {formatPrice(listing.price)}
             </p>
           )}
           {type === "DONATE" && (
-            <p className="mt-1 text-xl font-semibold text-success">Free</p>
+            <p className="mt-3 text-4xl font-semibold tracking-tight text-success">
+              Free
+            </p>
           )}
+
+          <h1 className="mt-2 text-xl font-medium leading-snug">
+            {listing.title}
+          </h1>
 
           {/* One meta line carries category, course, condition, age, and views —
               previously three separate "Label:" rows plus two pills. */}
@@ -251,7 +269,10 @@ export default async function ListingPage({
             {listing.description}
           </p>
 
-          {/* Seller / reporter card */}
+          {/* The trust panel. The product's whole promise is "verified
+              classmates, not strangers", and this is the page where someone
+              decides to message one and meet them in person — so the promise
+              gets stated here, in one object, next to the action it gates. */}
           <div className="mt-6 rounded-xl border border-line bg-surface p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-faint">
               {isLostFound
@@ -260,30 +281,52 @@ export default async function ListingPage({
                   : "Found by"
                 : "Seller"}
             </p>
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <div>
-                {/* A resting underline, not just a hover one: this is the only
-                    interactive text in the seller card, and with hover-only
-                    styling it read as a plain label — so the profile behind it
-                    was effectively undiscoverable. */}
-                <Link
-                  href={`/profile/${listing.owner.id}`}
-                  className="font-medium underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
+            <div className="mt-3 flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                {/* Initial in a circle — the same treatment the header uses for
+                    the account menu. No schema change, no upload flow, and it
+                    can never render as a broken image. */}
+                <span
+                  aria-hidden="true"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-sm font-semibold uppercase"
                 >
-                  {listing.owner.displayName}
-                </Link>
-                {(listing.owner.major || listing.owner.year) && (
+                  {(listing.owner.displayName ?? "?").charAt(0)}
+                </span>
+                <div className="min-w-0">
+                  {/* A resting underline, not just a hover one: with hover-only
+                      styling this read as a plain label, so the profile behind
+                      it was effectively undiscoverable. */}
+                  <Link
+                    href={`/profile/${listing.owner.id}`}
+                    className="font-medium underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
+                  >
+                    {listing.owner.displayName}
+                  </Link>
+                  {/* Precisely what the system checked: control of a UC email
+                      address. Not "verified student" — enrolment was never
+                      verified, and the university does not vouch for anyone. */}
+                  {/* Not shown to the owner: telling you that you are
+                      verified is noise. The mark exists to reassure the person
+                      deciding whether to message a stranger. */}
+                  {!isOwner && (
+                    <p className="mt-0.5 flex items-center gap-1 text-xs text-success-strong">
+                      <CheckIcon className="h-3.5 w-3.5 shrink-0" />
+                      Verified @uc.edu
+                    </p>
+                  )}
+                  {(listing.owner.major || listing.owner.year) && (
+                    <p className="mt-1 text-xs text-faint">
+                      {[listing.owner.major, listing.owner.year]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  )}
                   <p className="text-xs text-faint">
-                    {[listing.owner.major, listing.owner.year]
-                      .filter(Boolean)
-                      .join(" · ")}
+                    Member since {monthYear(listing.owner.createdAt)} ·{" "}
+                    {completedCount} completed{" "}
+                    {completedCount === 1 ? "exchange" : "exchanges"}
                   </p>
-                )}
-                <p className="text-xs text-faint">
-                  Member since {monthYear(listing.owner.createdAt)} ·{" "}
-                  {completedCount} completed{" "}
-                  {completedCount === 1 ? "exchange" : "exchanges"}
-                </p>
+                </div>
               </div>
               {ratingAgg._count > 0 ? (
                 <StarRating
@@ -338,6 +381,13 @@ export default async function ListingPage({
                     ownerName={listing.owner.displayName ?? "this user"}
                     signInHref={signInHref}
                   />
+                  {/* Only when there is some. A zero would advertise silence
+                      at exactly the wrong moment. */}
+                  {listing._count.favorites > 0 && (
+                    <span className="ml-auto text-sm text-faint">
+                      {listing._count.favorites} saved
+                    </span>
+                  )}
                 </div>
               </>
             )}
@@ -347,11 +397,17 @@ export default async function ListingPage({
           {/* Borderless section under a rule — the seller card is the only frame
               in this column, so two stacked boxes don't compete. */}
           {showMeetup && (
-            <div className="mt-8 border-t border-line pt-5">
-              <p className="text-xs font-medium uppercase tracking-[0.12em] text-faint">
-                Suggested safe meetup spots
-              </p>
-              <p className="mt-2 text-xs text-faint">
+            // Reassurance, not decision input, and the full list appears again
+            // in the chat the moment a meetup is actually proposed. It was the
+            // largest block on the page while answering a question nobody has
+            // yet. A native <details> keeps it keyboard- and screen-reader-
+            // accessible with no JS.
+            <details className="group mt-8 border-t border-line pt-5">
+              <summary className="tap-target flex cursor-pointer list-none items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-faint transition-colors hover:text-ink">
+                <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 transition-transform group-open:rotate-90" />
+                Safe meetup spots ({MEETUP_SPOTS.length})
+              </summary>
+              <p className="mt-3 text-xs text-faint">
                 Well-lit, staffed campus locations. You can propose one with a
                 time inside the chat.
               </p>
@@ -369,7 +425,7 @@ export default async function ListingPage({
                   </li>
                 ))}
               </ul>
-            </div>
+            </details>
           )}
         </div>
       </div>
