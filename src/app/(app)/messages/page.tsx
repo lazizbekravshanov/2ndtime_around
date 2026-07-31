@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ButtonLink } from "@/components/ui/Button";
 import { db } from "@/lib/db";
+import { CategoryGlyph } from "@/components/CategoryGlyph";
 import { photoList, timeAgo } from "@/lib/format";
 import { ChatIcon, PinIcon } from "@/components/icons";
 import { requireUser } from "@/lib/session";
@@ -21,6 +22,8 @@ export default async function MessagesPage() {
           id: true,
           title: true,
           photos: true,
+          // Names the thumbnail when a listing has no photo.
+          category: true,
           status: true,
           owner: { select: { id: true, displayName: true } },
         },
@@ -74,8 +77,14 @@ export default async function MessagesPage() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-xs text-faint">
-                        No photo
+                      // Same rule as cards, my-items rows, and the carousel: a
+                      // photoless listing shows its category, never an empty
+                      // box with the word "No" in it.
+                      <div className="flex h-full items-center justify-center text-faint">
+                        <CategoryGlyph
+                          category={c.listing.category}
+                          className="h-5 w-5"
+                        />
                       </div>
                     )}
                   </div>
