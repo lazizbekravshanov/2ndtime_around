@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ChevronLeftIcon } from "@/components/icons";
 import { TYPE_LABELS, type ListingType } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { CategoryGlyph } from "@/components/CategoryGlyph";
 import { formatPrice, photoList } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 import { RatingPrompt } from "@/components/RatingPrompt";
@@ -96,8 +97,8 @@ export default async function ConversationPage({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-xs text-faint">
-              No photo
+            <div className="flex h-full items-center justify-center text-faint">
+              <CategoryGlyph category={listing.category} className="h-5 w-5" />
             </div>
           )}
         </div>
